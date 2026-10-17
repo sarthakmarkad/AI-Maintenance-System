@@ -31,7 +31,8 @@
     "db:local:stop": "node scripts/local-db.mjs stop",
     "db:grants": "node scripts/runtime-grants.mjs",
     "db:test:prepare": "node scripts/test-db.mjs",
-    "format": "prettier --write \"apps/**/src/**/*.ts\" \"apps/web/{app,components,lib}/**/*.{ts,tsx,css}\" \"scripts/*.{ts,mjs}\" \"tests/**/*.ts\" playwright.config.ts"
+    "format": "prettier --write \"apps/**/src/**/*.ts\" \"apps/web/{app,components,lib}/**/*.{ts,tsx,css}\" \"scripts/*.{ts,mjs}\" \"tests/**/*.ts\" playwright.config.ts",
+    "demo:readings": "npm run build:api && node scripts/import-synthetic-readings.mjs"
   },
   "dependencies": {
     "@nestjs/common": "11.2.7",

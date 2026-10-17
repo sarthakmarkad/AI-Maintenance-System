@@ -270,7 +270,7 @@ function sheetInfo(sheet: ExcelJS.Worksheet): SheetInfo {
 
 // Validate every decompressed entry before ExcelJS loads the archive into memory.
 // This catches compressed bombs and duplicate/path-confused ZIP members without extracting files.
-async function guardArchive(buffer: Buffer): Promise<void> {
+export async function guardArchive(buffer: Buffer): Promise<void> {
   if (
     !buffer.length ||
     buffer.length > MAX_FILE_BYTES ||

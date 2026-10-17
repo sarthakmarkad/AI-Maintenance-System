@@ -21,6 +21,7 @@ import { useAuth } from "./auth-provider";
 import { Shell } from "./shell";
 import { Button } from "./ui/button";
 import { ProductionWorkspace } from "./production-workspace";
+import { ReadingsWorkspace } from "./readings-workspace";
 type Result =
   | { kind: "loading" }
   | { kind: "error"; message: string; requestId?: string }
@@ -28,9 +29,11 @@ type Result =
 export function MachineWorkspace({
   code,
   production = false,
+  readings = false,
 }: {
   code?: string;
   production?: boolean;
+  readings?: boolean;
 }) {
   const { session, loading, expired, expire } = useAuth();
   const router = useRouter();
@@ -106,7 +109,13 @@ export function MachineWorkspace({
           <Link href="/machines">Back to asset registry</Link>
         </section>
       ) : code && result.machines[0] ? (
-        production ? (
+        readings ? (
+          <ReadingsWorkspace
+            machine={result.machines[0]}
+            user={result.user}
+            token={session.access_token}
+          />
+        ) : production ? (
           <ProductionWorkspace
             machine={result.machines[0]}
             user={result.user}
@@ -320,12 +329,19 @@ function MachineDetail({
             <h3>Production records, with source context</h3>
             <p>
               Preview a production workbook, review flagged date blocks and see
-              totals from saved records. Process readings are a later milestone.
+              totals from saved records. Explore synthetic hourly process trends
+              separately.
             </p>
             <Button asChild>
               <Link href={`/machines/${machine.code}/production`}>
                 <ArrowDownToLine size={14} />
                 Open production records
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href={`/machines/${machine.code}/readings`}>
+                <Activity size={14} />
+                Open process trends
               </Link>
             </Button>
           </div>

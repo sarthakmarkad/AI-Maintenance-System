@@ -9,3 +9,6 @@ REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON ALL TABLES IN SCHEMA maintenance FROM
 
 GRANT INSERT ON maintenance."ProductionImport", maintenance."ProductionDay", maintenance."ProductionRow", maintenance."AuditEvent" TO :"runtime_role";
 GRANT UPDATE (status, "committedAt", "committedDayKeys") ON maintenance."ProductionImport" TO :"runtime_role";
+
+GRANT INSERT ON maintenance."ReadingImport", maintenance."ProcessReading" TO :"runtime_role";
+GRANT UPDATE (status, "committedAt") ON maintenance."ReadingImport" TO :"runtime_role";

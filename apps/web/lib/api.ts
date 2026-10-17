@@ -54,3 +54,6 @@ export type WorkbookInfo = components["schemas"]["WorkbookInfoDto"];
 export type ProductionDashboard =
   components["schemas"]["ProductionDashboardDto"];
 export type ProductionCommit = components["schemas"]["ProductionCommitDto"];
+export type ReadingPreview = components["schemas"]["ReadingPreviewDto"];
+export type ReadingTrends = components["schemas"]["ReadingTrendsDto"];
+export type ReadingCommit = components["schemas"]["ReadingCommitDto"];

@@ -1,6 +1,6 @@
 # Data boundaries
 
-Original files remain under ignored `Maintenance_Handoff/data`; no company workbook has been copied into source, Git or public assets. Future originals belong in private storage; original-file byte persistence is not implemented yet. M2 processes uploads in memory and stores parsed source rows/validation provenance only in the private database.
+Original files remain under ignored `Maintenance_Handoff/data`; no company workbook has been copied into source, Git or public assets. Future originals belong in private storage; original-file byte persistence is not implemented yet. M2–3 process uploads in memory and stores parsed source rows/validation provenance only in the private database.
 
 ## Authentic production workbooks
 
@@ -21,3 +21,5 @@ Demo nominal values 200°C / 45°C / 100 bar and review bands 180–220 / 40–5
 Hourly snapshots miss between-sample events. Imported readings support retrospective analysis; measured_at and received/imported_at must remain distinct. Operator reports are the application's immediate incident input. A single unusual sample does not create a confirmed breakdown or emergency alarm. There is no direct second-by-second telemetry/SAP integration.
 
 Never use synthetic readings to explain authentic production loss or claim validated industrial prediction accuracy. Demo event labels and derived review flags must be excluded from ML input features.
+
+The reading implementation contract is documented in PROCESS-READINGS.md. Its versioned retrospective review rules consume only numeric readings. Source formula flags remain raw provenance; Demo_Events is not imported into the reading feature set.

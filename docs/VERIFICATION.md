@@ -12,16 +12,16 @@ Environment: macOS arm64, Node 24.18.0, npm 11.16.0, PostgreSQL 16.15 in the iso
 | Type checks | PASS | Strict TypeScript for NestJS, Next.js and browser tests |
 | Backend production compilation | PASS | tsc emits runnable NestJS application |
 | Frontend production build | PASS | Next.js builds login, registry, machine and production pages; isolated build cache preserves the running dev server |
-| Backend/config/verifier/workflow/parser tests | PASS, 20 | Foundation HTTP/auth/workflow checks plus cached formulas, multiple jobs per shift, activity rows, dates, controls, numeric ambiguity and XLSX input bounds |
-| Real PostgreSQL integration tests | PASS, 16 | Foundation constraints/access plus staged imports, selected-day validation, same-preview idempotency, cross-preview races, renamed files, source isolation, audit rollback, preview expiry, immutable snapshots and narrow runtime grants |
-| Browser tests | PASS, 20 | Ten scenarios each in desktop Chromium and Pixel 7 emulation; foundation flows plus import review/acknowledgement/commit, source separation, role visibility, conflict recovery, nested expiry and tab switching |
+| Backend/config/verifier/workflow/parser tests | PASS, 27 | Foundation/production checks plus namespace-aware reading XML, local/UTC conversion, both Excel date systems, duplicate/invalid rows, empty numeric caches, invented bands, label exclusion and gap-separated reviews |
+| Real PostgreSQL integration tests | PASS, 22 | Foundation/production checks plus reading scope/roles, staged provenance, idempotent and racing commits, ID/time conflicts, retained receipt times, trend gaps, audit rollback, expiry and protected readings |
+| Browser tests | PASS, 28 | Fourteen scenarios each in desktop Chromium and Pixel 7 emulation; foundation/production flows plus reading review/commit/reload/source history, chart layout, roles, conflicts and expiry |
 | Initial unconfigured local smoke | PASS | Actual running API: liveness 200, readiness 503 with database connected/auth unconfigured, protected endpoints 401, OpenAPI 200 |
 | Initial unconfigured browser | PASS | Real local frontend redirects to login, shows setup notice, disables sign-in and fits mobile width; no interception for this check |
 | Reference/privacy boundary | PASS | Handoff, company files, .env, frontend local environment, native DB and test artifacts ignored by Git; no originals changed or copied into public assets |
 
-The browser suite deliberately intercepts Supabase and API responses. Those 20 passes prove client behavior against fixtures, not hosted login or browser-to-real-API authentication. The verifier tests exercise the actual Supabase SDK against a controlled local Auth HTTP stub; they do not prove hosted Supabase token verification. Database HTTP tests use real PostgreSQL and test-only identity injection. No identity bypass is available in the application.
+The browser suite deliberately intercepts Supabase and API responses. Those 28 passes prove client behavior against fixtures, not hosted login or browser-to-real-API authentication. The verifier tests exercise the actual Supabase SDK against a controlled local Auth HTTP stub; they do not prove hosted Supabase token verification. Database HTTP tests use real PostgreSQL and test-only identity injection. No identity bypass is available in the application.
 
-An expiry redirect race was found by browser testing and fixed. Early runs also exposed missing browser installation and ambiguous selectors; the final browser suite passed all 20 tests. Browser tests use an isolated .next-test directory and can run while local development remains active.
+An expiry redirect race was found by browser testing and fixed. Early runs also exposed missing browser installation and ambiguous selectors; the final browser suite passed all 28 tests. Browser tests use an isolated .next-test directory and can run while local development remains active.
 
 ## Not verified / not implemented
 
@@ -30,7 +30,7 @@ An expiry redirect race was found by browser testing and fixed. Early runs also 
 - Production deployment, hosting, TLS/proxy configuration or Docker startup. Nothing was published.
 - Hosted GitHub Actions execution; workflow is included for future runs.
 - Work-order persistence/concurrent database updates: only the pure future policy contract is tested. Atomic version checking/audit for incident mutations belongs to its milestone.
-- Process readings, original workbook-byte storage/private Storage, queues, anomaly detection, AI, notifications, reports or the remainder of the 20-feature platform. Production Excel import and saved dashboard values are verified below.
+- Original workbook-byte storage/private Storage, queues, industrial anomaly detection, AI, notifications, reports or the remainder of the 20-feature platform. Production import and synthetic hourly trends/review rules are verified below.
 - Performance/availability/prediction claims, engineering safe limits, downtime units or actual shift start times.
 
 ## Hosted Auth connection follow-up — 17 October 2026
@@ -74,7 +74,7 @@ The hosted Auth URL/public key and first-user application membership are now con
 
 ## Next milestone
 
-Synthetic hourly process-reading import with separate measured/received timestamps, duplicate/gap/unit validation, visible synthetic provenance and retrospective review warnings. Reported ranges are unverified and cannot establish safe limits or causes of authentic production losses. Persistent incident workflows follow that milestone.
+Persisted breakdown reporting, technician assignment and repair submission, human RCA, maintenance-head review/return and supervisor/head closure. Preserve restoration, review and closure times independently, with optimistic versions and atomic audit.
 
 ## Production import acceptance — 17 October 2026
 
@@ -90,3 +90,13 @@ Synthetic hourly process-reading import with separate measured/received timestam
 ## Local address recovery — 17 October 2026
 
 The reported offline workspace was open at `127.0.0.1:3000`, while the configured API CORS origin is `localhost:3000`. Frontend, API readiness and the database were already healthy. Added a development-only redirect to the canonical localhost origin when using the configured localhost pilot API. Verified HTTP 307 preserves the production path and query string. API origin permissions remain unchanged. Strict type checks pass. Reloading the actual Chrome tab followed the redirect and restored the trusted Administrator registry. The production dashboard then loaded all 27 saved days and 160 jobs. Local screenshot: `.local/production-access-restored.png`.
+
+## Synthetic readings acceptance — 17 October 2026
+
+- Applied milestone-3 migration and narrow runtime grants to the operational local PostgreSQL database and isolated test database. Supabase-hosted persistence remains pending.
+- Current automated suite: **27 unit/backend + 22 PostgreSQL integration + 28 desktop/mobile browser = 77 tests**. The eight reading browser cases were rerun after final layout/source-review changes. Strict type checks, API compilation, Next.js production build and dependency audit also pass. Hosted CI is not claimed.
+- Independently read the supplied original worksheet XML, compared every source ID, all 1,008 parameter values and every IST/UTC timestamp with parser staging. All 336 observations are eligible; no scheduled hourly gaps. Review counts are 3 hot, 5 cold and 5 pressure values, grouped into four retrospective review periods. Evidence stays in `.local/readings-source-verification.json`.
+- Loaded the supplied workbook through the trusted local CLI using the existing verified/provisioned pilot Administrator UUID and restricted runtime connection. This is explicitly LOCAL_CLI in the preview/commit audit metadata, not a hosted browser-upload or Auth-verification claim. Same parser/service/transaction path is used. Actual import: 336 readings, one commit audit event, separate measurement/receipt timestamps, immutable raw cells and matching decimal values. Full source comparison is retained in `.local/readings-live-verification.json`. Re-running the actual CLI import excluded all 336 existing observations; database count stayed 336 with exactly one commit audit.
+- After loading, the actual signed-in Chrome page retrieved saved readings through hosted Supabase Auth, the NestJS API and local PostgreSQL. Observed retained September coverage, 336 observations, zero missing hours, 13 unique review samples, four periods, all three parameter summaries, source history and separate dataset measurement/receipt times. Visually inspected the real hot-temperature chart and labels; screenshots are `.local/process-readings-dashboard.png` and `.local/process-readings-chart.png`. No intercepted API or test identity was used for this read.
+- **Actual browser upload verified after the user unlocked the Mac:** Chrome extension file access remained disabled, so selected the original workbook through the standard macOS file picker. The signed-in page sent the actual multipart preview to NestJS. Observed 336 source rows, zero eligible new observations and 336 already-imported exclusions. Even after acknowledgement, Import 0 valid observations stayed disabled. Database evidence confirms an API-origin preview, all existing rows excluded, exactly 336 saved readings and the original single commit audit. No extra commit was attempted because no new rows existed. Screenshot: `.local/readings-live-upload-duplicate.png`. New-reading commit is covered by the actual CLI service run, real PostgreSQL HTTP tests and desktop/mobile fixture tests; a separate new-data browser commit is not claimed.
+- Operational checks compare all saved readings, raw-cell snapshots, counts and review groups with independent source evidence. Authentic production counts and exact totals remain unchanged. All supplied original workbook SHA-256 checksums are unchanged and private files remain ignored by Git.

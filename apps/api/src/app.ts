@@ -6,6 +6,8 @@ import helmet from "helmet";
 import { json } from "express";
 import { ProductionController } from "./production/controller";
 import { ProductionService } from "./production/service";
+import { ReadingsController } from "./readings/controller";
+import { ReadingsService } from "./readings/service";
 import { CONFIG, parseConfig, type Config } from "./config";
 import { Database } from "./database";
 import { REPOSITORY, PrismaRepository } from "./repository";
@@ -23,6 +25,7 @@ export function appModule(config: Config) {
       MeController,
       MachinesController,
       ProductionController,
+      ReadingsController,
     ],
     providers: [
       { provide: CONFIG, useValue: config },
@@ -32,6 +35,7 @@ export function appModule(config: Config) {
       AuthGuard,
       RolesGuard,
       ProductionService,
+      ReadingsService,
     ],
   })
   class AppModule {}
@@ -58,9 +62,9 @@ export function configure(
     new DocumentBuilder()
       .setTitle("Supreme Maintenance API")
       .setDescription(
-        "Milestone 2. Scoped machine registry and production workbook preview, validation, idempotent commit and persisted totals.",
+        "Milestones 1–3. Scoped registry, production imports and synthetic hourly process readings with retrospective trends.",
       )
-      .setVersion("0.2.0")
+      .setVersion("0.3.0")
       .addBearerAuth()
       .build(),
   );

@@ -8,6 +8,7 @@ import {
   LogOut,
   ShieldCheck,
   BarChart3,
+  Activity,
 } from "lucide-react";
 import { getSupabase } from "@/lib/supabase";
 import type { Me } from "@/lib/api";
@@ -33,6 +34,7 @@ export function Shell({
   const router = useRouter();
   const pathname = usePathname();
   const inProduction = pathname.includes("/production");
+  const inReadings = pathname.includes("/readings");
   const [signingOut, setSigningOut] = useState(false);
   const [error, setError] = useState("");
   async function signOut() {
@@ -62,7 +64,7 @@ export function Shell({
         <div className="workspace-label">PILOT WORKSPACE</div>
         <nav aria-label="Main navigation">
           <Link
-            className={`nav-item ${inProduction ? "" : "active"}`}
+            className={`nav-item ${inProduction || inReadings ? "" : "active"}`}
             href="/machines"
           >
             <Boxes size={18} />
@@ -78,6 +80,15 @@ export function Shell({
               Production
             </Link>
           )}
+          {code && (
+            <Link
+              className={`nav-item ${inReadings ? "active" : ""}`}
+              href={`/machines/${code}/readings`}
+            >
+              <Activity size={18} />
+              Process trends
+            </Link>
+          )}
         </nav>
         <div className="sidebar-note">
           <ShieldCheck size={20} />
@@ -86,7 +97,7 @@ export function Shell({
         </div>
         <div className="sidebar-footer">
           <span className="tiny-dot" />
-          WH-C pilot · Production
+          WH-C pilot · Process trends
         </div>
       </aside>
       <div className="workspace">
@@ -130,7 +141,7 @@ export function Shell({
           <span>
             Supreme Industries · Machine maintenance & performance intelligence
           </span>
-          <span>Local pilot / v0.2</span>
+          <span>Local pilot / v0.3</span>
         </footer>
       </div>
     </div>

@@ -1,8 +1,8 @@
 # Supreme Maintenance Intelligence
 
-Production workbook import and saved dashboards.
+Synthetic hourly process readings and trends.
 
-Implemented: foundation access plus bounded Excel preview, validation, source provenance, duplicate-safe transactional import and saved production/scrap dashboards.
+Implemented: foundation and production plus synthetic hourly import, IST timestamps, source/receipt history, gap-aware parameter charts and retrospective demo-band reviews.
 
 ## Local development
 

@@ -164,6 +164,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/machines/{code}/readings/previews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ReadingsController_preview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/readings/previews/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ReadingsController_getPreview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/readings/previews/{id}/commit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ReadingsController_commit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/readings/trends": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ReadingsController_trends"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -350,6 +414,126 @@ export interface components {
             lastImportedAt: string | null;
             daily: components["schemas"]["DailyProductionDto"][];
             imports: components["schemas"]["ProductionImportHistoryDto"][];
+        };
+        ReadingPreviewRowDto: {
+            sourceRow: number;
+            sourceId: string;
+            localMeasuredAt: string | null;
+            /** Format: date-time */
+            measuredAt: string | null;
+            demoShift: string;
+            hotTempC: number | null;
+            coldTempC: number | null;
+            pressureBar: number | null;
+            problems: string[];
+            eligible: boolean;
+            alreadyImported: boolean;
+            rawCells: {
+                [key: string]: unknown;
+            };
+        };
+        ReadingPreviewDto: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            source: "SYNTHETIC";
+            filename: string;
+            workbookHash: string;
+            sheet: string;
+            parserVersion: string;
+            policyVersion: string;
+            /** @enum {string} */
+            status: "PREVIEW" | "COMMITTED";
+            createdAt: string;
+            expiresAt: string;
+            committedAt: string | null;
+            warnings: string[];
+            rows: components["schemas"]["ReadingPreviewRowDto"][];
+        };
+        ReadingCommitInputDto: {
+            /** @enum {boolean} */
+            acknowledgeWarnings: true;
+        };
+        ReadingCommitDto: {
+            importId: string;
+            importedReadings: number;
+            alreadyCommitted: boolean;
+        };
+        TrendPointDto: {
+            measuredAt: string;
+            localMeasuredAt: string;
+            hotTempC: number | null;
+            coldTempC: number | null;
+            pressureBar: number | null;
+        };
+        ReadingStatisticDto: {
+            /** @enum {string} */
+            key: "hotTempC" | "coldTempC" | "pressureBar";
+            name: string;
+            unit: string;
+            low: number;
+            high: number;
+            min: number | null;
+            max: number | null;
+            mean: number | null;
+            reviewCount: number;
+        };
+        ReadingReviewDto: {
+            parameter: string;
+            unit: string;
+            low: number;
+            high: number;
+            /** @enum {string} */
+            direction: "BELOW" | "ABOVE";
+            firstMeasuredAt: string;
+            lastMeasuredAt: string;
+            receivedAt: string;
+            samples: number;
+            /** @enum {string} */
+            kind: "ISOLATED" | "CONSECUTIVE";
+        };
+        ReadingRecordDto: {
+            sourceId: string;
+            sourceRow: number;
+            importId: string;
+            measuredAt: string;
+            localMeasuredAt: string;
+            receivedAt: string;
+            demoShift: string;
+            hotTempC: number;
+            coldTempC: number;
+            pressureBar: number;
+            filename: string;
+            sheet: string;
+            workbookHash: string;
+        };
+        ReadingImportHistoryDto: {
+            id: string;
+            filename: string;
+            sheet: string;
+            workbookHash: string;
+            receivedAt: string;
+            observations: number;
+        };
+        ReadingTrendsDto: {
+            /** @enum {string} */
+            source: "SYNTHETIC";
+            timezone: string;
+            policyVersion: string;
+            from: string;
+            to: string;
+            hasData: boolean;
+            observations: number;
+            expectedHours: number;
+            missingHours: number;
+            reviewObservations: number;
+            latestMeasuredAt: string | null;
+            lastReceivedAt: string | null;
+            points: components["schemas"]["TrendPointDto"][];
+            statistics: components["schemas"]["ReadingStatisticDto"][];
+            reviews: components["schemas"]["ReadingReviewDto"][];
+            rows: components["schemas"]["ReadingRecordDto"][];
+            imports: components["schemas"]["ReadingImportHistoryDto"][];
         };
     };
     responses: never;
@@ -885,6 +1069,290 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProductionDashboardDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    ReadingsController_preview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingPreviewDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    ReadingsController_getPreview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingPreviewDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    ReadingsController_commit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReadingCommitInputDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingCommitDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    ReadingsController_trends: {
+        parameters: {
+            query?: {
+                to?: string;
+                from?: string;
+            };
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingTrendsDto"];
                 };
             };
             400: {

@@ -56,6 +56,7 @@ model AppUser {
   membership Membership?
   auditEvents AuditEvent[]
   productionImports ProductionImport[]
+  readingImports ReadingImport[]
   @@schema("maintenance")
 }
 model Membership {
@@ -92,6 +93,8 @@ model Machine {
   access MachineAccess[]
   productionImports ProductionImport[]
   productionDays ProductionDay[]
+  readingImports ReadingImport[]
+  processReadings ProcessReading[]
   @@unique([orgId, id])
   @@unique([orgId, code])
   @@index([orgId, departmentId])
@@ -210,5 +213,59 @@ model ProductionRow {
   day ProductionDay @relation(fields:[orgId,machineId,dayId],references:[orgId,machineId,id],onDelete:Restrict)
   @@unique([dayId,sourceRow])
   @@index([orgId,machineId])
+  @@schema("maintenance")
+}
+
+enum ReadingImportStatus {
+  PREVIEW
+  COMMITTED
+  @@schema("maintenance")
+}
+model ReadingImport {
+  id String @id @default(uuid()) @db.Uuid
+  orgId String @db.Uuid
+  machineId String @db.Uuid
+  source ProductionSource @default(SYNTHETIC)
+  filename String @db.VarChar(180)
+  workbookHash String @db.VarChar(64)
+  sheet String @default("Hourly_Readings") @db.VarChar(100)
+  parserVersion String @db.VarChar(50)
+  policyVersion String @db.VarChar(50)
+  staged Json
+  status ReadingImportStatus @default(PREVIEW)
+  createdBy String @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  expiresAt DateTime @db.Timestamptz(3)
+  committedAt DateTime? @db.Timestamptz(3)
+  machine Machine @relation(fields:[orgId,machineId],references:[orgId,id],onDelete:Restrict)
+  creator AppUser @relation(fields:[createdBy],references:[id],onDelete:Restrict)
+  readings ProcessReading[]
+  @@unique([orgId,machineId,source,id])
+  @@index([orgId,machineId,createdAt])
+  @@index([createdBy])
+  @@schema("maintenance")
+}
+model ProcessReading {
+  id String @id @default(uuid()) @db.Uuid
+  orgId String @db.Uuid
+  machineId String @db.Uuid
+  importId String @db.Uuid
+  source ProductionSource @default(SYNTHETIC)
+  sourceId String @db.VarChar(64)
+  sourceRow Int
+  measuredAt DateTime @db.Timestamptz(3)
+  receivedAt DateTime @db.Timestamptz(3)
+  localMeasuredAt String @db.VarChar(19)
+  demoShift ProductionShift
+  hotTempC Decimal @db.Decimal(12,3)
+  coldTempC Decimal @db.Decimal(12,3)
+  pressureBar Decimal @db.Decimal(12,3)
+  rawCells Json
+  machine Machine @relation(fields:[orgId,machineId],references:[orgId,id],onDelete:Restrict)
+  import ReadingImport @relation(fields:[orgId,machineId,source,importId],references:[orgId,machineId,source,id],onDelete:Restrict)
+  @@unique([orgId,machineId,source,measuredAt])
+  @@unique([orgId,machineId,source,sourceId])
+  @@unique([importId,sourceRow])
+  @@index([importId])
   @@schema("maintenance")
 }

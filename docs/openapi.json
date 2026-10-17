@@ -858,12 +858,451 @@
           "Production"
         ]
       }
+    },
+    "/api/machines/{code}/readings/previews": {
+      "post": {
+        "operationId": "ReadingsController_preview",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadingPreviewDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Synthetic process readings"
+        ]
+      }
+    },
+    "/api/machines/{code}/readings/previews/{id}": {
+      "get": {
+        "operationId": "ReadingsController_getPreview",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadingPreviewDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Synthetic process readings"
+        ]
+      }
+    },
+    "/api/machines/{code}/readings/previews/{id}/commit": {
+      "post": {
+        "operationId": "ReadingsController_commit",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadingCommitInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadingCommitDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Synthetic process readings"
+        ]
+      }
+    },
+    "/api/machines/{code}/readings/trends": {
+      "get": {
+        "operationId": "ReadingsController_trends",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2026-09-14",
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2026-09-01",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadingTrendsDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Synthetic process readings"
+        ]
+      }
     }
   },
   "info": {
     "title": "Supreme Maintenance API",
     "description": "",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "contact": {}
   },
   "tags": [],
@@ -1547,6 +1986,499 @@
           "scrapKg",
           "lastImportedAt",
           "daily",
+          "imports"
+        ]
+      },
+      "ReadingPreviewRowDto": {
+        "type": "object",
+        "properties": {
+          "sourceRow": {
+            "type": "number"
+          },
+          "sourceId": {
+            "type": "string"
+          },
+          "localMeasuredAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "measuredAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "demoShift": {
+            "type": "string"
+          },
+          "hotTempC": {
+            "type": "number",
+            "nullable": true
+          },
+          "coldTempC": {
+            "type": "number",
+            "nullable": true
+          },
+          "pressureBar": {
+            "type": "number",
+            "nullable": true
+          },
+          "problems": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "eligible": {
+            "type": "boolean"
+          },
+          "alreadyImported": {
+            "type": "boolean"
+          },
+          "rawCells": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "sourceRow",
+          "sourceId",
+          "localMeasuredAt",
+          "measuredAt",
+          "demoShift",
+          "hotTempC",
+          "coldTempC",
+          "pressureBar",
+          "problems",
+          "eligible",
+          "alreadyImported",
+          "rawCells"
+        ]
+      },
+      "ReadingPreviewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "SYNTHETIC"
+            ]
+          },
+          "filename": {
+            "type": "string"
+          },
+          "workbookHash": {
+            "type": "string"
+          },
+          "sheet": {
+            "type": "string"
+          },
+          "parserVersion": {
+            "type": "string"
+          },
+          "policyVersion": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PREVIEW",
+              "COMMITTED"
+            ]
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string"
+          },
+          "committedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReadingPreviewRowDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "source",
+          "filename",
+          "workbookHash",
+          "sheet",
+          "parserVersion",
+          "policyVersion",
+          "status",
+          "createdAt",
+          "expiresAt",
+          "committedAt",
+          "warnings",
+          "rows"
+        ]
+      },
+      "ReadingCommitInputDto": {
+        "type": "object",
+        "properties": {
+          "acknowledgeWarnings": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "required": [
+          "acknowledgeWarnings"
+        ]
+      },
+      "ReadingCommitDto": {
+        "type": "object",
+        "properties": {
+          "importId": {
+            "type": "string"
+          },
+          "importedReadings": {
+            "type": "number"
+          },
+          "alreadyCommitted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "importId",
+          "importedReadings",
+          "alreadyCommitted"
+        ]
+      },
+      "TrendPointDto": {
+        "type": "object",
+        "properties": {
+          "measuredAt": {
+            "type": "string"
+          },
+          "localMeasuredAt": {
+            "type": "string"
+          },
+          "hotTempC": {
+            "type": "number",
+            "nullable": true
+          },
+          "coldTempC": {
+            "type": "number",
+            "nullable": true
+          },
+          "pressureBar": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "measuredAt",
+          "localMeasuredAt",
+          "hotTempC",
+          "coldTempC",
+          "pressureBar"
+        ]
+      },
+      "ReadingStatisticDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "enum": [
+              "hotTempC",
+              "coldTempC",
+              "pressureBar"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "low": {
+            "type": "number"
+          },
+          "high": {
+            "type": "number"
+          },
+          "min": {
+            "type": "number",
+            "nullable": true
+          },
+          "max": {
+            "type": "number",
+            "nullable": true
+          },
+          "mean": {
+            "type": "number",
+            "nullable": true
+          },
+          "reviewCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "key",
+          "name",
+          "unit",
+          "low",
+          "high",
+          "min",
+          "max",
+          "mean",
+          "reviewCount"
+        ]
+      },
+      "ReadingReviewDto": {
+        "type": "object",
+        "properties": {
+          "parameter": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "low": {
+            "type": "number"
+          },
+          "high": {
+            "type": "number"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "BELOW",
+              "ABOVE"
+            ]
+          },
+          "firstMeasuredAt": {
+            "type": "string"
+          },
+          "lastMeasuredAt": {
+            "type": "string"
+          },
+          "receivedAt": {
+            "type": "string"
+          },
+          "samples": {
+            "type": "number"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "ISOLATED",
+              "CONSECUTIVE"
+            ]
+          }
+        },
+        "required": [
+          "parameter",
+          "unit",
+          "low",
+          "high",
+          "direction",
+          "firstMeasuredAt",
+          "lastMeasuredAt",
+          "receivedAt",
+          "samples",
+          "kind"
+        ]
+      },
+      "ReadingRecordDto": {
+        "type": "object",
+        "properties": {
+          "sourceId": {
+            "type": "string"
+          },
+          "sourceRow": {
+            "type": "number"
+          },
+          "importId": {
+            "type": "string"
+          },
+          "measuredAt": {
+            "type": "string"
+          },
+          "localMeasuredAt": {
+            "type": "string"
+          },
+          "receivedAt": {
+            "type": "string"
+          },
+          "demoShift": {
+            "type": "string"
+          },
+          "hotTempC": {
+            "type": "number"
+          },
+          "coldTempC": {
+            "type": "number"
+          },
+          "pressureBar": {
+            "type": "number"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "sheet": {
+            "type": "string"
+          },
+          "workbookHash": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sourceId",
+          "sourceRow",
+          "importId",
+          "measuredAt",
+          "localMeasuredAt",
+          "receivedAt",
+          "demoShift",
+          "hotTempC",
+          "coldTempC",
+          "pressureBar",
+          "filename",
+          "sheet",
+          "workbookHash"
+        ]
+      },
+      "ReadingImportHistoryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "sheet": {
+            "type": "string"
+          },
+          "workbookHash": {
+            "type": "string"
+          },
+          "receivedAt": {
+            "type": "string"
+          },
+          "observations": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "filename",
+          "sheet",
+          "workbookHash",
+          "receivedAt",
+          "observations"
+        ]
+      },
+      "ReadingTrendsDto": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "SYNTHETIC"
+            ]
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "policyVersion": {
+            "type": "string"
+          },
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "hasData": {
+            "type": "boolean"
+          },
+          "observations": {
+            "type": "number"
+          },
+          "expectedHours": {
+            "type": "number"
+          },
+          "missingHours": {
+            "type": "number"
+          },
+          "reviewObservations": {
+            "type": "number"
+          },
+          "latestMeasuredAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastReceivedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrendPointDto"
+            }
+          },
+          "statistics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReadingStatisticDto"
+            }
+          },
+          "reviews": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReadingReviewDto"
+            }
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReadingRecordDto"
+            }
+          },
+          "imports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReadingImportHistoryDto"
+            }
+          }
+        },
+        "required": [
+          "source",
+          "timezone",
+          "policyVersion",
+          "from",
+          "to",
+          "hasData",
+          "observations",
+          "expectedHours",
+          "missingHours",
+          "reviewObservations",
+          "latestMeasuredAt",
+          "lastReceivedAt",
+          "points",
+          "statistics",
+          "reviews",
+          "rows",
           "imports"
         ]
       }
