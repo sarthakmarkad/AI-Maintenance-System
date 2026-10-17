@@ -1,0 +1,38 @@
+name: Foundation checks
+on: [push, pull_request]
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16.15-alpine
+        env:
+          POSTGRES_USER: maintenance_owner
+          POSTGRES_PASSWORD: ephemeral-ci-owner
+          POSTGRES_DB: maintenance_test
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U maintenance_owner -d maintenance_test" --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://maintenance_runtime:ephemeral-ci-runtime@127.0.0.1:5432/maintenance_test?schema=maintenance
+      DIRECT_URL: postgresql://maintenance_owner:ephemeral-ci-owner@127.0.0.1:5432/maintenance_test?schema=maintenance
+      TEST_DATABASE_URL: postgresql://maintenance_owner:ephemeral-ci-owner@127.0.0.1:5432/maintenance_test?schema=maintenance
+      TEST_RUNTIME_DATABASE_URL: postgresql://maintenance_runtime:ephemeral-ci-runtime@127.0.0.1:5432/maintenance_test?schema=maintenance
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - name: Create isolated restricted test login
+        env:
+          PGPASSWORD: ephemeral-ci-owner
+        run: psql -h 127.0.0.1 -U maintenance_owner -d maintenance_test -v ON_ERROR_STOP=1 -c "CREATE ROLE maintenance_runtime LOGIN PASSWORD 'ephemeral-ci-runtime' NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT"
+      - run: npm run test:db
+      - run: npm run api:generate && git diff --exit-code docs/openapi.json packages/api-client/schema.d.ts
+      - run: npm run build
+      - run: npm exec playwright -- install --with-deps chromium
+      - run: npm run test:web
+      - run: npm audit --audit-level=high

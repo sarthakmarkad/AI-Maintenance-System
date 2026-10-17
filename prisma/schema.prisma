@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+  schemas = ["maintenance"]
+}
+enum Role {
+  OPERATOR
+  TECHNICIAN
+  MAINTENANCE_HEAD
+  SUPERVISOR
+  MANAGEMENT
+  ADMINISTRATOR
+  @@schema("maintenance")
+}
+model Organization {
+  id String @id @default(uuid()) @db.Uuid
+  slug String @unique @db.VarChar(80)
+  name String @db.VarChar(160)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  departments Department[]
+  locations Location[]
+  memberships Membership[]
+  machines Machine[]
+  auditEvents AuditEvent[]
+  @@schema("maintenance")
+}
+model Department {
+  id String @id @default(uuid()) @db.Uuid
+  orgId String @db.Uuid
+  name String @db.VarChar(120)
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Restrict)
+  machines Machine[]
+  @@unique([orgId, id])
+  @@unique([orgId, name])
+  @@schema("maintenance")
+}
+model Location {
+  id String @id @default(uuid()) @db.Uuid
+  orgId String @db.Uuid
+  name String @db.VarChar(160)
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Restrict)
+  machines Machine[]
+  @@unique([orgId, id])
+  @@unique([orgId, name])
+  @@schema("maintenance")
+}
+model AppUser {
+  // Matches a verified Supabase Auth user ID. Not a user-editable profile role.
+  id String @id @db.Uuid
+  displayName String @db.VarChar(120)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  membership Membership?
+  auditEvents AuditEvent[]
+  @@schema("maintenance")
+}
+model Membership {
+  id String @id @default(uuid()) @db.Uuid
+  userId String @unique @db.Uuid
+  orgId String @db.Uuid
+  role Role
+  active Boolean @default(true)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  user AppUser @relation(fields: [userId], references: [id], onDelete: Restrict)
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Restrict)
+  machineAccess MachineAccess[]
+  @@unique([orgId, id])
+  @@index([orgId, role, active])
+  @@schema("maintenance")
+}
+model Machine {
+  id String @id @default(uuid()) @db.Uuid
+  orgId String @db.Uuid
+  code String @db.VarChar(32)
+  name String @db.VarChar(160)
+  manufacturer String @db.VarChar(160)
+  model String? @db.VarChar(160)
+  // Unknown means unknown: registry metadata is not a live health measurement.
+  operationalStatus String @default("NOT_MONITORED") @db.VarChar(32)
+  departmentId String? @db.Uuid
+  locationId String? @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Restrict)
+  department Department? @relation(fields: [orgId, departmentId], references: [orgId, id], onDelete: Restrict)
+  location Location? @relation(fields: [orgId, locationId], references: [orgId, id], onDelete: Restrict)
+  access MachineAccess[]
+  @@unique([orgId, id])
+  @@unique([orgId, code])
+  @@index([orgId, departmentId])
+  @@index([orgId, locationId])
+  @@schema("maintenance")
+}
+model MachineAccess {
+  orgId String @db.Uuid
+  machineId String @db.Uuid
+  membershipId String @db.Uuid
+  grantedAt DateTime @default(now()) @db.Timestamptz(3)
+  machine Machine @relation(fields: [orgId, machineId], references: [orgId, id], onDelete: Cascade)
+  membership Membership @relation(fields: [orgId, membershipId], references: [orgId, id], onDelete: Cascade)
+  @@id([machineId, membershipId])
+  @@index([orgId, membershipId])
+  @@schema("maintenance")
+}
+model AuditEvent {
+  id String @id @default(uuid()) @db.Uuid
+  orgId String @db.Uuid
+  // Nullable for system seed events; actor user ID otherwise. Immutable history.
+  actorId String? @db.Uuid
+  action String @db.VarChar(80)
+  entityId String @db.VarChar(120)
+  detail Json
+  at DateTime @default(now()) @db.Timestamptz(3)
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Restrict)
+  actor AppUser? @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  @@index([orgId, at])
+  @@schema("maintenance")
+}

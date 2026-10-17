@@ -1,0 +1,100 @@
+{
+  "name": "maintenance-intelligence",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22.12 <25"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n api,web \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "npm run build:api && concurrently -k \"tsc -p apps/api/tsconfig.json --watch --preserveWatchOutput\" \"node --watch --env-file-if-exists=.env apps/api/dist/main.js\"",
+    "dev:web": "npm run dev --workspace @maintenance/web",
+    "build:api": "tsc -p apps/api/tsconfig.json",
+    "build:web": "npm run build --workspace @maintenance/web",
+    "build": "npm run build:api && npm run build:web",
+    "typecheck": "tsc -p apps/api/tsconfig.json --noEmit && tsc -p apps/web/tsconfig.json --noEmit && tsc -p tsconfig.tests.json",
+    "test": "npm run build:api && node --test apps/api/dist/tests/*.test.js",
+    "test:db": "npm run db:test:prepare && npm run build:api && node --env-file-if-exists=.env --test apps/api/dist/tests/*.integration.js",
+    "test:web": "playwright test",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:seed": "tsx scripts/seed.ts",
+    "db:provision": "tsx scripts/provision-user.ts",
+    "api:generate": "npm run build:api && tsx scripts/openapi.ts && openapi-typescript docs/openapi.json -o packages/api-client/schema.d.ts",
+    "check": "npm run typecheck && npm test && npm run build",
+    "postinstall": "prisma generate",
+    "db:local": "node scripts/local-db.mjs",
+    "db:local:stop": "node scripts/local-db.mjs stop",
+    "db:grants": "node scripts/runtime-grants.mjs",
+    "db:test:prepare": "node scripts/test-db.mjs",
+    "format": "prettier --write \"apps/**/src/**/*.ts\" \"apps/web/{app,components,lib}/**/*.{ts,tsx,css}\" \"scripts/*.{ts,mjs}\" \"tests/**/*.ts\" playwright.config.ts"
+  },
+  "dependencies": {
+    "@nestjs/common": "11.2.7",
+    "@nestjs/core": "11.2.7",
+    "@nestjs/platform-express": "11.2.7",
+    "@nestjs/swagger": "11.4.7",
+    "@prisma/client": "6.19.3",
+    "@radix-ui/react-slot": "1.2.3",
+    "@supabase/supabase-js": "2.118.0",
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "dotenv": "17.2.3",
+    "exceljs": "4.4.0",
+    "helmet": "8.1.0",
+    "lucide-react": "0.468.0",
+    "multer": "2.4.0",
+    "next": "16.4.2",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "recharts": "3.10.1",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2",
+    "saxes": "6.0.0",
+    "tailwind-merge": "3.3.1",
+    "yauzl": "3.4.0",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@nestjs/testing": "11.2.7",
+    "@playwright/test": "1.64.1",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/express": "5.0.3",
+    "@types/multer": "2.3.0",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "@types/supertest": "6.0.3",
+    "@types/yauzl": "2.10.3",
+    "concurrently": "9.2.5",
+    "openapi-typescript": "7.10.1",
+    "prettier": "3.6.2",
+    "prisma": "6.19.3",
+    "supertest": "7.1.4",
+    "tailwindcss": "4.3.3",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3"
+  },
+  "overrides": {
+    "deepmerge-ts": "8.0.0",
+    "@nestjs/swagger": {
+      "js-yaml": "5.5.0"
+    },
+    "exceljs": {
+      "uuid": "11.1.1"
+    }
+  },
+  "allowScripts": {
+    "@prisma/client@6.19.3": true,
+    "prisma@6.19.3": true,
+    "@prisma/engines@6.19.3": true,
+    "esbuild@0.25.12": true,
+    "@scarf/scarf@1.4.0": false,
+    "fsevents@2.3.3": false
+  },
+  "packageManager": "npm@11.16.0"
+}

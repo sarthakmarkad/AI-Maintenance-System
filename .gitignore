@@ -1,0 +1,17 @@
+node_modules/
+.next/
+.next-test/
+dist/
+coverage/
+playwright-report/
+test-results/
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+*.log
+.DS_Store
+.local/
+data/company/
+Maintenance_Handoff/
+Maintenance_Local_Handoff.zip
