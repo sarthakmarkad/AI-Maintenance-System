@@ -595,6 +595,7 @@ export function ReadingsWorkspace({
                     </p>
                   </section>
                 ))}
+
                 <section className="panel">
                   <div className="panel-heading">
                     <div>

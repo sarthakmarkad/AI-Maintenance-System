@@ -1,4 +1,4 @@
-// Reviewed policy contract for milestone 4; no HTTP write endpoint or persistence yet.
+// Shared workflow policy; persistence adds scoped queries, atomic versions and audit.
 import { Role } from "@prisma/client";
 import {
   BadRequestException,
@@ -7,6 +7,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import type { Principal } from "../repository";
+import { z } from "zod";
 export type IssueStatus =
   | "REPORTED"
   | "ASSIGNED"
@@ -65,16 +66,21 @@ export function transition(
   };
   const text = (key: string) => {
     const value = input[key];
-    if (typeof value !== "string" || value.trim().length < 3)
-      throw new BadRequestException(
-        `${key} must contain at least 3 characters.`,
-      );
+    if (
+      typeof value !== "string" ||
+      value.trim().length < 3 ||
+      value.trim().length > 4000
+    )
+      throw new BadRequestException(`${key} must contain 3–4,000 characters.`);
     return value.trim();
   };
   switch (action) {
     case "assign":
       role(Role.MAINTENANCE_HEAD);
-      state("REPORTED", "ASSIGNED");
+      state("REPORTED", "ASSIGNED", "IN_PROGRESS");
+      if (issue.technicianId === input.technicianId)
+        throw new ConflictException("This technician is already assigned.");
+      if (issue.technicianId) text("reason");
       if (
         !technicians.some(
           (t) =>
@@ -87,6 +93,12 @@ export function transition(
           "Select a technician in this organization.",
         );
       next.technicianId = String(input.technicianId);
+      next.findings =
+        next.rootCause =
+        next.correctiveAction =
+        next.preventiveAction =
+        next.restoredAt =
+          null;
       next.status = "ASSIGNED";
       break;
     case "start":
@@ -108,7 +120,8 @@ export function transition(
       next.preventiveAction = text("preventiveAction");
       if (
         typeof input.restoredAt !== "string" ||
-        !/^\d{4}-\d{2}-\d{2}T.+(Z|[+-]\d{2}:\d{2})$/.test(input.restoredAt) ||
+        !z.string().datetime({ offset: true }).safeParse(input.restoredAt)
+          .success ||
         !Number.isFinite(Date.parse(input.restoredAt)) ||
         Date.parse(input.restoredAt) < Date.parse(issue.reportedAt) ||
         Date.parse(input.restoredAt) > now.getTime()

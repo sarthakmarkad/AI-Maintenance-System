@@ -1,4 +1,5 @@
 import type { components } from "@maintenance/api-client";
+import { selectedRole } from "./role-selection";
 export type Machine = components["schemas"]["MachineDto"];
 export type Me = components["schemas"]["MeDto"];
 export type Machines = components["schemas"]["MachinesDto"];
@@ -23,6 +24,7 @@ export async function api<T>(
     response = await fetch(`${base}${path}`, {
       ...init,
       headers: {
+        ...(selectedRole() ? { "X-Workspace-Role": selectedRole()! } : {}),
         ...init?.headers,
         Authorization: `Bearer ${token}`,
       },
@@ -57,3 +59,8 @@ export type ProductionCommit = components["schemas"]["ProductionCommitDto"];
 export type ReadingPreview = components["schemas"]["ReadingPreviewDto"];
 export type ReadingTrends = components["schemas"]["ReadingTrendsDto"];
 export type ReadingCommit = components["schemas"]["ReadingCommitDto"];
+export type WorkOrder = components["schemas"]["WorkOrderDto"];
+export type WorkOrderList = components["schemas"]["WorkOrderListDto"];
+export type WorkOrderHistory = components["schemas"]["WorkOrderHistoryDto"];
+export type EligibleTechnicians =
+  components["schemas"]["EligibleTechniciansDto"];

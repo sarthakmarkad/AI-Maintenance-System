@@ -1,5 +1,21 @@
-import type { Metadata } from 'next';
-import { AuthProvider } from '@/components/auth-provider';
-import './globals.css';
-export const metadata:Metadata={title:'Supreme | Maintenance Intelligence',description:'WH-C machine maintenance and performance intelligence workspace.'};
-export default function RootLayout({children}:{children:React.ReactNode}) {return <html lang="en"><body><AuthProvider>{children}</AuthProvider></body></html>;}
+import type { Metadata } from "next";
+import { AuthProvider } from "@/components/auth-provider";
+import "./globals.css";
+export const metadata: Metadata = {
+  title: "Supreme | Maintenance Intelligence",
+  description:
+    "WH-C machine maintenance and performance intelligence workspace.",
+};
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>
+        <AuthProvider>{children}</AuthProvider>
+      </body>
+    </html>
+  );
+}

@@ -1,8 +1,8 @@
 # Supreme Maintenance Intelligence
 
-Synthetic hourly process readings and trends.
+Persisted maintenance work orders.
 
-Implemented: foundation and production plus synthetic hourly import, IST timestamps, source/receipt history, gap-aware parameter charts and retrospective demo-band reviews.
+Implemented: authenticated registry, production import, synthetic process trends and role-controlled reporting, assignment, repair, engineering review and closure. Trusted backend role resolution is included as the authorization foundation for the next login/role-view milestone. Google sign-in and selectable role UX follow in the next commit.
 
 ## Local development
 

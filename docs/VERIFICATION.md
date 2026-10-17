@@ -1,37 +1,8 @@
-# Verification — 17 October 2026
+# Verification — 18 October 2026
 
-## Actual local results
+## Git implementation checkpoint
 
-Environment: macOS arm64, Node 24.18.0, npm 11.16.0, PostgreSQL 16.15 in the isolated project instance at 127.0.0.1:55432. Tests were executed locally; no deployed environment is claimed.
-
-| Check | Result | Evidence / limits |
-|---|---|---|
-| Folder access | PASS | Actual Maintenance root verified; temporary file/folder created, read and removed |
-| Dependency installation | PASS | Lockfile generated; Prisma client generated; known build scripts explicitly allowed |
-| Dependency audit | PASS | npm audit: 0 vulnerabilities after targeted compatible dependency patches |
-| Type checks | PASS | Strict TypeScript for NestJS, Next.js and browser tests |
-| Backend production compilation | PASS | tsc emits runnable NestJS application |
-| Frontend production build | PASS | Next.js builds login, registry, machine and production pages; isolated build cache preserves the running dev server |
-| Backend/config/verifier/workflow/parser tests | PASS, 27 | Foundation/production checks plus namespace-aware reading XML, local/UTC conversion, both Excel date systems, duplicate/invalid rows, empty numeric caches, invented bands, label exclusion and gap-separated reviews |
-| Real PostgreSQL integration tests | PASS, 22 | Foundation/production checks plus reading scope/roles, staged provenance, idempotent and racing commits, ID/time conflicts, retained receipt times, trend gaps, audit rollback, expiry and protected readings |
-| Browser tests | PASS, 28 | Fourteen scenarios each in desktop Chromium and Pixel 7 emulation; foundation/production flows plus reading review/commit/reload/source history, chart layout, roles, conflicts and expiry |
-| Initial unconfigured local smoke | PASS | Actual running API: liveness 200, readiness 503 with database connected/auth unconfigured, protected endpoints 401, OpenAPI 200 |
-| Initial unconfigured browser | PASS | Real local frontend redirects to login, shows setup notice, disables sign-in and fits mobile width; no interception for this check |
-| Reference/privacy boundary | PASS | Handoff, company files, .env, frontend local environment, native DB and test artifacts ignored by Git; no originals changed or copied into public assets |
-
-The browser suite deliberately intercepts Supabase and API responses. Those 28 passes prove client behavior against fixtures, not hosted login or browser-to-real-API authentication. The verifier tests exercise the actual Supabase SDK against a controlled local Auth HTTP stub; they do not prove hosted Supabase token verification. Database HTTP tests use real PostgreSQL and test-only identity injection. No identity bypass is available in the application.
-
-An expiry redirect race was found by browser testing and fixed. Early runs also exposed missing browser installation and ambiguous selectors; the final browser suite passed all 28 tests. Browser tests use an isolated .next-test directory and can run while local development remains active.
-
-## Not verified / not implemented
-
-- Hosted session refresh, expiry and logout against this actual project are not yet exercised; successful real sign-in and WH-C retrieval are verified below.
-- A Supabase-hosted PostgreSQL migration, restricted grants, pooler behavior or Data API schema exposure settings.
-- Production deployment, hosting, TLS/proxy configuration or Docker startup. Nothing was published.
-- Hosted GitHub Actions execution; workflow is included for future runs.
-- Work-order persistence/concurrent database updates: only the pure future policy contract is tested. Atomic version checking/audit for incident mutations belongs to its milestone.
-- Original workbook-byte storage/private Storage, queues, industrial anomaly detection, AI, notifications, reports or the remainder of the 20-feature platform. Production import and synthetic hourly trends/review rules are verified below.
-- Performance/availability/prediction claims, engineering safe limits, downtime units or actual shift start times.
+This source tree is a logical Git checkpoint reconstructed from saved implementation sources. Historical execution evidence below records the original milestone runs; it does not claim every check was rerun on this reconstructed intermediate tree. TypeScript and unit checks are run during Git preparation. The final calendar-only Git tree receives independent build/browser/database verification.
 
 ## Hosted Auth connection follow-up — 17 October 2026
 
@@ -74,7 +45,7 @@ The hosted Auth URL/public key and first-user application membership are now con
 
 ## Next milestone
 
-Persisted breakdown reporting, technician assignment and repair submission, human RCA, maintenance-head review/return and supervisor/head closure. Preserve restoration, review and closure times independently, with optimistic versions and atomic audit.
+Planned maintenance calendar and in-app due reminders. Statistical anomaly detection remains a later milestone.
 
 ## Production import acceptance — 17 October 2026
 
@@ -100,3 +71,14 @@ The reported offline workspace was open at `127.0.0.1:3000`, while the configure
 - After loading, the actual signed-in Chrome page retrieved saved readings through hosted Supabase Auth, the NestJS API and local PostgreSQL. Observed retained September coverage, 336 observations, zero missing hours, 13 unique review samples, four periods, all three parameter summaries, source history and separate dataset measurement/receipt times. Visually inspected the real hot-temperature chart and labels; screenshots are `.local/process-readings-dashboard.png` and `.local/process-readings-chart.png`. No intercepted API or test identity was used for this read.
 - **Actual browser upload verified after the user unlocked the Mac:** Chrome extension file access remained disabled, so selected the original workbook through the standard macOS file picker. The signed-in page sent the actual multipart preview to NestJS. Observed 336 source rows, zero eligible new observations and 336 already-imported exclusions. Even after acknowledgement, Import 0 valid observations stayed disabled. Database evidence confirms an API-origin preview, all existing rows excluded, exactly 336 saved readings and the original single commit audit. No extra commit was attempted because no new rows existed. Screenshot: `.local/readings-live-upload-duplicate.png`. New-reading commit is covered by the actual CLI service run, real PostgreSQL HTTP tests and desktop/mobile fixture tests; a separate new-data browser commit is not claimed.
 - Operational checks compare all saved readings, raw-cell snapshots, counts and review groups with independent source evidence. Authentic production counts and exact totals remain unchanged. All supplied original workbook SHA-256 checksums are unchanged and private files remain ignored by Git.
+
+## Maintenance workflow acceptance — 17 October 2026
+
+- Applied migration 202610170004 and narrow runtime grants to local operational and isolated test databases. No hosted database migration or deployment occurred.
+- Verified **27 backend/unit + 31 real PostgreSQL integration + 42 desktop/mobile browser cases = 100 passing cases**. The combined browser run passed the prior 28 and ten new cases; two new selectors failed in each viewport. After using semantic combobox locators, all fourteen new workflow cases passed. Strict TypeScript, regenerated OpenAPI 0.4 contracts, NestJS/Next.js production builds and npm audit (zero vulnerabilities) also pass.
+- Real database HTTP tests verify trusted roles/org/machine scope, active eligible assignments, concurrent identical report retries, changed retry rejection, assigned-only repairs, required human RCA/actions and calendar-valid independent restoration time. They exercise reasoned reassignment, return/resubmission evidence, head-only approval, supervisor/head closure, Administrator denial, competing version updates and complete paginated history beyond fifty events. Audit failure rolls back state/history; runtime SQL cannot edit original report columns/history/audit, and CLOSED is terminal.
+- Browser fixtures verify report drafts/request keys across failed retries, eligible assignment, technician start/submission, return/resubmission/approval/closure, Administrator read-only behavior, conflict blocking until reload, status filters and expired authentication. Desktop/mobile detail layouts fit their viewports; saved screenshots were inspected. These fixtures do not prove hosted multi-role authentication.
+- The actual signed-in Administrator retrieved the new empty Work orders page in **Codex's built-in in-app browser**, through hosted Supabase Auth, the real NestJS API and local PostgreSQL. Observed correct trusted identity, zero incidents and no operational action controls. No browser response interception, role changes or fake operational incidents were used. Screenshot: `.local/work-orders-admin.png`.
+- Final private data checks preserve all original September records (27 days, 160 jobs, two activity rows), exact totals and staged source evidence. An additional existing October import contains thirteen days: operational production now has forty saved days, all matching their stored import snapshots. The milestone does not remove or rewrite that import. All 336 reading IDs/values/measurement times/raw cells match staging; separate receipt times, zero gaps, thirteen review observations, four groups and the single commit audit remain intact. Original workbook SHA-256 hashes are unchanged. Evidence: `.local/work-orders-verification.json`.
+- The operational database contains zero work orders and zero work-order events after verification. The full workflow ran only against the isolated test database or browser fixtures. Private evidence, credentials, handoff/company originals and generated test artifacts remain ignored by Git.
+- Current account remains Administrator. Live multi-user acceptance requires separately provisioned actual operational-role accounts; this milestone does not manufacture Auth users or grant the current Administrator engineering authority. Notifications, calendar/scheduled maintenance, attachments, cancellation/reopening, KPI calculations and AI diagnosis remain future work.

@@ -27,30 +27,25 @@ Supabase browser email/password flow issues sessions. Browser `getSession()` is 
 
 References: [Supabase getUser](https://supabase.com/docs/reference/javascript/auth-getuser), [Supabase Next.js quickstart](https://supabase.com/docs/guides/auth/quickstarts/nextjs), [Prisma v6 schemas](https://docs.prisma.io/docs/orm/v6/prisma-schema/data-model/multi-schema).
 
-The browser sends a bearer token in `Authorization`; operational requests do not use ambient cookies. CORS allows only configured `WEB_ORIGIN`. This avoids cookie-based CSRF for these API reads. Token persistence uses the Supabase browser library; XSS prevention remains important. No operational mutations are exposed in M1. Supabase handles credential submission; there is no NestJS password endpoint. Shared distributed rate limiting is deferred until a deployed topology exists.
+The browser sends a bearer token in `Authorization`; operational requests do not use ambient cookies. CORS allows only configured `WEB_ORIGIN`. This avoids cookie-based CSRF for these API reads. Token persistence uses the Supabase browser library; XSS prevention remains important. M1 exposed reads; later milestone-specific endpoints add guarded operational mutations. Supabase handles credential submission; there is no NestJS password endpoint. Shared distributed rate limiting is deferred until a deployed topology exists.
 
-Application tables live in private `maintenance`, with no Data API/browser grants. RLS is not claimed to inherit a Prisma request identity: the dedicated runtime role has only explicit SELECT grants, and record scope is enforced by NestJS queries. Do not expose this schema through Data API or grant it to browser roles. Integration tests check composite FKs, runtime write denial and direct unprivileged SQL denial; actual Supabase project configuration is pending.
+Application tables live in private `maintenance`, with no Data API/browser grants. RLS is not claimed to inherit a Prisma request identity: the dedicated runtime role has explicit scoped-purpose grants, and record scope is enforced by NestJS queries. Do not expose this schema through Data API or grant it to browser roles. Integration tests check composite FKs, runtime write denial and direct unprivileged SQL denial; actual Supabase project configuration is pending.
 
 Unconfigured development is explicit and fail-closed; production startup rejects missing DB/Auth/HTTPS origin. There is no runtime mock identity adapter. Test doubles exist solely inside test files.
 
-## Workflow contract retained for later persistence
+## Persisted maintenance workflow — milestone 4
 
-`apps/api/src/domain/workflow.ts` is a pure reviewed policy contract, not an implemented incident API or persisted workflow. Tests preserve:
+`apps/api/src/domain/workflow.ts` now supplies the policy used by the persisted work-order API. Operator reporting, assigned-technician repair, maintenance-head approval/return and supervisor OR head closure preserve the confirmed responsibilities. Administrator has no engineering action authority.
 
-- Operator reports; assigned technician investigates/repairs/submits.
-- Maintenance head approves or returns with a reason.
-- Supervisor OR maintenance head closes an approved issue.
-- Administrator does not acquire review/closure authority from its role.
-- Cross-organization, unassigned-technician and stale-version changes fail.
-- Restoration, engineering review and administrative closure timestamps remain separate.
+Implemented states are `REPORTED → ASSIGNED → IN_PROGRESS → AWAITING_REVIEW → APPROVED → CLOSED`, with return to IN_PROGRESS and reasoned head reassignment from ASSIGNED/IN_PROGRESS. Six labels, head-only assignment, mandatory findings/human RCA/corrective/preventive fields, restoration required at submission, and terminal closure remain provisional pilot choices inherited from the draft and accepted for this implementation, not authoritative missing-SRS requirements. Reassignment clears current repair fields and retains earlier submissions in immutable history. Cancellation/reopening remain deferred.
 
-Proposed state labels remain `REPORTED → ASSIGNED → IN_PROGRESS → AWAITING_REVIEW → APPROVED → CLOSED`. Head-only assignment/reassignment, mandatory findings/RCA/corrective/preventive fields on submission, restoration required at submission, and no reopen action are **provisional workflow choices**, inherited from the draft and requiring validation before M4 persistence. Assignment history, returned-review evidence, atomic version compare-and-update, audit records and reopening need database/API design in M4. Unit stale-version checks alone do not prove database concurrency handling.
+Persistence adds scoped foreign keys, original report protection, strict request schemas, retry-safe report keys, atomic version compare-and-update, append-only history and transactional audit. Real test-database races prove one update wins; audit failure rolls back state/history. Restoration, submission, engineering approval and closure retain independent instants. See [WORK-ORDERS.md](WORK-ORDERS.md) for the complete contract and limits.
 
 ## Package and local environment choices
 
 Pinned Node-compatible Next.js/React/NestJS dependencies with npm lockfile. Stayed on Prisma 6.19.3's supported schema/client API to avoid an unrelated major migration; scoped transitive overrides patch vulnerable dependencies. `deepmerge-ts` 8 is used by Prisma configuration and exercised by generation/migration/tests. Swagger alone receives patched js-yaml 5; OpenAPI tooling retains its compatible version. Only known Prisma/esbuild install scripts are allowed; optional telemetry/native file-watching install scripts are denied.
 
-The native local database is isolated at 55432, with owner and SELECT-only runtime logins. Docker config is an alternative, unverified here. Runtime logs include correlation ID, method, status, duration and safe error type; no tokens, request bodies, queries or workbook data. No publication/deployment is part of this task.
+The native local database is isolated at 55432, with owner and restricted runtime logins; later migrations add narrow operational grants. Docker config is an alternative, unverified here. Runtime logs include correlation ID, method, status, duration and safe error type; no tokens, request bodies, queries or workbook data. No publication/deployment is part of this task.
 
 ## Hosted Auth connected — 17 October 2026
 
@@ -73,3 +68,11 @@ ReadingImport and ProcessReading use scoped foreign keys, source/time and source
 Invented demo bands are versioned as demo-hourly-bands-v1, separate from reported ranges or future engineering settings. Retrospective review is calculated deterministically from saved numeric values at query time after receipt. Formula review columns and Demo_Events are excluded. Consecutive samples are grouped only across adjacent hourly instants in the selected date window; gaps and in-band observations end a group. No duration, industrial fault cause, confirmed breakdown or prediction accuracy is inferred.
 
 The optional trusted local CLI uses the same service and restricted connection, resolves active membership from the database and records LOCAL_CLI audit metadata. Its operator must supply a verified Auth UUID, like the existing provisioning CLI. It is not a login or an application identity bypass. Browser/API authentication remains Supabase-verified.
+
+## Single-identity role views and Google sign-in
+
+The user explicitly requested the same existing Gmail identity for all six roles, declining separate addresses and aliases. Added MembershipRoleGrant rather than duplicate Supabase accounts or changing the default Administrator membership. A browser role selection is only a request; AuthGuard verifies a matching active trusted grant and applies exactly one role on each request. Work-order transactions recheck selected-role access and preserve actual actor-role history. Technician eligibility includes explicitly granted technician roles with machine access. Runtime/database browser roles cannot write grants.
+
+This supersedes the single-role-only assumption while retaining one membership/organization per user. Administrator itself still has no engineering authority; the pilot identity can switch to a separately granted head role. This is not independent-person approval separation. Future staff identities must receive only their real responsibilities. See TEAM-ACCESS.md for the matrix and trusted provisioning behavior.
+
+Added Google sign-in using the existing Supabase browser client with PKCE and explicit callback exchange. API identity verification stays provider-agnostic and always contacts Supabase getUser. Google identity does not create application grants. Public provider settings control button availability, not authorization. Fixed callback destination, URL scrubbing, no-referrer/no-store headers and sanitized errors protect the return flow. The owner subsequently configured Google OAuth and reported checking the login. Hosted provider availability and the real Google redirect were verified; the agent stopped its credential/consent flow at the user’s request. Setup is documented in GOOGLE-SIGN-IN-SETUP.md.

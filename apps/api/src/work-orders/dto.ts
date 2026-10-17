@@ -1,0 +1,175 @@
+import { ApiProperty } from "@nestjs/swagger";
+import {
+  WorkOrderStatus,
+  WorkOrderPriority,
+  ReportedImpact,
+  Role,
+} from "@prisma/client";
+export class WorkOrderPersonDto {
+  @ApiProperty({ format: "uuid" }) userId!: string;
+  @ApiProperty() displayName!: string;
+}
+export class WorkOrderEventDto {
+  @ApiProperty() id!: string;
+  @ApiProperty() version!: number;
+  @ApiProperty({
+    enum: [
+      "REPORT",
+      "ASSIGN",
+      "START",
+      "SUBMIT",
+      "APPROVE",
+      "RETURN",
+      "CLOSE",
+    ],
+  })
+  action!: string;
+  @ApiProperty({ type: String, enum: WorkOrderStatus, nullable: true })
+  fromStatus!: string | null;
+  @ApiProperty({ enum: WorkOrderStatus }) toStatus!: string;
+  @ApiProperty({ type: WorkOrderPersonDto }) actor!: WorkOrderPersonDto;
+  @ApiProperty({ enum: Role }) actorRole!: string;
+  @ApiProperty({ format: "date-time" }) at!: string;
+  @ApiProperty({ type: "object", additionalProperties: true }) detail!: Record<
+    string,
+    unknown
+  >;
+}
+export class WorkOrderSummaryDto {
+  @ApiProperty({ format: "uuid" }) id!: string;
+  @ApiProperty() title!: string;
+  @ApiProperty({ enum: WorkOrderStatus }) status!: string;
+  @ApiProperty() version!: number;
+  @ApiProperty({ enum: WorkOrderPriority }) priority!: string;
+  @ApiProperty({ enum: ReportedImpact }) impact!: string;
+  @ApiProperty({ format: "date-time" }) reportedAt!: string;
+  @ApiProperty({ type: String, format: "date-time", nullable: true })
+  observedAt!: string | null;
+  @ApiProperty({ type: WorkOrderPersonDto }) reporter!: WorkOrderPersonDto;
+  @ApiProperty({ type: WorkOrderPersonDto, nullable: true })
+  technician!: WorkOrderPersonDto | null;
+  @ApiProperty({ type: String, format: "date-time", nullable: true })
+  restoredAt!: string | null;
+  @ApiProperty({ type: String, format: "date-time", nullable: true })
+  closedAt!: string | null;
+  @ApiProperty({
+    type: [String],
+    enum: ["assign", "start", "submit", "approve", "return", "close"],
+  })
+  allowedActions!: string[];
+}
+export class WorkOrderDto extends WorkOrderSummaryDto {
+  @ApiProperty() description!: string;
+  @ApiProperty({ type: String, nullable: true }) startedAt!: string | null;
+  @ApiProperty({ type: String, nullable: true }) findings!: string | null;
+  @ApiProperty({ type: String, nullable: true }) rootCause!: string | null;
+  @ApiProperty({ type: String, nullable: true }) correctiveAction!:
+    | string
+    | null;
+  @ApiProperty({ type: String, nullable: true }) preventiveAction!:
+    | string
+    | null;
+  @ApiProperty({ type: String, nullable: true }) submittedAt!: string | null;
+  @ApiProperty({ type: String, nullable: true }) returnReason!: string | null;
+  @ApiProperty({ type: String, nullable: true }) reviewedAt!: string | null;
+  @ApiProperty({ type: WorkOrderPersonDto, nullable: true })
+  reviewer!: WorkOrderPersonDto | null;
+  @ApiProperty({ type: WorkOrderPersonDto, nullable: true })
+  closer!: WorkOrderPersonDto | null;
+  @ApiProperty() updatedAt!: string;
+  @ApiProperty({ type: [WorkOrderEventDto] }) events!: WorkOrderEventDto[];
+  @ApiProperty({ type: Number, nullable: true }) historyNextVersion!:
+    | number
+    | null;
+}
+export class WorkOrderReportedDto extends WorkOrderDto {
+  @ApiProperty() alreadyReported!: boolean;
+}
+export class WorkOrderListDto {
+  @ApiProperty({ type: [WorkOrderSummaryDto] }) items!: WorkOrderSummaryDto[];
+  @ApiProperty({ type: String, nullable: true }) nextCursor!: string | null;
+  @ApiProperty({ type: "object", additionalProperties: { type: "integer" } })
+  counts!: Record<string, number>;
+  @ApiProperty() total!: number;
+}
+export class WorkOrderHistoryDto {
+  @ApiProperty({ type: [WorkOrderEventDto] }) items!: WorkOrderEventDto[];
+  @ApiProperty({ type: Number, nullable: true }) nextBeforeVersion!:
+    | number
+    | null;
+}
+export class EligibleTechniciansDto {
+  @ApiProperty({ type: [WorkOrderPersonDto] }) items!: WorkOrderPersonDto[];
+}
+export class ReportWorkOrderDto {
+  @ApiProperty({
+    format: "uuid",
+    description:
+      "Stable client retry key for one report; same key with changed content conflicts.",
+  })
+  requestId!: string;
+  @ApiProperty({ minLength: 3, maxLength: 160 }) title!: string;
+  @ApiProperty({ minLength: 3, maxLength: 4000 }) description!: string;
+  @ApiProperty({ enum: WorkOrderPriority }) priority!: string;
+  @ApiProperty({ enum: ReportedImpact }) impact!: string;
+  @ApiProperty({
+    type: String,
+    format: "date-time",
+    nullable: true,
+    required: false,
+    description:
+      "Optional explicitly observed time; never inferred from imported data.",
+  })
+  observedAt?: string | null;
+}
+export class WorkOrderActionDto {
+  @ApiProperty({ minimum: 1 }) version!: number;
+  @ApiProperty({
+    required: false,
+    format: "uuid",
+    description: "assign only; active in-org technician with machine grant",
+  })
+  technicianId?: string;
+  @ApiProperty({
+    required: false,
+    description:
+      "Required for return and for reassignment; 3–4,000 characters.",
+  })
+  reason?: string;
+  @ApiProperty({
+    required: false,
+    description: "Required on submit; 3–4,000 characters.",
+  })
+  findings?: string;
+  @ApiProperty({
+    required: false,
+    description:
+      "Required on submit; human RCA, 3–4,000 characters.",
+  })
+  rootCause?: string;
+  @ApiProperty({
+    required: false,
+    description:
+      "Required on submit; corrective action, 3–4,000 characters.",
+  })
+  correctiveAction?: string;
+  @ApiProperty({
+    required: false,
+    description:
+      "Required on submit; preventive action, 3–4,000 characters.",
+  })
+  preventiveAction?: string;
+  @ApiProperty({
+    required: false,
+    format: "date-time",
+    description:
+      "Required on submit; explicit offset timestamp between report and submission.",
+  })
+  restoredAt?: string;
+  @ApiProperty({
+    required: false,
+    description:
+      "approve/close only; optional 3–4,000-character note. Extra fields for each action are rejected.",
+  })
+  note?: string;
+}

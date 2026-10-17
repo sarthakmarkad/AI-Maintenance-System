@@ -22,6 +22,7 @@ import { Shell } from "./shell";
 import { Button } from "./ui/button";
 import { ProductionWorkspace } from "./production-workspace";
 import { ReadingsWorkspace } from "./readings-workspace";
+import { WorkOrdersWorkspace } from "./work-orders-workspace";
 type Result =
   | { kind: "loading" }
   | { kind: "error"; message: string; requestId?: string }
@@ -30,10 +31,14 @@ export function MachineWorkspace({
   code,
   production = false,
   readings = false,
+  workOrders = false,
+  orderId,
 }: {
   code?: string;
   production?: boolean;
   readings?: boolean;
+  workOrders?: boolean;
+  orderId?: string;
 }) {
   const { session, loading, expired, expire } = useAuth();
   const router = useRouter();
@@ -109,7 +114,14 @@ export function MachineWorkspace({
           <Link href="/machines">Back to asset registry</Link>
         </section>
       ) : code && result.machines[0] ? (
-        readings ? (
+        workOrders ? (
+          <WorkOrdersWorkspace
+            machine={result.machines[0]}
+            user={result.user}
+            token={session.access_token}
+            orderId={orderId}
+          />
+        ) : readings ? (
           <ReadingsWorkspace
             machine={result.machines[0]}
             user={result.user}
@@ -266,8 +278,8 @@ function MachineDetail({
             your production line.
           </h2>
           <p>
-            Maintenance context starts here. Your machine record is connected;
-            production and incident history will follow.
+            Your machine record, production history and synthetic process trends
+            are connected. Track operator reports and maintenance work below.
           </p>
           <div className="hero-meta">
             <span>
@@ -352,10 +364,15 @@ function MachineDetail({
           <span className="eyebrow">PEOPLE KEEP THE PROCESS MOVING</span>
           <h2>A clear maintenance handoff</h2>
           <p>
-            Confirmed responsibilities. Workflow implementation follows in a
-            later milestone.
+            Report, assign, repair, review and close with a traceable history.
           </p>
         </div>
+        <Button asChild variant="outline">
+          <Link href={`/machines/${machine.code}/work-orders`}>
+            Open work orders
+            <ArrowRight size={14} />
+          </Link>
+        </Button>
         <div className="workflow-steps">
           <div>
             <span>01</span>

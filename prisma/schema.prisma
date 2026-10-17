@@ -70,8 +70,27 @@ model Membership {
   user AppUser @relation(fields: [userId], references: [id], onDelete: Restrict)
   organization Organization @relation(fields: [orgId], references: [id], onDelete: Restrict)
   machineAccess MachineAccess[]
+  roleGrants MembershipRoleGrant[]
+  reportedOrders WorkOrder[] @relation("OrderReporter")
+  assignedOrders WorkOrder[] @relation("OrderTechnician")
+  reviewedOrders WorkOrder[] @relation("OrderReviewer")
+  closedOrders WorkOrder[] @relation("OrderCloser")
+  orderEvents WorkOrderEvent[]
+  @@unique([orgId,userId])
   @@unique([orgId, id])
   @@index([orgId, role, active])
+  @@schema("maintenance")
+}
+model MembershipRoleGrant {
+  id String @id @default(uuid()) @db.Uuid
+  orgId String @db.Uuid
+  membershipId String @db.Uuid
+  role Role
+  active Boolean @default(true)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  membership Membership @relation(fields:[orgId,membershipId],references:[orgId,id],onDelete:Restrict)
+  @@unique([membershipId,role])
+  @@index([orgId,membershipId,active])
   @@schema("maintenance")
 }
 model Machine {
@@ -95,6 +114,7 @@ model Machine {
   productionDays ProductionDay[]
   readingImports ReadingImport[]
   processReadings ProcessReading[]
+  workOrders WorkOrder[]
   @@unique([orgId, id])
   @@unique([orgId, code])
   @@index([orgId, departmentId])
@@ -267,5 +287,89 @@ model ProcessReading {
   @@unique([orgId,machineId,source,sourceId])
   @@unique([importId,sourceRow])
   @@index([importId])
+  @@schema("maintenance")
+}
+
+enum WorkOrderStatus {
+  REPORTED
+  ASSIGNED
+  IN_PROGRESS
+  AWAITING_REVIEW
+  APPROVED
+  CLOSED
+  @@schema("maintenance")
+}
+enum WorkOrderPriority {
+  LOW
+  NORMAL
+  HIGH
+  @@schema("maintenance")
+}
+enum ReportedImpact {
+  STOPPED
+  DEGRADED
+  OBSERVATION
+  @@schema("maintenance")
+}
+model WorkOrder {
+  id String @id @default(uuid()) @db.Uuid
+  orgId String @db.Uuid
+  machineId String @db.Uuid
+  requestId String @db.Uuid
+  reportFingerprint String @db.VarChar(64)
+  title String @db.VarChar(160)
+  description String @db.Text
+  priority WorkOrderPriority @default(NORMAL)
+  impact ReportedImpact
+  observedAt DateTime? @db.Timestamptz(3)
+  reportedAt DateTime @default(now()) @db.Timestamptz(3)
+  reportedBy String @db.Uuid
+  status WorkOrderStatus @default(REPORTED)
+  version Int @default(1)
+  technicianId String? @db.Uuid
+  startedAt DateTime? @db.Timestamptz(3)
+  findings String? @db.Text
+  rootCause String? @db.Text
+  correctiveAction String? @db.Text
+  preventiveAction String? @db.Text
+  restoredAt DateTime? @db.Timestamptz(3)
+  submittedAt DateTime? @db.Timestamptz(3)
+  returnReason String? @db.Text
+  reviewedAt DateTime? @db.Timestamptz(3)
+  reviewedBy String? @db.Uuid
+  closedAt DateTime? @db.Timestamptz(3)
+  closedBy String? @db.Uuid
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  machine Machine @relation(fields:[orgId,machineId],references:[orgId,id],onDelete:Restrict)
+  reporter Membership @relation("OrderReporter",fields:[orgId,reportedBy],references:[orgId,userId],onDelete:Restrict)
+  technician Membership? @relation("OrderTechnician",fields:[orgId,technicianId],references:[orgId,userId],onDelete:Restrict)
+  reviewer Membership? @relation("OrderReviewer",fields:[orgId,reviewedBy],references:[orgId,userId],onDelete:Restrict)
+  closer Membership? @relation("OrderCloser",fields:[orgId,closedBy],references:[orgId,userId],onDelete:Restrict)
+  events WorkOrderEvent[]
+  @@unique([orgId,machineId,id])
+  @@unique([orgId,reportedBy,requestId])
+  @@index([orgId,machineId,reportedAt,id])
+  @@index([orgId,machineId,status,reportedAt])
+  @@index([orgId,technicianId])
+  @@schema("maintenance")
+}
+model WorkOrderEvent {
+  id String @id @default(uuid()) @db.Uuid
+  orgId String @db.Uuid
+  machineId String @db.Uuid
+  orderId String @db.Uuid
+  version Int
+  action String @db.VarChar(16)
+  fromStatus WorkOrderStatus?
+  toStatus WorkOrderStatus
+  actorId String @db.Uuid
+  actorName String @db.VarChar(120)
+  actorRole Role
+  detail Json
+  at DateTime @default(now()) @db.Timestamptz(3)
+  order WorkOrder @relation(fields:[orgId,machineId,orderId],references:[orgId,machineId,id],onDelete:Restrict)
+  actor Membership @relation(fields:[orgId,actorId],references:[orgId,userId],onDelete:Restrict)
+  @@unique([orderId,version])
+  @@index([orgId,machineId,orderId,version])
   @@schema("maintenance")
 }

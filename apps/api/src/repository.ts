@@ -12,6 +12,7 @@ export type Principal = {
   orgId: string;
   organization: string;
   role: Role;
+  availableRoles?: Role[];
 };
 export const REPOSITORY = Symbol("REPOSITORY");
 export const machineSelect = {
@@ -30,7 +31,7 @@ export type MachineRecord = Prisma.MachineGetPayload<{
   select: typeof machineSelect;
 }>;
 export interface Repository {
-  principal(userId: string): Promise<Principal | null>;
+  principal(userId: string, requestedRole?: Role): Promise<Principal | null>;
   machines(
     user: Principal,
     limit: number,
@@ -46,19 +47,32 @@ export class PrismaRepository implements Repository {
       throw new ServiceUnavailableException("Database is not configured.");
     return this.db.client;
   }
-  async principal(userId: string) {
+  async principal(userId: string, requestedRole?: Role) {
     const membership = await this.client.membership.findUnique({
       where: { userId },
-      include: { user: true, organization: true },
+      include: {
+        user: true,
+        organization: true,
+        roleGrants: { where: { active: true } },
+      },
     });
     if (!membership?.active) return null;
+    const availableRoles = [
+      ...new Set([
+        membership.role,
+        ...membership.roleGrants.map((g) => g.role),
+      ]),
+    ];
+    const role = requestedRole ?? membership.role;
+    if (!availableRoles.includes(role)) return null;
     return {
       userId,
       membershipId: membership.id,
       displayName: membership.user.displayName,
       orgId: membership.orgId,
       organization: membership.organization.name,
-      role: membership.role,
+      role,
+      availableRoles,
     };
   }
   private scope(user: Principal): Prisma.MachineWhereInput {

@@ -72,6 +72,7 @@
     "@types/supertest": "6.0.3",
     "@types/yauzl": "2.10.3",
     "concurrently": "9.2.5",
+    "jszip": "3.10.1",
     "openapi-typescript": "7.10.1",
     "prettier": "3.6.2",
     "prisma": "6.19.3",

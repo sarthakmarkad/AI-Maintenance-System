@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   BarChart3,
   Activity,
+  ClipboardList,
 } from "lucide-react";
 import { getSupabase } from "@/lib/supabase";
 import type { Me } from "@/lib/api";
@@ -34,6 +35,7 @@ export function Shell({
   const router = useRouter();
   const pathname = usePathname();
   const inProduction = pathname.includes("/production");
+  const inOrders = pathname.includes("/work-orders");
   const inReadings = pathname.includes("/readings");
   const [signingOut, setSigningOut] = useState(false);
   const [error, setError] = useState("");
@@ -64,7 +66,7 @@ export function Shell({
         <div className="workspace-label">PILOT WORKSPACE</div>
         <nav aria-label="Main navigation">
           <Link
-            className={`nav-item ${inProduction || inReadings ? "" : "active"}`}
+            className={`nav-item ${inProduction || inReadings || inOrders ? "" : "active"}`}
             href="/machines"
           >
             <Boxes size={18} />
@@ -89,6 +91,7 @@ export function Shell({
               Process trends
             </Link>
           )}
+          {code && (<Link className={`nav-item ${inOrders ? "active" : ""}`} href={`/machines/${code}/work-orders`}><ClipboardList size={18} />Work orders</Link>)}
         </nav>
         <div className="sidebar-note">
           <ShieldCheck size={20} />
@@ -141,7 +144,7 @@ export function Shell({
           <span>
             Supreme Industries · Machine maintenance & performance intelligence
           </span>
-          <span>Local pilot / v0.3</span>
+          <span>Local pilot / v0.4</span>
         </footer>
       </div>
     </div>

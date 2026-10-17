@@ -8,6 +8,8 @@ import { ProductionController } from "./production/controller";
 import { ProductionService } from "./production/service";
 import { ReadingsController } from "./readings/controller";
 import { ReadingsService } from "./readings/service";
+import { WorkOrdersController } from "./work-orders/controller";
+import { WorkOrdersService } from "./work-orders/service";
 import { CONFIG, parseConfig, type Config } from "./config";
 import { Database } from "./database";
 import { REPOSITORY, PrismaRepository } from "./repository";
@@ -26,6 +28,7 @@ export function appModule(config: Config) {
       MachinesController,
       ProductionController,
       ReadingsController,
+      WorkOrdersController,
     ],
     providers: [
       { provide: CONFIG, useValue: config },
@@ -36,6 +39,7 @@ export function appModule(config: Config) {
       RolesGuard,
       ProductionService,
       ReadingsService,
+      WorkOrdersService,
     ],
   })
   class AppModule {}
@@ -53,7 +57,12 @@ export function configure(
   app.enableCors({
     origin: config.WEB_ORIGIN,
     methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Authorization", "Content-Type", "X-Request-Id"],
+    allowedHeaders: [
+      "Authorization",
+      "Content-Type",
+      "X-Request-Id",
+      "X-Workspace-Role",
+    ],
     exposedHeaders: ["X-Request-Id"],
   });
   app.enableShutdownHooks();
@@ -62,9 +71,9 @@ export function configure(
     new DocumentBuilder()
       .setTitle("Supreme Maintenance API")
       .setDescription(
-        "Milestones 1–3. Scoped registry, production imports and synthetic hourly process readings with retrospective trends.",
+        "Milestones 1–4. Scoped registry, imports/trends and role-controlled maintenance work orders.",
       )
-      .setVersion("0.3.0")
+      .setVersion("0.4.0")
       .addBearerAuth()
       .build(),
   );

@@ -228,6 +228,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/machines/{code}/work-orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["WorkOrdersController_list"];
+        put?: never;
+        post: operations["WorkOrdersController_report"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/work-orders/technicians": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["WorkOrdersController_technicians"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/work-orders/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["WorkOrdersController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/work-orders/{id}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["WorkOrdersController_history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/work-orders/{id}/actions/{action}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["WorkOrdersController_act"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -260,6 +340,8 @@ export interface components {
             orgId: string;
             organization: string;
             role: components["schemas"]["Role"];
+            /** @description Trusted active roles this account may select. Permissions apply only to the selected role. */
+            availableRoles: ("OPERATOR" | "TECHNICIAN" | "MAINTENANCE_HEAD" | "SUPERVISOR" | "MANAGEMENT" | "ADMINISTRATOR")[];
         };
         NamedDto: {
             name: string;
@@ -534,6 +616,185 @@ export interface components {
             reviews: components["schemas"]["ReadingReviewDto"][];
             rows: components["schemas"]["ReadingRecordDto"][];
             imports: components["schemas"]["ReadingImportHistoryDto"][];
+        };
+        ReportWorkOrderDto: {
+            /**
+             * Format: uuid
+             * @description Stable client retry key for one report; same key with changed content conflicts.
+             */
+            requestId: string;
+            title: string;
+            description: string;
+            /** @enum {string} */
+            priority: "LOW" | "NORMAL" | "HIGH";
+            /** @enum {string} */
+            impact: "STOPPED" | "DEGRADED" | "OBSERVATION";
+            /**
+             * Format: date-time
+             * @description Optional explicitly observed time; never inferred from imported data.
+             */
+            observedAt?: string | null;
+        };
+        WorkOrderPersonDto: {
+            /** Format: uuid */
+            userId: string;
+            displayName: string;
+        };
+        WorkOrderEventDto: {
+            id: string;
+            version: number;
+            /** @enum {string} */
+            action: "REPORT" | "ASSIGN" | "START" | "SUBMIT" | "APPROVE" | "RETURN" | "CLOSE";
+            /** @enum {string|null} */
+            fromStatus: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED" | null;
+            /** @enum {string} */
+            toStatus: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED";
+            actor: components["schemas"]["WorkOrderPersonDto"];
+            /** @enum {string} */
+            actorRole: "OPERATOR" | "TECHNICIAN" | "MAINTENANCE_HEAD" | "SUPERVISOR" | "MANAGEMENT" | "ADMINISTRATOR";
+            /** Format: date-time */
+            at: string;
+            detail: {
+                [key: string]: unknown;
+            };
+        };
+        WorkOrderReportedDto: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            /** @enum {string} */
+            status: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED";
+            version: number;
+            /** @enum {string} */
+            priority: "LOW" | "NORMAL" | "HIGH";
+            /** @enum {string} */
+            impact: "STOPPED" | "DEGRADED" | "OBSERVATION";
+            /** Format: date-time */
+            reportedAt: string;
+            /** Format: date-time */
+            observedAt: string | null;
+            reporter: components["schemas"]["WorkOrderPersonDto"];
+            technician: components["schemas"]["WorkOrderPersonDto"] | null;
+            /** Format: date-time */
+            restoredAt: string | null;
+            /** Format: date-time */
+            closedAt: string | null;
+            allowedActions: ("assign" | "start" | "submit" | "approve" | "return" | "close")[];
+            description: string;
+            startedAt: string | null;
+            findings: string | null;
+            rootCause: string | null;
+            correctiveAction: string | null;
+            preventiveAction: string | null;
+            submittedAt: string | null;
+            returnReason: string | null;
+            reviewedAt: string | null;
+            reviewer: components["schemas"]["WorkOrderPersonDto"] | null;
+            closer: components["schemas"]["WorkOrderPersonDto"] | null;
+            updatedAt: string;
+            events: components["schemas"]["WorkOrderEventDto"][];
+            historyNextVersion: number | null;
+            alreadyReported: boolean;
+        };
+        WorkOrderSummaryDto: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            /** @enum {string} */
+            status: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED";
+            version: number;
+            /** @enum {string} */
+            priority: "LOW" | "NORMAL" | "HIGH";
+            /** @enum {string} */
+            impact: "STOPPED" | "DEGRADED" | "OBSERVATION";
+            /** Format: date-time */
+            reportedAt: string;
+            /** Format: date-time */
+            observedAt: string | null;
+            reporter: components["schemas"]["WorkOrderPersonDto"];
+            technician: components["schemas"]["WorkOrderPersonDto"] | null;
+            /** Format: date-time */
+            restoredAt: string | null;
+            /** Format: date-time */
+            closedAt: string | null;
+            allowedActions: ("assign" | "start" | "submit" | "approve" | "return" | "close")[];
+        };
+        WorkOrderListDto: {
+            items: components["schemas"]["WorkOrderSummaryDto"][];
+            nextCursor: string | null;
+            counts: {
+                [key: string]: number;
+            };
+            total: number;
+        };
+        EligibleTechniciansDto: {
+            items: components["schemas"]["WorkOrderPersonDto"][];
+        };
+        WorkOrderDto: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            /** @enum {string} */
+            status: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED";
+            version: number;
+            /** @enum {string} */
+            priority: "LOW" | "NORMAL" | "HIGH";
+            /** @enum {string} */
+            impact: "STOPPED" | "DEGRADED" | "OBSERVATION";
+            /** Format: date-time */
+            reportedAt: string;
+            /** Format: date-time */
+            observedAt: string | null;
+            reporter: components["schemas"]["WorkOrderPersonDto"];
+            technician: components["schemas"]["WorkOrderPersonDto"] | null;
+            /** Format: date-time */
+            restoredAt: string | null;
+            /** Format: date-time */
+            closedAt: string | null;
+            allowedActions: ("assign" | "start" | "submit" | "approve" | "return" | "close")[];
+            description: string;
+            startedAt: string | null;
+            findings: string | null;
+            rootCause: string | null;
+            correctiveAction: string | null;
+            preventiveAction: string | null;
+            submittedAt: string | null;
+            returnReason: string | null;
+            reviewedAt: string | null;
+            reviewer: components["schemas"]["WorkOrderPersonDto"] | null;
+            closer: components["schemas"]["WorkOrderPersonDto"] | null;
+            updatedAt: string;
+            events: components["schemas"]["WorkOrderEventDto"][];
+            historyNextVersion: number | null;
+        };
+        WorkOrderHistoryDto: {
+            items: components["schemas"]["WorkOrderEventDto"][];
+            nextBeforeVersion: number | null;
+        };
+        WorkOrderActionDto: {
+            version: number;
+            /**
+             * Format: uuid
+             * @description assign only; active in-org technician with machine grant
+             */
+            technicianId?: string;
+            /** @description Required for return and for reassignment; 3–4,000 characters. */
+            reason?: string;
+            /** @description Required on submit; 3–4,000 characters. */
+            findings?: string;
+            /** @description Required on submit; human RCA, 3–4,000 characters. */
+            rootCause?: string;
+            /** @description Required on submit; corrective action, 3–4,000 characters. */
+            correctiveAction?: string;
+            /** @description Required on submit; preventive action, 3–4,000 characters. */
+            preventiveAction?: string;
+            /**
+             * Format: date-time
+             * @description Required on submit; explicit offset timestamp between report and submission.
+             */
+            restoredAt?: string;
+            /** @description approve/close only; optional 3–4,000-character note. Extra fields for each action are rejected. */
+            note?: string;
         };
     };
     responses: never;
@@ -1380,6 +1641,438 @@ export interface operations {
                 };
             };
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    WorkOrdersController_list: {
+        parameters: {
+            query?: {
+                after?: string;
+                limit?: number;
+                status?: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED";
+            };
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkOrderListDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    WorkOrdersController_report: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReportWorkOrderDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkOrderReportedDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    WorkOrdersController_technicians: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EligibleTechniciansDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    WorkOrdersController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkOrderDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    WorkOrdersController_history: {
+        parameters: {
+            query?: {
+                beforeVersion?: number;
+            };
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkOrderHistoryDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    WorkOrdersController_act: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+                action: "assign" | "start" | "submit" | "approve" | "return" | "close";
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkOrderActionDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkOrderDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

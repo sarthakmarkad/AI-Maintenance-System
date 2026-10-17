@@ -79,7 +79,7 @@ export class MeController {
   @Get()
   @ApiOkResponse({ type: MeDto })
   me(@CurrentUser() user: Principal) {
-    return user;
+    return { ...user, availableRoles: user.availableRoles ?? [user.role] };
   }
 }
 @ApiTags("Machines")

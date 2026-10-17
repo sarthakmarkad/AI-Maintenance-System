@@ -12,3 +12,6 @@ GRANT UPDATE (status, "committedAt", "committedDayKeys") ON maintenance."Product
 
 GRANT INSERT ON maintenance."ReadingImport", maintenance."ProcessReading" TO :"runtime_role";
 GRANT UPDATE (status, "committedAt") ON maintenance."ReadingImport" TO :"runtime_role";
+
+GRANT INSERT ON maintenance."WorkOrder", maintenance."WorkOrderEvent" TO :"runtime_role";
+GRANT UPDATE (status, version, "technicianId", "startedAt", findings, "rootCause", "correctiveAction", "preventiveAction", "restoredAt", "submittedAt", "returnReason", "reviewedAt", "reviewedBy", "closedAt", "closedBy", "updatedAt") ON maintenance."WorkOrder" TO :"runtime_role";

@@ -12,6 +12,13 @@ export class MeDto {
   @ApiProperty({ format: "uuid" }) orgId!: string;
   @ApiProperty() organization!: string;
   @ApiProperty({ enum: Role, enumName: "Role" }) role!: Role;
+  @ApiProperty({
+    enum: Role,
+    isArray: true,
+    description:
+      "Trusted active roles this account may select. Permissions apply only to the selected role.",
+  })
+  availableRoles!: Role[];
 }
 export class NamedDto {
   @ApiProperty() name!: string;

@@ -90,11 +90,21 @@ export class AuthGuard implements CanActivate {
     if (!match || match[1].length > 8192)
       throw new UnauthorizedException("Sign in to access this resource.");
     const id = await this.verifier.verify(match[1]);
-    const principal = await this.repo.principal(id);
+    const requested = req.headers["x-workspace-role"];
+    const selected =
+      requested === undefined
+        ? undefined
+        : z.nativeEnum(Role).safeParse(requested);
+    if (selected && !selected.success)
+      throw new ForbiddenException("Choose an authorized workspace role.");
+    const requestedRole = selected?.success ? selected.data : undefined;
+    const principal = await this.repo.principal(id, requestedRole);
     if (!principal)
       throw new ForbiddenException(
         "Your account has no active application membership. Contact your administrator.",
       );
+    if (requestedRole && principal.role !== requestedRole)
+      throw new ForbiddenException("This role is not granted to your account.");
     req.principal = principal;
     return true;
   }

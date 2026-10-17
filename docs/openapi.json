@@ -1297,12 +1297,689 @@
           "Synthetic process readings"
         ]
       }
+    },
+    "/api/machines/{code}/work-orders": {
+      "post": {
+        "operationId": "WorkOrdersController_report",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportWorkOrderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrderReportedDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Maintenance work orders"
+        ]
+      },
+      "get": {
+        "operationId": "WorkOrdersController_list",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "after",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "REPORTED",
+                "ASSIGNED",
+                "IN_PROGRESS",
+                "AWAITING_REVIEW",
+                "APPROVED",
+                "CLOSED"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrderListDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Maintenance work orders"
+        ]
+      }
+    },
+    "/api/machines/{code}/work-orders/technicians": {
+      "get": {
+        "operationId": "WorkOrdersController_technicians",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EligibleTechniciansDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Maintenance work orders"
+        ]
+      }
+    },
+    "/api/machines/{code}/work-orders/{id}": {
+      "get": {
+        "operationId": "WorkOrdersController_get",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrderDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Maintenance work orders"
+        ]
+      }
+    },
+    "/api/machines/{code}/work-orders/{id}/history": {
+      "get": {
+        "operationId": "WorkOrdersController_history",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "beforeVersion",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrderHistoryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Maintenance work orders"
+        ]
+      }
+    },
+    "/api/machines/{code}/work-orders/{id}/actions/{action}": {
+      "post": {
+        "operationId": "WorkOrdersController_act",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "action",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "enum": [
+                "assign",
+                "start",
+                "submit",
+                "approve",
+                "return",
+                "close"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkOrderActionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrderDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Maintenance work orders"
+        ]
+      }
     }
   },
   "info": {
     "title": "Supreme Maintenance API",
     "description": "",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "contact": {}
   },
   "tags": [],
@@ -1404,6 +2081,21 @@
                 "$ref": "#/components/schemas/Role"
               }
             ]
+          },
+          "availableRoles": {
+            "type": "array",
+            "description": "Trusted active roles this account may select. Permissions apply only to the selected role.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "OPERATOR",
+                "TECHNICIAN",
+                "MAINTENANCE_HEAD",
+                "SUPERVISOR",
+                "MANAGEMENT",
+                "ADMINISTRATOR"
+              ]
+            }
           }
         },
         "required": [
@@ -1412,7 +2104,8 @@
           "displayName",
           "orgId",
           "organization",
-          "role"
+          "role",
+          "availableRoles"
         ]
       },
       "NamedDto": {
@@ -2480,6 +3173,729 @@
           "reviews",
           "rows",
           "imports"
+        ]
+      },
+      "ReportWorkOrderDto": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Stable client retry key for one report; same key with changed content conflicts."
+          },
+          "title": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 160
+          },
+          "description": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 4000
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "LOW",
+              "NORMAL",
+              "HIGH"
+            ]
+          },
+          "impact": {
+            "type": "string",
+            "enum": [
+              "STOPPED",
+              "DEGRADED",
+              "OBSERVATION"
+            ]
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Optional explicitly observed time; never inferred from imported data."
+          }
+        },
+        "required": [
+          "requestId",
+          "title",
+          "description",
+          "priority",
+          "impact"
+        ]
+      },
+      "WorkOrderPersonDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId",
+          "displayName"
+        ]
+      },
+      "WorkOrderEventDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "version": {
+            "type": "number"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "REPORT",
+              "ASSIGN",
+              "START",
+              "SUBMIT",
+              "APPROVE",
+              "RETURN",
+              "CLOSE"
+            ]
+          },
+          "fromStatus": {
+            "type": "string",
+            "enum": [
+              "REPORTED",
+              "ASSIGNED",
+              "IN_PROGRESS",
+              "AWAITING_REVIEW",
+              "APPROVED",
+              "CLOSED"
+            ],
+            "nullable": true
+          },
+          "toStatus": {
+            "type": "string",
+            "enum": [
+              "REPORTED",
+              "ASSIGNED",
+              "IN_PROGRESS",
+              "AWAITING_REVIEW",
+              "APPROVED",
+              "CLOSED"
+            ]
+          },
+          "actor": {
+            "$ref": "#/components/schemas/WorkOrderPersonDto"
+          },
+          "actorRole": {
+            "type": "string",
+            "enum": [
+              "OPERATOR",
+              "TECHNICIAN",
+              "MAINTENANCE_HEAD",
+              "SUPERVISOR",
+              "MANAGEMENT",
+              "ADMINISTRATOR"
+            ]
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "detail": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "action",
+          "fromStatus",
+          "toStatus",
+          "actor",
+          "actorRole",
+          "at",
+          "detail"
+        ]
+      },
+      "WorkOrderReportedDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "REPORTED",
+              "ASSIGNED",
+              "IN_PROGRESS",
+              "AWAITING_REVIEW",
+              "APPROVED",
+              "CLOSED"
+            ]
+          },
+          "version": {
+            "type": "number"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "LOW",
+              "NORMAL",
+              "HIGH"
+            ]
+          },
+          "impact": {
+            "type": "string",
+            "enum": [
+              "STOPPED",
+              "DEGRADED",
+              "OBSERVATION"
+            ]
+          },
+          "reportedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "reporter": {
+            "$ref": "#/components/schemas/WorkOrderPersonDto"
+          },
+          "technician": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/WorkOrderPersonDto"
+              }
+            ]
+          },
+          "restoredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "allowedActions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "assign",
+                "start",
+                "submit",
+                "approve",
+                "return",
+                "close"
+              ]
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "findings": {
+            "type": "string",
+            "nullable": true
+          },
+          "rootCause": {
+            "type": "string",
+            "nullable": true
+          },
+          "correctiveAction": {
+            "type": "string",
+            "nullable": true
+          },
+          "preventiveAction": {
+            "type": "string",
+            "nullable": true
+          },
+          "submittedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "returnReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "reviewedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "reviewer": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/WorkOrderPersonDto"
+              }
+            ]
+          },
+          "closer": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/WorkOrderPersonDto"
+              }
+            ]
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkOrderEventDto"
+            }
+          },
+          "historyNextVersion": {
+            "type": "number",
+            "nullable": true
+          },
+          "alreadyReported": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "status",
+          "version",
+          "priority",
+          "impact",
+          "reportedAt",
+          "observedAt",
+          "reporter",
+          "technician",
+          "restoredAt",
+          "closedAt",
+          "allowedActions",
+          "description",
+          "startedAt",
+          "findings",
+          "rootCause",
+          "correctiveAction",
+          "preventiveAction",
+          "submittedAt",
+          "returnReason",
+          "reviewedAt",
+          "reviewer",
+          "closer",
+          "updatedAt",
+          "events",
+          "historyNextVersion",
+          "alreadyReported"
+        ]
+      },
+      "WorkOrderSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "REPORTED",
+              "ASSIGNED",
+              "IN_PROGRESS",
+              "AWAITING_REVIEW",
+              "APPROVED",
+              "CLOSED"
+            ]
+          },
+          "version": {
+            "type": "number"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "LOW",
+              "NORMAL",
+              "HIGH"
+            ]
+          },
+          "impact": {
+            "type": "string",
+            "enum": [
+              "STOPPED",
+              "DEGRADED",
+              "OBSERVATION"
+            ]
+          },
+          "reportedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "reporter": {
+            "$ref": "#/components/schemas/WorkOrderPersonDto"
+          },
+          "technician": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/WorkOrderPersonDto"
+              }
+            ]
+          },
+          "restoredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "allowedActions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "assign",
+                "start",
+                "submit",
+                "approve",
+                "return",
+                "close"
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "status",
+          "version",
+          "priority",
+          "impact",
+          "reportedAt",
+          "observedAt",
+          "reporter",
+          "technician",
+          "restoredAt",
+          "closedAt",
+          "allowedActions"
+        ]
+      },
+      "WorkOrderListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkOrderSummaryDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          },
+          "counts": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor",
+          "counts",
+          "total"
+        ]
+      },
+      "EligibleTechniciansDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkOrderPersonDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "WorkOrderDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "REPORTED",
+              "ASSIGNED",
+              "IN_PROGRESS",
+              "AWAITING_REVIEW",
+              "APPROVED",
+              "CLOSED"
+            ]
+          },
+          "version": {
+            "type": "number"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "LOW",
+              "NORMAL",
+              "HIGH"
+            ]
+          },
+          "impact": {
+            "type": "string",
+            "enum": [
+              "STOPPED",
+              "DEGRADED",
+              "OBSERVATION"
+            ]
+          },
+          "reportedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "reporter": {
+            "$ref": "#/components/schemas/WorkOrderPersonDto"
+          },
+          "technician": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/WorkOrderPersonDto"
+              }
+            ]
+          },
+          "restoredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "allowedActions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "assign",
+                "start",
+                "submit",
+                "approve",
+                "return",
+                "close"
+              ]
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "findings": {
+            "type": "string",
+            "nullable": true
+          },
+          "rootCause": {
+            "type": "string",
+            "nullable": true
+          },
+          "correctiveAction": {
+            "type": "string",
+            "nullable": true
+          },
+          "preventiveAction": {
+            "type": "string",
+            "nullable": true
+          },
+          "submittedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "returnReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "reviewedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "reviewer": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/WorkOrderPersonDto"
+              }
+            ]
+          },
+          "closer": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/WorkOrderPersonDto"
+              }
+            ]
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkOrderEventDto"
+            }
+          },
+          "historyNextVersion": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "status",
+          "version",
+          "priority",
+          "impact",
+          "reportedAt",
+          "observedAt",
+          "reporter",
+          "technician",
+          "restoredAt",
+          "closedAt",
+          "allowedActions",
+          "description",
+          "startedAt",
+          "findings",
+          "rootCause",
+          "correctiveAction",
+          "preventiveAction",
+          "submittedAt",
+          "returnReason",
+          "reviewedAt",
+          "reviewer",
+          "closer",
+          "updatedAt",
+          "events",
+          "historyNextVersion"
+        ]
+      },
+      "WorkOrderHistoryDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkOrderEventDto"
+            }
+          },
+          "nextBeforeVersion": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextBeforeVersion"
+        ]
+      },
+      "WorkOrderActionDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "number",
+            "minimum": 1
+          },
+          "technicianId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "assign only; active in-org technician with machine grant"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Required for return and for reassignment; 3–4,000 characters."
+          },
+          "findings": {
+            "type": "string",
+            "description": "Required on submit; 3–4,000 characters."
+          },
+          "rootCause": {
+            "type": "string",
+            "description": "Required on submit; human RCA, 3–4,000 characters."
+          },
+          "correctiveAction": {
+            "type": "string",
+            "description": "Required on submit; corrective action, 3–4,000 characters."
+          },
+          "preventiveAction": {
+            "type": "string",
+            "description": "Required on submit; preventive action, 3–4,000 characters."
+          },
+          "restoredAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Required on submit; explicit offset timestamp between report and submission."
+          },
+          "note": {
+            "type": "string",
+            "description": "approve/close only; optional 3–4,000-character note. Extra fields for each action are rejected."
+          }
+        },
+        "required": [
+          "version"
         ]
       }
     }
