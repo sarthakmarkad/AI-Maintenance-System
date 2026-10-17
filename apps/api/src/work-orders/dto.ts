@@ -4,6 +4,7 @@ import {
   WorkOrderPriority,
   ReportedImpact,
   Role,
+  WorkOrderKind,
 } from "@prisma/client";
 export class WorkOrderPersonDto {
   @ApiProperty({ format: "uuid" }) userId!: string;
@@ -15,6 +16,7 @@ export class WorkOrderEventDto {
   @ApiProperty({
     enum: [
       "REPORT",
+      "SCHEDULE",
       "ASSIGN",
       "START",
       "SUBMIT",
@@ -36,6 +38,9 @@ export class WorkOrderEventDto {
   >;
 }
 export class WorkOrderSummaryDto {
+  @ApiProperty({ enum: WorkOrderKind }) kind!: string;
+  @ApiProperty({ type: () => WorkOrderOccurrenceDto, nullable: true })
+  maintenanceOccurrence!: WorkOrderOccurrenceDto | null;
   @ApiProperty({ format: "uuid" }) id!: string;
   @ApiProperty() title!: string;
   @ApiProperty({ enum: WorkOrderStatus }) status!: string;
@@ -59,6 +64,7 @@ export class WorkOrderSummaryDto {
   allowedActions!: string[];
 }
 export class WorkOrderDto extends WorkOrderSummaryDto {
+  @ApiProperty({ type: String, nullable: true }) performedAt!: string | null;
   @ApiProperty() description!: string;
   @ApiProperty({ type: String, nullable: true }) startedAt!: string | null;
   @ApiProperty({ type: String, nullable: true }) findings!: string | null;
@@ -144,32 +150,44 @@ export class WorkOrderActionDto {
   @ApiProperty({
     required: false,
     description:
-      "Required on submit; human RCA, 3–4,000 characters.",
+      "Required on BREAKDOWN submit only; human RCA, 3–4,000 characters. Rejected for planned maintenance.",
   })
   rootCause?: string;
   @ApiProperty({
     required: false,
     description:
-      "Required on submit; corrective action, 3–4,000 characters.",
+      "Required on submit; corrective action for breakdowns, work performed for planned maintenance; 3–4,000 characters.",
   })
   correctiveAction?: string;
   @ApiProperty({
     required: false,
     description:
-      "Required on submit; preventive action, 3–4,000 characters.",
+      "Required on BREAKDOWN submit; optional planned maintenance follow-up; 3–4,000 characters when provided.",
   })
   preventiveAction?: string;
   @ApiProperty({
     required: false,
     format: "date-time",
     description:
-      "Required on submit; explicit offset timestamp between report and submission.",
+      "BREAKDOWN submit only; explicit offset timestamp between report and submission. Rejected for planned maintenance.",
   })
   restoredAt?: string;
+  @ApiProperty({
+    required: false,
+    format: "date-time",
+    description:
+      "Planned submission only; explicit maintenance performed time. Planned work requires findings/work performed, permits optional follow-up and rejects breakdown RCA/restoration fields.",
+  })
+  performedAt?: string;
   @ApiProperty({
     required: false,
     description:
       "approve/close only; optional 3–4,000-character note. Extra fields for each action are rejected.",
   })
   note?: string;
+}
+export class WorkOrderOccurrenceDto {
+  @ApiProperty({ format: "uuid" }) id!: string;
+  @ApiProperty({ format: "uuid" }) planId!: string;
+  @ApiProperty({ format: "date-time" }) dueAt!: string;
 }

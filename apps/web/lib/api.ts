@@ -64,3 +64,8 @@ export type WorkOrderList = components["schemas"]["WorkOrderListDto"];
 export type WorkOrderHistory = components["schemas"]["WorkOrderHistoryDto"];
 export type EligibleTechnicians =
   components["schemas"]["EligibleTechniciansDto"];
+export type MaintenanceCalendar = components["schemas"]["CalendarDto"];
+export type MaintenancePlans = components["schemas"]["PlansDto"];
+export type MaintenanceOccurrence =
+  components["schemas"]["CalendarOccurrenceDto"];
+export type MaintenanceReminders = components["schemas"]["RemindersDto"];

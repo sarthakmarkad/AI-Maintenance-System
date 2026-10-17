@@ -23,6 +23,7 @@ import { Button } from "./ui/button";
 import { ProductionWorkspace } from "./production-workspace";
 import { ReadingsWorkspace } from "./readings-workspace";
 import { WorkOrdersWorkspace } from "./work-orders-workspace";
+import { CalendarWorkspace } from "./calendar-workspace";
 import { clearRoleSelection } from "@/lib/role-selection";
 type Result =
   | { kind: "loading" }
@@ -33,12 +34,14 @@ export function MachineWorkspace({
   production = false,
   readings = false,
   workOrders = false,
+  calendar = false,
   orderId,
 }: {
   code?: string;
   production?: boolean;
   readings?: boolean;
   workOrders?: boolean;
+  calendar?: boolean;
   orderId?: string;
 }) {
   const { session, loading, expired, expire } = useAuth();
@@ -124,7 +127,13 @@ export function MachineWorkspace({
           </Button>
         </section>
       ) : code && result.machines[0] ? (
-        workOrders ? (
+        calendar ? (
+          <CalendarWorkspace
+            machine={result.machines[0]}
+            user={result.user}
+            token={session.access_token}
+          />
+        ) : workOrders ? (
           <WorkOrdersWorkspace
             machine={result.machines[0]}
             user={result.user}

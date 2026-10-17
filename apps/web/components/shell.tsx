@@ -10,6 +10,7 @@ import {
   BarChart3,
   Activity,
   ClipboardList,
+  CalendarDays,
 } from "lucide-react";
 import { getSupabase } from "@/lib/supabase";
 import { api, type Me } from "@/lib/api";
@@ -39,6 +40,7 @@ export function Shell({
   const inProduction = pathname.includes("/production");
   const inReadings = pathname.includes("/readings");
   const inOrders = pathname.includes("/work-orders");
+  const inCalendar = pathname.includes("/calendar");
   const [signingOut, setSigningOut] = useState(false);
   const [error, setError] = useState("");
   const [switchingRole, setSwitchingRole] = useState(false);
@@ -90,7 +92,7 @@ export function Shell({
         <div className="workspace-label">PILOT WORKSPACE</div>
         <nav aria-label="Main navigation">
           <Link
-            className={`nav-item ${inProduction || inReadings || inOrders ? "" : "active"}`}
+            className={`nav-item ${inProduction || inReadings || inOrders || inCalendar ? "" : "active"}`}
             href="/machines"
           >
             <Boxes size={18} />
@@ -122,6 +124,15 @@ export function Shell({
             >
               <ClipboardList size={18} />
               Work orders
+            </Link>
+          )}
+          {code && (
+            <Link
+              className={`nav-item ${inCalendar ? "active" : ""}`}
+              href={`/machines/${code}/calendar`}
+            >
+              <CalendarDays size={18} />
+              Maintenance calendar
             </Link>
           )}
         </nav>
@@ -196,7 +207,7 @@ export function Shell({
           <span>
             Supreme Industries · Machine maintenance & performance intelligence
           </span>
-          <span>Local pilot / v0.4</span>
+          <span>Local pilot / v0.5</span>
         </footer>
       </div>
     </div>

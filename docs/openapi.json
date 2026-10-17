@@ -1974,12 +1974,893 @@
           "Maintenance work orders"
         ]
       }
+    },
+    "/api/machines/{code}/calendar": {
+      "get": {
+        "operationId": "CalendarController_calendar",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "after",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "UPCOMING",
+                "DUE",
+                "OVERDUE",
+                "COMPLETED",
+                "SKIPPED"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": true,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "from",
+            "required": true,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Planned maintenance"
+        ]
+      }
+    },
+    "/api/machines/{code}/calendar/plans": {
+      "get": {
+        "operationId": "CalendarController_plans",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlansDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Planned maintenance"
+        ]
+      },
+      "post": {
+        "operationId": "CalendarController_create",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Planned maintenance"
+        ]
+      }
+    },
+    "/api/machines/{code}/calendar/plans/{id}/state": {
+      "post": {
+        "operationId": "CalendarController_state",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanStateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Planned maintenance"
+        ]
+      }
+    },
+    "/api/machines/{code}/calendar/occurrences/{id}/release": {
+      "post": {
+        "operationId": "CalendarController_release",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReleaseTaskDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReleasedTaskDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Planned maintenance"
+        ]
+      }
+    },
+    "/api/machines/{code}/calendar/occurrences/{id}/skip": {
+      "post": {
+        "operationId": "CalendarController_skip",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkipTaskDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkippedTaskDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Planned maintenance"
+        ]
+      }
+    },
+    "/api/machines/{code}/calendar/reminders": {
+      "get": {
+        "operationId": "CalendarController_reminders",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "after",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RemindersDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Planned maintenance"
+        ]
+      }
+    },
+    "/api/machines/{code}/calendar/reminders/{id}/read": {
+      "post": {
+        "operationId": "CalendarController_read",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReminderReadDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Planned maintenance"
+        ]
+      }
     }
   },
   "info": {
     "title": "Supreme Maintenance API",
     "description": "",
-    "version": "0.4.0",
+    "version": "0.5.0",
     "contact": {}
   },
   "tags": [],
@@ -3224,6 +4105,28 @@
           "impact"
         ]
       },
+      "WorkOrderOccurrenceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "planId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dueAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "planId",
+          "dueAt"
+        ]
+      },
       "WorkOrderPersonDto": {
         "type": "object",
         "properties": {
@@ -3253,6 +4156,7 @@
             "type": "string",
             "enum": [
               "REPORT",
+              "SCHEDULE",
               "ASSIGN",
               "START",
               "SUBMIT",
@@ -3322,6 +4226,22 @@
       "WorkOrderReportedDto": {
         "type": "object",
         "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "BREAKDOWN",
+              "PLANNED"
+            ]
+          },
+          "maintenanceOccurrence": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/WorkOrderOccurrenceDto"
+              }
+            ]
+          },
           "id": {
             "type": "string",
             "format": "uuid"
@@ -3403,6 +4323,10 @@
                 "close"
               ]
             }
+          },
+          "performedAt": {
+            "type": "string",
+            "nullable": true
           },
           "description": {
             "type": "string"
@@ -3475,6 +4399,8 @@
           }
         },
         "required": [
+          "kind",
+          "maintenanceOccurrence",
           "id",
           "title",
           "status",
@@ -3488,6 +4414,7 @@
           "restoredAt",
           "closedAt",
           "allowedActions",
+          "performedAt",
           "description",
           "startedAt",
           "findings",
@@ -3508,6 +4435,22 @@
       "WorkOrderSummaryDto": {
         "type": "object",
         "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "BREAKDOWN",
+              "PLANNED"
+            ]
+          },
+          "maintenanceOccurrence": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/WorkOrderOccurrenceDto"
+              }
+            ]
+          },
           "id": {
             "type": "string",
             "format": "uuid"
@@ -3592,6 +4535,8 @@
           }
         },
         "required": [
+          "kind",
+          "maintenanceOccurrence",
           "id",
           "title",
           "status",
@@ -3654,6 +4599,22 @@
       "WorkOrderDto": {
         "type": "object",
         "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "BREAKDOWN",
+              "PLANNED"
+            ]
+          },
+          "maintenanceOccurrence": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/WorkOrderOccurrenceDto"
+              }
+            ]
+          },
           "id": {
             "type": "string",
             "format": "uuid"
@@ -3735,6 +4696,10 @@
                 "close"
               ]
             }
+          },
+          "performedAt": {
+            "type": "string",
+            "nullable": true
           },
           "description": {
             "type": "string"
@@ -3804,6 +4769,8 @@
           }
         },
         "required": [
+          "kind",
+          "maintenanceOccurrence",
           "id",
           "title",
           "status",
@@ -3817,6 +4784,7 @@
           "restoredAt",
           "closedAt",
           "allowedActions",
+          "performedAt",
           "description",
           "startedAt",
           "findings",
@@ -3874,20 +4842,25 @@
           },
           "rootCause": {
             "type": "string",
-            "description": "Required on submit; human RCA, 3–4,000 characters."
+            "description": "Required on BREAKDOWN submit only; human RCA, 3–4,000 characters. Rejected for planned maintenance."
           },
           "correctiveAction": {
             "type": "string",
-            "description": "Required on submit; corrective action, 3–4,000 characters."
+            "description": "Required on submit; corrective action for breakdowns, work performed for planned maintenance; 3–4,000 characters."
           },
           "preventiveAction": {
             "type": "string",
-            "description": "Required on submit; preventive action, 3–4,000 characters."
+            "description": "Required on BREAKDOWN submit; optional planned maintenance follow-up; 3–4,000 characters when provided."
           },
           "restoredAt": {
             "type": "string",
             "format": "date-time",
-            "description": "Required on submit; explicit offset timestamp between report and submission."
+            "description": "BREAKDOWN submit only; explicit offset timestamp between report and submission. Rejected for planned maintenance."
+          },
+          "performedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Planned submission only; explicit maintenance performed time. Planned work requires findings/work performed, permits optional follow-up and rejects breakdown RCA/restoration fields."
           },
           "note": {
             "type": "string",
@@ -3896,6 +4869,516 @@
         },
         "required": [
           "version"
+        ]
+      },
+      "CalendarOccurrenceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "planId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sequence": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          },
+          "instructions": {
+            "type": "string"
+          },
+          "dueAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "LOW",
+              "NORMAL",
+              "HIGH"
+            ]
+          },
+          "version": {
+            "type": "number"
+          },
+          "technician": {
+            "$ref": "#/components/schemas/WorkOrderPersonDto"
+          },
+          "workOrderId": {
+            "type": "string",
+            "nullable": true
+          },
+          "workOrderStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "UPCOMING",
+              "DUE",
+              "OVERDUE",
+              "COMPLETED",
+              "SKIPPED"
+            ]
+          },
+          "skippedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "skipReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "planActive": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "planId",
+          "sequence",
+          "title",
+          "instructions",
+          "dueAt",
+          "priority",
+          "version",
+          "technician",
+          "workOrderId",
+          "workOrderStatus",
+          "status",
+          "skippedAt",
+          "skipReason",
+          "planActive"
+        ]
+      },
+      "ScheduleStatusDto": {
+        "type": "object",
+        "properties": {
+          "lastJobAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "failed": {
+            "type": "boolean"
+          },
+          "catchingUp": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "lastJobAt",
+          "failed",
+          "catchingUp"
+        ]
+      },
+      "CalendarDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CalendarOccurrenceDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          },
+          "counts": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          },
+          "dayCounts": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          },
+          "canManage": {
+            "type": "boolean"
+          },
+          "serverTime": {
+            "type": "string"
+          },
+          "scheduling": {
+            "$ref": "#/components/schemas/ScheduleStatusDto"
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor",
+          "counts",
+          "dayCounts",
+          "canManage",
+          "serverTime",
+          "scheduling"
+        ]
+      },
+      "PlanDto": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 160
+          },
+          "instructions": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 4000
+          },
+          "frequency": {
+            "type": "string",
+            "enum": [
+              "DAILY",
+              "WEEKLY",
+              "MONTHLY"
+            ]
+          },
+          "interval": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "firstDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Explicit offset timestamp; recurrence follows Asia/Kolkata fixed calendar dates. Monthly anchor days clamp without drifting."
+          },
+          "technicianId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "LOW",
+              "NORMAL",
+              "HIGH"
+            ]
+          },
+          "remindDays": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 14
+          },
+          "technicianName": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "number"
+          },
+          "pauseReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "nextSequence": {
+            "type": "number"
+          },
+          "nextDueAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastGeneratedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "catchingUp": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "requestId",
+          "title",
+          "instructions",
+          "frequency",
+          "interval",
+          "firstDueAt",
+          "technicianId",
+          "priority",
+          "remindDays",
+          "technicianName",
+          "id",
+          "active",
+          "version",
+          "pauseReason",
+          "nextSequence",
+          "nextDueAt",
+          "lastGeneratedAt",
+          "catchingUp",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "PlansDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlanDto"
+            }
+          },
+          "canManage": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "items",
+          "canManage"
+        ]
+      },
+      "PlanInputDto": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 160
+          },
+          "instructions": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 4000
+          },
+          "frequency": {
+            "type": "string",
+            "enum": [
+              "DAILY",
+              "WEEKLY",
+              "MONTHLY"
+            ]
+          },
+          "interval": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "firstDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Explicit offset timestamp; recurrence follows Asia/Kolkata fixed calendar dates. Monthly anchor days clamp without drifting."
+          },
+          "technicianId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "LOW",
+              "NORMAL",
+              "HIGH"
+            ]
+          },
+          "remindDays": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 14
+          }
+        },
+        "required": [
+          "requestId",
+          "title",
+          "instructions",
+          "frequency",
+          "interval",
+          "firstDueAt",
+          "technicianId",
+          "priority",
+          "remindDays"
+        ]
+      },
+      "PlanStateDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "number"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 4000
+          }
+        },
+        "required": [
+          "version",
+          "active",
+          "reason"
+        ]
+      },
+      "ReleaseTaskDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "number"
+          },
+          "technicianId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "version",
+          "technicianId"
+        ]
+      },
+      "ReleasedTaskDto": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "alreadyReleased": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "orderId",
+          "alreadyReleased"
+        ]
+      },
+      "SkipTaskDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "number"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 4000
+          }
+        },
+        "required": [
+          "version",
+          "reason"
+        ]
+      },
+      "SkippedTaskDto": {
+        "type": "object",
+        "properties": {
+          "skipped": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "skipped"
+        ]
+      },
+      "ReminderDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "UPCOMING",
+              "DUE",
+              "OVERDUE"
+            ]
+          },
+          "occurrenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "dueAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orderId": {
+            "type": "string",
+            "nullable": true
+          },
+          "read": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "occurrenceId",
+          "title",
+          "dueAt",
+          "orderId",
+          "read",
+          "createdAt"
+        ]
+      },
+      "RemindersDto": {
+        "type": "object",
+        "properties": {
+          "unread": {
+            "type": "number"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReminderDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "unread",
+          "items",
+          "nextCursor"
+        ]
+      },
+      "ReminderReadDto": {
+        "type": "object",
+        "properties": {
+          "read": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "read"
         ]
       }
     }

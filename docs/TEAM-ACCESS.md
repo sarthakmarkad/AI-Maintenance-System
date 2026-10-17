@@ -44,3 +44,7 @@ The frontend uses a PKCE browser flow with explicit callback exchange; there is 
 Google availability is read from Supabase's public settings; the button remains disabled while the provider is not configured. Email login stays available. See [GOOGLE-SIGN-IN-SETUP.md](GOOGLE-SIGN-IN-SETUP.md) for the exact project/origin/redirect configuration and repeatable setup instructions. Google authentication does not provision or alter application grants.
 
 Real PostgreSQL HTTP tests exercise one identity through all six views, a complete workflow, import allow/deny checks, acting-role history, forged and revoked roles and machine revocation. Browser tests exercise PKCE and role-switch UX with fixtures. The owner has now configured Google OAuth and reports checking the login. Hosted provider availability and redirect to Google were independently observed; the agent stopped before completing Google credentials/consent at the user’s request. Completed callback identity/linkage was not independently inspected.
+
+## Calendar permissions (M5)
+
+All six views read the scoped calendar. Only Maintenance head creates/pauses/resumes plans, releases assigned planned work orders or skips unreleased occurrences. Heads/supervisors see scoped actionable reminders; technicians see reminders for their assigned work, and read receipts are separate per identity/role. Administrator has no calendar management authority. Planned work still requires assigned-technician completion, head review and supervisor/head approved closure. See CALENDAR.md.

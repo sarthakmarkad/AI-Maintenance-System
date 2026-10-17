@@ -21,6 +21,8 @@ export type Issue = {
   status: IssueStatus;
   version: number;
   reportedAt: string;
+  kind?: "BREAKDOWN" | "PLANNED";
+  performedAt?: string | null;
   technicianId: string | null;
   findings: string | null;
   rootCause: string | null;
@@ -100,6 +102,7 @@ export function transition(
         next.restoredAt =
           null;
       next.status = "ASSIGNED";
+      if (issue.kind === "PLANNED") next.performedAt = null;
       break;
     case "start":
     case "submit":
@@ -115,6 +118,35 @@ export function transition(
       }
       state("IN_PROGRESS");
       next.findings = text("findings");
+      if (issue.kind === "PLANNED") {
+        if (input.rootCause !== undefined || input.restoredAt !== undefined)
+          throw new BadRequestException(
+            "Planned maintenance does not record a breakdown cause or restoration time.",
+          );
+        next.rootCause = next.restoredAt = null;
+        next.correctiveAction = text("correctiveAction");
+        next.preventiveAction =
+          input.preventiveAction === undefined
+            ? null
+            : text("preventiveAction");
+        if (
+          typeof input.performedAt !== "string" ||
+          !z.string().datetime({ offset: true }).safeParse(input.performedAt)
+            .success ||
+          Date.parse(input.performedAt) < Date.parse(issue.reportedAt) ||
+          Date.parse(input.performedAt) > now.getTime()
+        )
+          throw new BadRequestException(
+            "Maintenance performed time must be between work-order creation and now.",
+          );
+        next.performedAt = new Date(input.performedAt).toISOString();
+        next.status = "AWAITING_REVIEW";
+        break;
+      }
+      if (input.performedAt !== undefined)
+        throw new BadRequestException(
+          "Breakdown repairs require restoration time, not planned maintenance performed time.",
+        );
       next.rootCause = text("rootCause");
       next.correctiveAction = text("correctiveAction");
       next.preventiveAction = text("preventiveAction");

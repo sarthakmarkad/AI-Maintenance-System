@@ -76,6 +76,11 @@ model Membership {
   reviewedOrders WorkOrder[] @relation("OrderReviewer")
   closedOrders WorkOrder[] @relation("OrderCloser")
   orderEvents WorkOrderEvent[]
+  createdPlans MaintenancePlan[] @relation("PlanCreator")
+  technicianPlans MaintenancePlan[] @relation("PlanTechnician")
+  scheduledOccurrences MaintenanceOccurrence[] @relation("OccurrenceTechnician")
+  skippedOccurrences MaintenanceOccurrence[] @relation("OccurrenceSkipper")
+  reminderReceipts MaintenanceReminderReceipt[]
   @@unique([orgId,userId])
   @@unique([orgId, id])
   @@index([orgId, role, active])
@@ -115,6 +120,8 @@ model Machine {
   readingImports ReadingImport[]
   processReadings ProcessReading[]
   workOrders WorkOrder[]
+  maintenancePlans MaintenancePlan[]
+  maintenanceOccurrences MaintenanceOccurrence[]
   @@unique([orgId, id])
   @@unique([orgId, code])
   @@index([orgId, departmentId])
@@ -318,6 +325,9 @@ model WorkOrder {
   requestId String @db.Uuid
   reportFingerprint String @db.VarChar(64)
   title String @db.VarChar(160)
+  kind WorkOrderKind @default(BREAKDOWN)
+  occurrenceId String? @unique @db.Uuid
+  performedAt DateTime? @db.Timestamptz(3)
   description String @db.Text
   priority WorkOrderPriority @default(NORMAL)
   impact ReportedImpact
@@ -346,11 +356,119 @@ model WorkOrder {
   reviewer Membership? @relation("OrderReviewer",fields:[orgId,reviewedBy],references:[orgId,userId],onDelete:Restrict)
   closer Membership? @relation("OrderCloser",fields:[orgId,closedBy],references:[orgId,userId],onDelete:Restrict)
   events WorkOrderEvent[]
+  occurrence MaintenanceOccurrence? @relation(fields:[orgId,machineId,occurrenceId],references:[orgId,machineId,id],onDelete:Restrict)
+  @@unique([orgId,machineId,occurrenceId])
   @@unique([orgId,machineId,id])
   @@unique([orgId,reportedBy,requestId])
   @@index([orgId,machineId,reportedAt,id])
   @@index([orgId,machineId,status,reportedAt])
   @@index([orgId,technicianId])
+  @@schema("maintenance")
+}
+enum WorkOrderKind {
+  BREAKDOWN
+  PLANNED
+  @@schema("maintenance")
+}
+enum MaintenanceFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  @@schema("maintenance")
+}
+enum MaintenanceReminderKind {
+  UPCOMING
+  DUE
+  OVERDUE
+  @@schema("maintenance")
+}
+model MaintenancePlan {
+  id String @id @default(uuid()) @db.Uuid
+  orgId String @db.Uuid
+  machineId String @db.Uuid
+  requestId String @db.Uuid
+  fingerprint String @db.VarChar(64)
+  title String @db.VarChar(160)
+  instructions String @db.Text
+  frequency MaintenanceFrequency
+  interval Int @default(1)
+  firstDueAt DateTime @db.Timestamptz(3)
+  technicianId String @db.Uuid
+  priority WorkOrderPriority @default(NORMAL)
+  remindDays Int @default(3)
+  active Boolean @default(true)
+  version Int @default(1)
+  pauseReason String? @db.Text
+  nextSequence Int @default(0)
+  lastGeneratedAt DateTime? @db.Timestamptz(3)
+  createdBy String @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  machine Machine @relation(fields:[orgId,machineId],references:[orgId,id],onDelete:Restrict)
+  creator Membership @relation("PlanCreator",fields:[orgId,createdBy],references:[orgId,userId],onDelete:Restrict)
+  technician Membership @relation("PlanTechnician",fields:[orgId,technicianId],references:[orgId,userId],onDelete:Restrict)
+  occurrences MaintenanceOccurrence[]
+  @@unique([orgId,machineId,id])
+  @@unique([orgId,createdBy,requestId])
+  @@index([active,id])
+  @@index([orgId,machineId,createdAt])
+  @@schema("maintenance")
+}
+model MaintenanceOccurrence {
+  id String @id @default(uuid()) @db.Uuid
+  orgId String @db.Uuid
+  machineId String @db.Uuid
+  planId String @db.Uuid
+  sequence Int
+  dueAt DateTime @db.Timestamptz(3)
+  remindAt DateTime @db.Timestamptz(3)
+  title String @db.VarChar(160)
+  instructions String @db.Text
+  technicianId String @db.Uuid
+  priority WorkOrderPriority
+  version Int @default(1)
+  skippedAt DateTime? @db.Timestamptz(3)
+  skippedBy String? @db.Uuid
+  skipReason String? @db.Text
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  machine Machine @relation(fields:[orgId,machineId],references:[orgId,id],onDelete:Restrict)
+  plan MaintenancePlan @relation(fields:[orgId,machineId,planId],references:[orgId,machineId,id],onDelete:Restrict)
+  technician Membership @relation("OccurrenceTechnician",fields:[orgId,technicianId],references:[orgId,userId],onDelete:Restrict)
+  skipper Membership? @relation("OccurrenceSkipper",fields:[orgId,skippedBy],references:[orgId,userId],onDelete:Restrict)
+  workOrder WorkOrder?
+  reminders MaintenanceReminder[]
+  @@unique([orgId,machineId,id])
+  @@unique([planId,sequence])
+  @@unique([planId,dueAt])
+  @@index([orgId,machineId,dueAt,id])
+  @@index([dueAt,remindAt])
+  @@schema("maintenance")
+}
+model MaintenanceReminder {
+  id String @id @default(uuid()) @db.Uuid
+  orgId String @db.Uuid
+  machineId String @db.Uuid
+  occurrenceId String @db.Uuid
+  kind MaintenanceReminderKind
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  occurrence MaintenanceOccurrence @relation(fields:[orgId,machineId,occurrenceId],references:[orgId,machineId,id],onDelete:Restrict)
+  receipts MaintenanceReminderReceipt[]
+  @@unique([occurrenceId,kind])
+  @@unique([orgId,machineId,id])
+  @@index([orgId,machineId,createdAt])
+  @@schema("maintenance")
+}
+model MaintenanceReminderReceipt {
+  id String @id @default(uuid()) @db.Uuid
+  orgId String @db.Uuid
+  machineId String @db.Uuid
+  reminderId String @db.Uuid
+  userId String @db.Uuid
+  role Role
+  readAt DateTime @default(now()) @db.Timestamptz(3)
+  reminder MaintenanceReminder @relation(fields:[orgId,machineId,reminderId],references:[orgId,machineId,id],onDelete:Restrict)
+  reader Membership @relation(fields:[orgId,userId],references:[orgId,userId],onDelete:Restrict)
+  @@unique([reminderId,userId,role])
   @@schema("maintenance")
 }
 model WorkOrderEvent {

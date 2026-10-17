@@ -15,3 +15,8 @@ GRANT UPDATE (status, "committedAt") ON maintenance."ReadingImport" TO :"runtime
 
 GRANT INSERT ON maintenance."WorkOrder", maintenance."WorkOrderEvent" TO :"runtime_role";
 GRANT UPDATE (status, version, "technicianId", "startedAt", findings, "rootCause", "correctiveAction", "preventiveAction", "restoredAt", "submittedAt", "returnReason", "reviewedAt", "reviewedBy", "closedAt", "closedBy", "updatedAt") ON maintenance."WorkOrder" TO :"runtime_role";
+
+GRANT INSERT ON maintenance."MaintenancePlan", maintenance."MaintenanceOccurrence", maintenance."MaintenanceReminder", maintenance."MaintenanceReminderReceipt" TO :"runtime_role";
+GRANT UPDATE (active, version, "pauseReason", "nextSequence", "lastGeneratedAt", "updatedAt") ON maintenance."MaintenancePlan" TO :"runtime_role";
+GRANT UPDATE (version, "skippedAt", "skippedBy", "skipReason") ON maintenance."MaintenanceOccurrence" TO :"runtime_role";
+GRANT UPDATE ("performedAt") ON maintenance."WorkOrder" TO :"runtime_role";

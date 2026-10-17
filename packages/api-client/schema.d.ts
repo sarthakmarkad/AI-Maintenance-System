@@ -308,6 +308,118 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/machines/{code}/calendar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["CalendarController_calendar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/calendar/plans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["CalendarController_plans"];
+        put?: never;
+        post: operations["CalendarController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/calendar/plans/{id}/state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["CalendarController_state"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/calendar/occurrences/{id}/release": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["CalendarController_release"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/calendar/occurrences/{id}/skip": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["CalendarController_skip"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/calendar/reminders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["CalendarController_reminders"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/calendar/reminders/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["CalendarController_read"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -635,6 +747,14 @@ export interface components {
              */
             observedAt?: string | null;
         };
+        WorkOrderOccurrenceDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            planId: string;
+            /** Format: date-time */
+            dueAt: string;
+        };
         WorkOrderPersonDto: {
             /** Format: uuid */
             userId: string;
@@ -644,7 +764,7 @@ export interface components {
             id: string;
             version: number;
             /** @enum {string} */
-            action: "REPORT" | "ASSIGN" | "START" | "SUBMIT" | "APPROVE" | "RETURN" | "CLOSE";
+            action: "REPORT" | "SCHEDULE" | "ASSIGN" | "START" | "SUBMIT" | "APPROVE" | "RETURN" | "CLOSE";
             /** @enum {string|null} */
             fromStatus: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED" | null;
             /** @enum {string} */
@@ -659,6 +779,9 @@ export interface components {
             };
         };
         WorkOrderReportedDto: {
+            /** @enum {string} */
+            kind: "BREAKDOWN" | "PLANNED";
+            maintenanceOccurrence: components["schemas"]["WorkOrderOccurrenceDto"] | null;
             /** Format: uuid */
             id: string;
             title: string;
@@ -680,6 +803,7 @@ export interface components {
             /** Format: date-time */
             closedAt: string | null;
             allowedActions: ("assign" | "start" | "submit" | "approve" | "return" | "close")[];
+            performedAt: string | null;
             description: string;
             startedAt: string | null;
             findings: string | null;
@@ -697,6 +821,9 @@ export interface components {
             alreadyReported: boolean;
         };
         WorkOrderSummaryDto: {
+            /** @enum {string} */
+            kind: "BREAKDOWN" | "PLANNED";
+            maintenanceOccurrence: components["schemas"]["WorkOrderOccurrenceDto"] | null;
             /** Format: uuid */
             id: string;
             title: string;
@@ -731,6 +858,9 @@ export interface components {
             items: components["schemas"]["WorkOrderPersonDto"][];
         };
         WorkOrderDto: {
+            /** @enum {string} */
+            kind: "BREAKDOWN" | "PLANNED";
+            maintenanceOccurrence: components["schemas"]["WorkOrderOccurrenceDto"] | null;
             /** Format: uuid */
             id: string;
             title: string;
@@ -752,6 +882,7 @@ export interface components {
             /** Format: date-time */
             closedAt: string | null;
             allowedActions: ("assign" | "start" | "submit" | "approve" | "return" | "close")[];
+            performedAt: string | null;
             description: string;
             startedAt: string | null;
             findings: string | null;
@@ -782,19 +913,163 @@ export interface components {
             reason?: string;
             /** @description Required on submit; 3–4,000 characters. */
             findings?: string;
-            /** @description Required on submit; human RCA, 3–4,000 characters. */
+            /** @description Required on BREAKDOWN submit only; human RCA, 3–4,000 characters. Rejected for planned maintenance. */
             rootCause?: string;
-            /** @description Required on submit; corrective action, 3–4,000 characters. */
+            /** @description Required on submit; corrective action for breakdowns, work performed for planned maintenance; 3–4,000 characters. */
             correctiveAction?: string;
-            /** @description Required on submit; preventive action, 3–4,000 characters. */
+            /** @description Required on BREAKDOWN submit; optional planned maintenance follow-up; 3–4,000 characters when provided. */
             preventiveAction?: string;
             /**
              * Format: date-time
-             * @description Required on submit; explicit offset timestamp between report and submission.
+             * @description BREAKDOWN submit only; explicit offset timestamp between report and submission. Rejected for planned maintenance.
              */
             restoredAt?: string;
+            /**
+             * Format: date-time
+             * @description Planned submission only; explicit maintenance performed time. Planned work requires findings/work performed, permits optional follow-up and rejects breakdown RCA/restoration fields.
+             */
+            performedAt?: string;
             /** @description approve/close only; optional 3–4,000-character note. Extra fields for each action are rejected. */
             note?: string;
+        };
+        CalendarOccurrenceDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            planId: string;
+            sequence: number;
+            title: string;
+            instructions: string;
+            /** Format: date-time */
+            dueAt: string;
+            /** @enum {string} */
+            priority: "LOW" | "NORMAL" | "HIGH";
+            version: number;
+            technician: components["schemas"]["WorkOrderPersonDto"];
+            workOrderId: string | null;
+            workOrderStatus: string | null;
+            /** @enum {string} */
+            status: "UPCOMING" | "DUE" | "OVERDUE" | "COMPLETED" | "SKIPPED";
+            skippedAt: string | null;
+            skipReason: string | null;
+            planActive: boolean;
+        };
+        ScheduleStatusDto: {
+            lastJobAt: string | null;
+            failed: boolean;
+            catchingUp: boolean;
+        };
+        CalendarDto: {
+            items: components["schemas"]["CalendarOccurrenceDto"][];
+            nextCursor: string | null;
+            counts: {
+                [key: string]: number;
+            };
+            dayCounts: {
+                [key: string]: number;
+            };
+            canManage: boolean;
+            serverTime: string;
+            scheduling: components["schemas"]["ScheduleStatusDto"];
+        };
+        PlanDto: {
+            /** Format: uuid */
+            requestId: string;
+            title: string;
+            instructions: string;
+            /** @enum {string} */
+            frequency: "DAILY" | "WEEKLY" | "MONTHLY";
+            interval: number;
+            /**
+             * Format: date-time
+             * @description Explicit offset timestamp; recurrence follows Asia/Kolkata fixed calendar dates. Monthly anchor days clamp without drifting.
+             */
+            firstDueAt: string;
+            /** Format: uuid */
+            technicianId: string;
+            /** @enum {string} */
+            priority: "LOW" | "NORMAL" | "HIGH";
+            remindDays: number;
+            technicianName: string;
+            /** Format: uuid */
+            id: string;
+            active: boolean;
+            version: number;
+            pauseReason: string | null;
+            nextSequence: number;
+            /** Format: date-time */
+            nextDueAt: string;
+            lastGeneratedAt: string | null;
+            catchingUp: boolean;
+            createdAt: string;
+            updatedAt: string;
+        };
+        PlansDto: {
+            items: components["schemas"]["PlanDto"][];
+            canManage: boolean;
+        };
+        PlanInputDto: {
+            /** Format: uuid */
+            requestId: string;
+            title: string;
+            instructions: string;
+            /** @enum {string} */
+            frequency: "DAILY" | "WEEKLY" | "MONTHLY";
+            interval: number;
+            /**
+             * Format: date-time
+             * @description Explicit offset timestamp; recurrence follows Asia/Kolkata fixed calendar dates. Monthly anchor days clamp without drifting.
+             */
+            firstDueAt: string;
+            /** Format: uuid */
+            technicianId: string;
+            /** @enum {string} */
+            priority: "LOW" | "NORMAL" | "HIGH";
+            remindDays: number;
+        };
+        PlanStateDto: {
+            version: number;
+            active: boolean;
+            reason: string;
+        };
+        ReleaseTaskDto: {
+            version: number;
+            /** Format: uuid */
+            technicianId: string;
+        };
+        ReleasedTaskDto: {
+            /** Format: uuid */
+            orderId: string;
+            alreadyReleased: boolean;
+        };
+        SkipTaskDto: {
+            version: number;
+            reason: string;
+        };
+        SkippedTaskDto: {
+            skipped: boolean;
+        };
+        ReminderDto: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            kind: "UPCOMING" | "DUE" | "OVERDUE";
+            /** Format: uuid */
+            occurrenceId: string;
+            title: string;
+            /** Format: date-time */
+            dueAt: string;
+            orderId: string | null;
+            read: boolean;
+            createdAt: string;
+        };
+        RemindersDto: {
+            unread: number;
+            items: components["schemas"]["ReminderDto"][];
+            nextCursor: string | null;
+        };
+        ReminderReadDto: {
+            read: boolean;
         };
     };
     responses: never;
@@ -2038,6 +2313,585 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WorkOrderDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    CalendarController_calendar: {
+        parameters: {
+            query: {
+                after?: unknown;
+                status?: "UPCOMING" | "DUE" | "OVERDUE" | "COMPLETED" | "SKIPPED";
+                to: unknown;
+                from: unknown;
+            };
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    CalendarController_plans: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlansDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    CalendarController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlanInputDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    CalendarController_state: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlanStateDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    CalendarController_release: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReleaseTaskDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReleasedTaskDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    CalendarController_skip: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SkipTaskDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SkippedTaskDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    CalendarController_reminders: {
+        parameters: {
+            query?: {
+                after?: unknown;
+            };
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RemindersDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    CalendarController_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReminderReadDto"];
                 };
             };
             400: {
