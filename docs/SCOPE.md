@@ -1,12 +1,12 @@
 # Scope retained from the handoff
 
-SRS v1.0 is the official baseline; its full text is unavailable here. This list is the handoff's intended overall functional scope, not a reconstruction of original authoritative requirements. M1 is only an intermediate delivery.
+SRS v1.0 is the official baseline; its full text is unavailable here. This list is the handoff's intended overall functional scope, not a reconstruction of original authoritative requirements. Milestones 1–2 are intermediate deliveries.
 
 | Functional area | Current status / intended delivery |
 |---|---|
 | 1 Machine/asset registry | M1: scoped registry reads and WH-C page |
-| 2 Historical machine-data import | Next: production Excel preview, validation, duplicate-safe commit |
-| 3 Machine performance dashboard | Next: persisted production totals; synthetic process trends later |
+| 2 Historical machine-data import | M2: production Excel preview, validation, duplicate-safe commit |
+| 3 Machine performance dashboard | M2: persisted production/scrap totals; synthetic process trends later |
 | 4 Anomaly detection | Later: separate statistical/Python service |
 | 5 Breakdown reporting | Later: operator reports |
 | 6 Maintenance work orders | Later: persisted workflow; policy contract tested in M1 |
@@ -22,7 +22,7 @@ SRS v1.0 is the official baseline; its full text is unavailable here. This list 
 | 16 Reports/exports | Later |
 | 17 Backend role-based access | M1: verified identity, trusted roles, org/record scope |
 | 18 Notifications | Later |
-| 19 Protected audit trail | M1: immutable seed/provisioning events; operational events later |
-| 20 REST API/OpenAPI | M1: NestJS endpoints, Swagger, generated frontend types |
+| 19 Protected audit trail | M1–2: immutable seed/provisioning/production import events; incident events later |
+| 20 REST API/OpenAPI | M1–2: authenticated registry/production REST endpoints, Swagger, generated frontend types |
 
-Next acceptance target: preview authentic WH-C production Excel with sheet/row provenance and review flags; validate job versus daily controls; commit idempotently; render persisted production/scrap totals. No queue is required until functionality needs background execution. Confirm downtime units and actual shift start times before corresponding metrics.
+Next acceptance target: import the supplied synthetic hourly process readings with separate measured/received timestamps and clear provenance; validate duplicates, gaps and parameter units; produce retrospective demonstration review warnings without claims of continuous monitoring, validated predictions or causes of authentic production losses. Queues/anomaly services are deferred until their functionality requires them.

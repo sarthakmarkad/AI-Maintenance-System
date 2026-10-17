@@ -84,6 +84,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/machines/{code}/production/inspect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ProductionController_inspect"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/production/previews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ProductionController_preview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/production/previews/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ProductionController_getPreview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/production/previews/{id}/commit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ProductionController_commit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/production/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ProductionController_dashboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -143,6 +223,133 @@ export interface components {
         MachinesDto: {
             items: components["schemas"]["MachineDto"][];
             nextCursor: string | null;
+        };
+        SheetInfoDto: {
+            name: string;
+            month: string | null;
+            supported: boolean;
+            reason: string | null;
+            heading: string;
+        };
+        WorkbookInfoDto: {
+            filename: string;
+            workbookHash: string;
+            sheets: components["schemas"]["SheetInfoDto"][];
+        };
+        ProductionRowDto: {
+            sourceRow: number;
+            /** @enum {string} */
+            kind: "JOB" | "ACTIVITY";
+            /** @enum {string|null} */
+            shift: "A" | "B" | "C" | null;
+            description: string;
+            productionKg: number | null;
+            jobChanges: number | null;
+            scrap: {
+                [key: string]: number;
+            };
+            downtime: {
+                [key: string]: number;
+            };
+            remarks: string;
+            rawCells: {
+                [key: string]: unknown;
+            };
+        };
+        ProductionProblemDto: {
+            /** @enum {string} */
+            severity: "ERROR" | "WARNING";
+            code: string;
+            cell: string;
+            message: string;
+        };
+        ProductionDayDto: {
+            key: string;
+            date: string | null;
+            rawDate: string;
+            sourceStartRow: number;
+            sourceEndRow: number;
+            productionKg: number;
+            scrapKg: number;
+            controlProductionKg: number | null;
+            controlScrapKg: number | null;
+            rows: components["schemas"]["ProductionRowDto"][];
+            problems: components["schemas"]["ProductionProblemDto"][];
+            eligible: boolean;
+            alreadyImported: boolean;
+        };
+        ProductionPreviewDto: {
+            /** Format: uuid */
+            id: string;
+            filename: string;
+            workbookHash: string;
+            sheet: string;
+            month: string;
+            parserVersion: string;
+            /** @enum {string} */
+            source: "AUTHENTIC" | "SYNTHETIC";
+            /** @enum {string} */
+            status: "PREVIEW" | "COMMITTED";
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            expiresAt: string;
+            warnings: string[];
+            committedDayKeys: string[];
+            days: components["schemas"]["ProductionDayDto"][];
+        };
+        CommitProductionDto: {
+            /**
+             * @example [
+             *       "row-8"
+             *     ]
+             */
+            dayKeys: string[];
+            /** @example true */
+            acknowledgeWarnings: boolean;
+        };
+        ProductionCommitDto: {
+            /** Format: uuid */
+            importId: string;
+            /** @enum {string} */
+            status: "COMMITTED";
+            importedDays: number;
+            jobRows: number;
+            productionKg: number;
+            scrapKg: number;
+            alreadyCommitted: boolean;
+        };
+        DailyProductionDto: {
+            date: string;
+            productionKg: number | null;
+            scrapKg: number | null;
+            jobRows: number | null;
+        };
+        ProductionImportHistoryDto: {
+            /** Format: uuid */
+            id: string;
+            filename: string;
+            sheet: string;
+            /** @enum {string} */
+            source: "AUTHENTIC" | "SYNTHETIC";
+            /** Format: date-time */
+            committedAt: string;
+            importedDays: number;
+        };
+        ProductionDashboardDto: {
+            /** @enum {string} */
+            source: "AUTHENTIC" | "SYNTHETIC";
+            from: string;
+            to: string;
+            hasData: boolean;
+            importedDays: number;
+            jobRows: number;
+            productionKg: number;
+            scrapKg: number;
+            /** Format: date-time */
+            lastImportedAt: string | null;
+            daily: components["schemas"]["DailyProductionDto"][];
+            imports: components["schemas"]["ProductionImportHistoryDto"][];
         };
     };
     responses: never;
@@ -314,6 +521,370 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MachineDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    ProductionController_inspect: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkbookInfoDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    ProductionController_preview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                    sheet: string;
+                    /** @enum {string} */
+                    source: "AUTHENTIC" | "SYNTHETIC";
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductionPreviewDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    ProductionController_getPreview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductionPreviewDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    ProductionController_commit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CommitProductionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductionCommitDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    ProductionController_dashboard: {
+        parameters: {
+            query?: {
+                to?: string;
+                from?: string;
+                source?: "AUTHENTIC" | "SYNTHETIC";
+            };
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductionDashboardDto"];
                 };
             };
             400: {

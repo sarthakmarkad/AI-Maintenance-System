@@ -1,8 +1,8 @@
 # Supreme Maintenance Intelligence
 
-Supabase authentication and scoped WH-C asset registry.
+Production workbook import and saved dashboards.
 
-Implemented: verified identity, trusted membership/role and organization/machine scope, protected frontend, PostgreSQL migrations and restricted grants, API documentation and local checks.
+Implemented: foundation access plus bounded Excel preview, validation, source provenance, duplicate-safe transactional import and saved production/scrap dashboards.
 
 ## Local development
 

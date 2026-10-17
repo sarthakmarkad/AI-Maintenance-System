@@ -55,6 +55,7 @@ model AppUser {
   createdAt DateTime @default(now()) @db.Timestamptz(3)
   membership Membership?
   auditEvents AuditEvent[]
+  productionImports ProductionImport[]
   @@schema("maintenance")
 }
 model Membership {
@@ -89,6 +90,8 @@ model Machine {
   department Department? @relation(fields: [orgId, departmentId], references: [orgId, id], onDelete: Restrict)
   location Location? @relation(fields: [orgId, locationId], references: [orgId, id], onDelete: Restrict)
   access MachineAccess[]
+  productionImports ProductionImport[]
+  productionDays ProductionDay[]
   @@unique([orgId, id])
   @@unique([orgId, code])
   @@index([orgId, departmentId])
@@ -118,5 +121,94 @@ model AuditEvent {
   organization Organization @relation(fields: [orgId], references: [id], onDelete: Restrict)
   actor AppUser? @relation(fields: [actorId], references: [id], onDelete: Restrict)
   @@index([orgId, at])
+  @@schema("maintenance")
+}
+
+enum ProductionSource {
+  AUTHENTIC
+  SYNTHETIC
+  @@schema("maintenance")
+}
+enum ProductionImportStatus {
+  PREVIEW
+  COMMITTED
+  @@schema("maintenance")
+}
+enum ProductionShift {
+  A
+  B
+  C
+  @@schema("maintenance")
+}
+enum ProductionRowKind {
+  JOB
+  ACTIVITY
+  @@schema("maintenance")
+}
+model ProductionImport {
+  id String @id @default(uuid()) @db.Uuid
+  orgId String @db.Uuid
+  machineId String @db.Uuid
+  source ProductionSource
+  filename String @db.VarChar(180)
+  workbookHash String @db.VarChar(64)
+  sheet String @db.VarChar(100)
+  parserVersion String @db.VarChar(40)
+  status ProductionImportStatus @default(PREVIEW)
+  staged Json
+  createdBy String @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  expiresAt DateTime @db.Timestamptz(3)
+  committedAt DateTime? @db.Timestamptz(3)
+  committedDayKeys String[] @default([])
+  machine Machine @relation(fields:[orgId,machineId],references:[orgId,id],onDelete:Restrict)
+  creator AppUser @relation(fields:[createdBy],references:[id],onDelete:Restrict)
+  days ProductionDay[]
+  @@unique([orgId,machineId,source,id])
+  @@index([orgId,machineId,createdAt])
+  @@index([createdBy])
+  @@schema("maintenance")
+}
+model ProductionDay {
+  id String @id @default(uuid()) @db.Uuid
+  orgId String @db.Uuid
+  machineId String @db.Uuid
+  importId String @db.Uuid
+  source ProductionSource
+  date DateTime @db.Date
+  productionKg Decimal @db.Decimal(16,3)
+  scrapKg Decimal @db.Decimal(16,3)
+  controlProductionKg Decimal @db.Decimal(16,3)
+  controlScrapKg Decimal @db.Decimal(16,3)
+  sourceStartRow Int
+  sourceEndRow Int
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  machine Machine @relation(fields:[orgId,machineId],references:[orgId,id],onDelete:Restrict)
+  import ProductionImport @relation(fields:[orgId,machineId,source,importId],references:[orgId,machineId,source,id],onDelete:Restrict)
+  rows ProductionRow[]
+  @@unique([orgId,machineId,source,date])
+  @@unique([orgId,machineId,id])
+  @@index([importId])
+  @@schema("maintenance")
+}
+model ProductionRow {
+  id String @id @default(uuid()) @db.Uuid
+  orgId String @db.Uuid
+  machineId String @db.Uuid
+  dayId String @db.Uuid
+  sourceRow Int
+  kind ProductionRowKind
+  shift ProductionShift
+  description String @db.Text
+  productionKg Decimal? @db.Decimal(16,3)
+  jobChanges Int?
+  scrap Json
+  downtime Json
+  downtimeUnit String @default("UNCONFIRMED") @db.VarChar(20)
+  remarks String @db.Text
+  rawCells Json
+  day ProductionDay @relation(fields:[orgId,machineId,dayId],references:[orgId,machineId,id],onDelete:Restrict)
+  @@unique([dayId,sourceRow])
+  @@index([orgId,machineId])
   @@schema("maintenance")
 }

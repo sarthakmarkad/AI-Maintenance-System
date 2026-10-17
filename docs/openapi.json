@@ -280,12 +280,590 @@
           "Machines"
         ]
       }
+    },
+    "/api/machines/{code}/production/inspect": {
+      "post": {
+        "operationId": "ProductionController_inspect",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkbookInfoDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Production"
+        ]
+      }
+    },
+    "/api/machines/{code}/production/previews": {
+      "post": {
+        "operationId": "ProductionController_preview",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file",
+                  "sheet",
+                  "source"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "sheet": {
+                    "type": "string"
+                  },
+                  "source": {
+                    "type": "string",
+                    "enum": [
+                      "AUTHENTIC",
+                      "SYNTHETIC"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionPreviewDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Production"
+        ]
+      }
+    },
+    "/api/machines/{code}/production/previews/{id}": {
+      "get": {
+        "operationId": "ProductionController_getPreview",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionPreviewDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Production"
+        ]
+      }
+    },
+    "/api/machines/{code}/production/previews/{id}/commit": {
+      "post": {
+        "operationId": "ProductionController_commit",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommitProductionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionCommitDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Production"
+        ]
+      }
+    },
+    "/api/machines/{code}/production/dashboard": {
+      "get": {
+        "operationId": "ProductionController_dashboard",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2026-09-30",
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2026-09-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "source",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "AUTHENTIC",
+                "SYNTHETIC"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionDashboardDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Production"
+        ]
+      }
     }
   },
   "info": {
     "title": "Supreme Maintenance API",
     "description": "",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "contact": {}
   },
   "tags": [],
@@ -492,6 +1070,484 @@
         "required": [
           "items",
           "nextCursor"
+        ]
+      },
+      "SheetInfoDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "month": {
+            "type": "string",
+            "nullable": true
+          },
+          "supported": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "heading": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "month",
+          "supported",
+          "reason",
+          "heading"
+        ]
+      },
+      "WorkbookInfoDto": {
+        "type": "object",
+        "properties": {
+          "filename": {
+            "type": "string"
+          },
+          "workbookHash": {
+            "type": "string"
+          },
+          "sheets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SheetInfoDto"
+            }
+          }
+        },
+        "required": [
+          "filename",
+          "workbookHash",
+          "sheets"
+        ]
+      },
+      "ProductionRowDto": {
+        "type": "object",
+        "properties": {
+          "sourceRow": {
+            "type": "number"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "JOB",
+              "ACTIVITY"
+            ]
+          },
+          "shift": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "A",
+              "B",
+              "C"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "productionKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "jobChanges": {
+            "type": "number",
+            "nullable": true
+          },
+          "scrap": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "downtime": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "remarks": {
+            "type": "string"
+          },
+          "rawCells": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "sourceRow",
+          "kind",
+          "shift",
+          "description",
+          "productionKg",
+          "jobChanges",
+          "scrap",
+          "downtime",
+          "remarks",
+          "rawCells"
+        ]
+      },
+      "ProductionProblemDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "enum": [
+              "ERROR",
+              "WARNING"
+            ]
+          },
+          "code": {
+            "type": "string"
+          },
+          "cell": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "severity",
+          "code",
+          "cell",
+          "message"
+        ]
+      },
+      "ProductionDayDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "nullable": true
+          },
+          "rawDate": {
+            "type": "string"
+          },
+          "sourceStartRow": {
+            "type": "number"
+          },
+          "sourceEndRow": {
+            "type": "number"
+          },
+          "productionKg": {
+            "type": "number"
+          },
+          "scrapKg": {
+            "type": "number"
+          },
+          "controlProductionKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "controlScrapKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductionRowDto"
+            }
+          },
+          "problems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductionProblemDto"
+            }
+          },
+          "eligible": {
+            "type": "boolean"
+          },
+          "alreadyImported": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "date",
+          "rawDate",
+          "sourceStartRow",
+          "sourceEndRow",
+          "productionKg",
+          "scrapKg",
+          "controlProductionKg",
+          "controlScrapKg",
+          "rows",
+          "problems",
+          "eligible",
+          "alreadyImported"
+        ]
+      },
+      "ProductionPreviewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "workbookHash": {
+            "type": "string"
+          },
+          "sheet": {
+            "type": "string"
+          },
+          "month": {
+            "type": "string"
+          },
+          "parserVersion": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "AUTHENTIC",
+              "SYNTHETIC"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PREVIEW",
+              "COMMITTED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "committedDayKeys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductionDayDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "filename",
+          "workbookHash",
+          "sheet",
+          "month",
+          "parserVersion",
+          "source",
+          "status",
+          "createdAt",
+          "expiresAt",
+          "warnings",
+          "committedDayKeys",
+          "days"
+        ]
+      },
+      "CommitProductionDto": {
+        "type": "object",
+        "properties": {
+          "dayKeys": {
+            "example": [
+              "row-8"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "acknowledgeWarnings": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "dayKeys",
+          "acknowledgeWarnings"
+        ]
+      },
+      "ProductionCommitDto": {
+        "type": "object",
+        "properties": {
+          "importId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "COMMITTED"
+            ]
+          },
+          "importedDays": {
+            "type": "number"
+          },
+          "jobRows": {
+            "type": "number"
+          },
+          "productionKg": {
+            "type": "number"
+          },
+          "scrapKg": {
+            "type": "number"
+          },
+          "alreadyCommitted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "importId",
+          "status",
+          "importedDays",
+          "jobRows",
+          "productionKg",
+          "scrapKg",
+          "alreadyCommitted"
+        ]
+      },
+      "DailyProductionDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "productionKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "scrapKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "jobRows": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "date",
+          "productionKg",
+          "scrapKg",
+          "jobRows"
+        ]
+      },
+      "ProductionImportHistoryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "sheet": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "AUTHENTIC",
+              "SYNTHETIC"
+            ]
+          },
+          "committedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "importedDays": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "filename",
+          "sheet",
+          "source",
+          "committedAt",
+          "importedDays"
+        ]
+      },
+      "ProductionDashboardDto": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "AUTHENTIC",
+              "SYNTHETIC"
+            ]
+          },
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "hasData": {
+            "type": "boolean"
+          },
+          "importedDays": {
+            "type": "number"
+          },
+          "jobRows": {
+            "type": "number"
+          },
+          "productionKg": {
+            "type": "number"
+          },
+          "scrapKg": {
+            "type": "number"
+          },
+          "lastImportedAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "daily": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DailyProductionDto"
+            }
+          },
+          "imports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductionImportHistoryDto"
+            }
+          }
+        },
+        "required": [
+          "source",
+          "from",
+          "to",
+          "hasData",
+          "importedDays",
+          "jobRows",
+          "productionKg",
+          "scrapKg",
+          "lastImportedAt",
+          "daily",
+          "imports"
         ]
       }
     }

@@ -1,6 +1,6 @@
 # Data boundaries
 
-Original files remain under ignored `Maintenance_Handoff/data`; no company workbook has been copied into source, Git or public assets. Future originals belong in private storage; storage persistence is not implemented yet.
+Original files remain under ignored `Maintenance_Handoff/data`; no company workbook has been copied into source, Git or public assets. Future originals belong in private storage; original-file byte persistence is not implemented yet. M2 processes uploads in memory and stores parsed source rows/validation provenance only in the private database.
 
 ## Authentic production workbooks
 

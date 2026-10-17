@@ -9,19 +9,19 @@ Environment: macOS arm64, Node 24.18.0, npm 11.16.0, PostgreSQL 16.15 in the iso
 | Folder access | PASS | Actual Maintenance root verified; temporary file/folder created, read and removed |
 | Dependency installation | PASS | Lockfile generated; Prisma client generated; known build scripts explicitly allowed |
 | Dependency audit | PASS | npm audit: 0 vulnerabilities after targeted compatible dependency patches |
-| Type checks | PASS | Strict TypeScript for NestJS and Next.js |
+| Type checks | PASS | Strict TypeScript for NestJS, Next.js and browser tests |
 | Backend production compilation | PASS | tsc emits runnable NestJS application |
-| Frontend production build | PASS | Next.js builds login, registry and dynamic machine page |
-| Backend/config/verifier/workflow tests | PASS, 14 | HTTP 401/403/404/400; trusted membership; invalid token; unconfigured auth; input validation; role distinctions; assignment restrictions; stale policy versions; separate timestamps |
-| Real PostgreSQL integration tests | PASS, 8 | Fresh migration, repeated seed, actual scoped queries, immediate revocation, composite FK and uniqueness rejection, keyset pagination, runtime write denial, immutable audit, unprivileged SQL denial |
-| Browser tests | PASS, 12 | Six scenarios each in desktop Chromium and Pixel 7 emulation; login/navigation, loading/empty, API retry, expiry, invalid login, logout and horizontal layout |
+| Frontend production build | PASS | Next.js builds login, registry, machine and production pages; isolated build cache preserves the running dev server |
+| Backend/config/verifier/workflow/parser tests | PASS, 20 | Foundation HTTP/auth/workflow checks plus cached formulas, multiple jobs per shift, activity rows, dates, controls, numeric ambiguity and XLSX input bounds |
+| Real PostgreSQL integration tests | PASS, 16 | Foundation constraints/access plus staged imports, selected-day validation, same-preview idempotency, cross-preview races, renamed files, source isolation, audit rollback, preview expiry, immutable snapshots and narrow runtime grants |
+| Browser tests | PASS, 20 | Ten scenarios each in desktop Chromium and Pixel 7 emulation; foundation flows plus import review/acknowledgement/commit, source separation, role visibility, conflict recovery, nested expiry and tab switching |
 | Initial unconfigured local smoke | PASS | Actual running API: liveness 200, readiness 503 with database connected/auth unconfigured, protected endpoints 401, OpenAPI 200 |
 | Initial unconfigured browser | PASS | Real local frontend redirects to login, shows setup notice, disables sign-in and fits mobile width; no interception for this check |
 | Reference/privacy boundary | PASS | Handoff, company files, .env, frontend local environment, native DB and test artifacts ignored by Git; no originals changed or copied into public assets |
 
-The browser suite deliberately intercepts Supabase and API responses. Those 12 passes prove client behavior against fixtures, not hosted login or browser-to-real-API authentication. The verifier tests exercise the actual Supabase SDK against a controlled local Auth HTTP stub; they do not prove hosted Supabase token verification. Database HTTP tests use real PostgreSQL and test-only identity injection. No identity bypass is available in the application.
+The browser suite deliberately intercepts Supabase and API responses. Those 20 passes prove client behavior against fixtures, not hosted login or browser-to-real-API authentication. The verifier tests exercise the actual Supabase SDK against a controlled local Auth HTTP stub; they do not prove hosted Supabase token verification. Database HTTP tests use real PostgreSQL and test-only identity injection. No identity bypass is available in the application.
 
-An expiry redirect race was found by browser testing and fixed. Early runs also exposed missing browser installation and ambiguous selectors; the final browser suite passed all 12 tests. Browser tests use an isolated .next-test directory and can run while local development remains active.
+An expiry redirect race was found by browser testing and fixed. Early runs also exposed missing browser installation and ambiguous selectors; the final browser suite passed all 20 tests. Browser tests use an isolated .next-test directory and can run while local development remains active.
 
 ## Not verified / not implemented
 
@@ -30,7 +30,7 @@ An expiry redirect race was found by browser testing and fixed. Early runs also 
 - Production deployment, hosting, TLS/proxy configuration or Docker startup. Nothing was published.
 - Hosted GitHub Actions execution; workflow is included for future runs.
 - Work-order persistence/concurrent database updates: only the pure future policy contract is tested. Atomic version checking/audit for incident mutations belongs to its milestone.
-- Production Excel parsing/import, persisted production dashboard values, process readings, private Storage, queues, anomaly detection, AI, notifications, reports or the remainder of the 20-feature platform.
+- Process readings, original workbook-byte storage/private Storage, queues, anomaly detection, AI, notifications, reports or the remainder of the 20-feature platform. Production Excel import and saved dashboard values are verified below.
 - Performance/availability/prediction claims, engineering safe limits, downtime units or actual shift start times.
 
 ## Hosted Auth connection follow-up — 17 October 2026
@@ -74,4 +74,19 @@ The hosted Auth URL/public key and first-user application membership are now con
 
 ## Next milestone
 
-Authentic production Excel preview, source sheet/row validation, ambiguous-value review, duplicate-safe persisted commit and dashboard production/scrap totals. Preserve job-grain rows and daily control totals separately. Data assumptions remain recorded in DATA-POLICY.md.
+Synthetic hourly process-reading import with separate measured/received timestamps, duplicate/gap/unit validation, visible synthetic provenance and retrospective review warnings. Reported ranges are unverified and cannot establish safe limits or causes of authentic production losses. Persistent incident workflows follow that milestone.
+
+## Production import acceptance — 17 October 2026
+
+- Applied the production migration to the actual local database and isolated test database; applied the narrow runtime grants. No hosted database migration is claimed.
+- Final relevant automated runs passed: **20 backend/unit + 16 PostgreSQL integration + 20 desktop/mobile browser = 56 tests**, strict type checks and NestJS/Next.js production builds. Generated OpenAPI and frontend contracts were refreshed. Dependency audit reported zero vulnerabilities, including the production dependency recheck after live import. Hosted CI has not been run.
+- The authenticated user's actual Chrome tab selected the original WH-C workbook. Real inspect and preview requests listed its worksheets and validated the September sheet using hosted Supabase identity, NestJS and local PostgreSQL. No response interception or injected test identity was used in this live flow.
+- Reviewed 30 date blocks: 27 eligible; excluded a missing date (A23), malformed date (A57), and independent scrap-control mismatch (AD91). No date or quantity was corrected automatically.
+- Committed the 27 valid days through the application UI. Observed 160 JOB rows and two ACTIVITY rows in the database, with exactly one corresponding commit audit event and three excluded blocks. Reloaded the real page and observed retained September coverage, totals, daily chart, gaps and import history.
+- Independently recalculated eligible production and category-scrap totals from the original worksheet's cached XML values before import. Saved decimal day/control totals match that evidence. Retained descriptions, shifts, remarks, source row references and category values match the parsed source; saved raw-cell JSON matches the staged database snapshot exactly. Raw numeric cache values are parsed floating-point JSON, not byte-for-byte XML text; independent raw-cache comparisons allow relative tolerance 1e-12. Production/control amounts are checked exactly at three decimals.
+- SHA-256 checks after the live import confirm all supplied original workbooks remain unchanged. Company volumes, detailed source evidence and screenshots remain in ignored `.local` and the private database. Screenshot: `.local/production-dashboard.png`; detailed live comparison: `.local/production-live-verification.json`.
+- Desktop/mobile fixture screenshots were inspected for layout. The live saved daily chart was also visually checked after rendering. Browser fixtures prove client behavior; the separate live run proves this actual workbook's browser-to-database path. Hosted session refresh/expiry, separate real role accounts, Supabase-hosted operational persistence and deployed operation retain the limits stated above.
+
+## Local address recovery — 17 October 2026
+
+The reported offline workspace was open at `127.0.0.1:3000`, while the configured API CORS origin is `localhost:3000`. Frontend, API readiness and the database were already healthy. Added a development-only redirect to the canonical localhost origin when using the configured localhost pilot API. Verified HTTP 307 preserves the production path and query string. API origin permissions remain unchanged. Strict type checks pass. Reloading the actual Chrome tab followed the redirect and restored the trusted Administrator registry. The production dashboard then loaded all 27 saved days and 160 jobs. Local screenshot: `.local/production-access-restored.png`.
