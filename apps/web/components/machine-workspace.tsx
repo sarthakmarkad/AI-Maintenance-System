@@ -23,6 +23,7 @@ import { Button } from "./ui/button";
 import { ProductionWorkspace } from "./production-workspace";
 import { ReadingsWorkspace } from "./readings-workspace";
 import { WorkOrdersWorkspace } from "./work-orders-workspace";
+import { clearRoleSelection } from "@/lib/role-selection";
 type Result =
   | { kind: "loading" }
   | { kind: "error"; message: string; requestId?: string }
@@ -112,6 +113,15 @@ export function MachineWorkspace({
             Try again
           </Button>
           <Link href="/machines">Back to asset registry</Link>
+          <Button
+            variant="outline"
+            onClick={() => {
+              clearRoleSelection();
+              window.location.assign("/machines");
+            }}
+          >
+            Return to default role
+          </Button>
         </section>
       ) : code && result.machines[0] ? (
         workOrders ? (

@@ -9,6 +9,7 @@ import {
 } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { getSupabase } from "@/lib/supabase";
+import { setRoleIdentity } from "@/lib/role-selection";
 type State = {
   session: Session | null;
   loading: boolean;
@@ -30,6 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     expired: false,
   });
   const expire = useCallback(async () => {
+    setRoleIdentity(null);
     // Keep the expiry reason across sign-out events and nested protected components.
     setState({ session: null, loading: false, error: null, expired: true });
     try {
@@ -48,6 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const {
       data: { subscription },
     } = client.auth.onAuthStateChange((_event, session) => {
+      setRoleIdentity(session?.user.id ?? null);
       if (mounted)
         setState((current) =>
           current.session?.access_token === session?.access_token &&
@@ -65,6 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     client.auth
       .getSession()
       .then(({ data, error }) => {
+        setRoleIdentity(data.session?.user.id ?? null);
         if (mounted)
           setState((current) => ({
             session: data.session,

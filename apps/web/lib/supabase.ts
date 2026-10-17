@@ -9,6 +9,7 @@ export function getSupabase() {
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: false,
+      flowType: "pkce",
     },
   });
   return client;

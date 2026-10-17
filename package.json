@@ -24,6 +24,7 @@
     "db:migrate": "prisma migrate deploy",
     "db:seed": "tsx scripts/seed.ts",
     "db:provision": "tsx scripts/provision-user.ts",
+    "db:grant-roles": "tsx scripts/grant-roles.ts",
     "api:generate": "npm run build:api && tsx scripts/openapi.ts && openapi-typescript docs/openapi.json -o packages/api-client/schema.d.ts",
     "check": "npm run typecheck && npm test && npm run build",
     "postinstall": "prisma generate",

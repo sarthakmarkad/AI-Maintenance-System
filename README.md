@@ -1,8 +1,8 @@
 # Supreme Maintenance Intelligence
 
-Persisted maintenance work orders.
+Maintenance work orders with trusted role access and Google sign-in.
 
-Implemented: authenticated registry, production import, synthetic process trends and role-controlled reporting, assignment, repair, engineering review and closure. Trusted backend role resolution is included as the authorization foundation for the next login/role-view milestone. Google sign-in and selectable role UX follow in the next commit.
+Implemented: authenticated WH-C registry, production imports, synthetic process trends, audited report/assign/repair/review/close workflow, selectable server-granted role views and Google PKCE login. Calendar and anomaly detection remain future milestones.
 
 ## Local development
 

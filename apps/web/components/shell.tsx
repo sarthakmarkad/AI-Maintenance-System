@@ -12,7 +12,9 @@ import {
   ClipboardList,
 } from "lucide-react";
 import { getSupabase } from "@/lib/supabase";
-import type { Me } from "@/lib/api";
+import { api, type Me } from "@/lib/api";
+import { clearRoleSelection, rememberRole } from "@/lib/role-selection";
+import { useAuth } from "./auth-provider";
 import { Button } from "./ui/button";
 import { useState, type ReactNode } from "react";
 const roleNames: Record<Me["role"], string> = {
@@ -35,16 +37,38 @@ export function Shell({
   const router = useRouter();
   const pathname = usePathname();
   const inProduction = pathname.includes("/production");
-  const inOrders = pathname.includes("/work-orders");
   const inReadings = pathname.includes("/readings");
+  const inOrders = pathname.includes("/work-orders");
   const [signingOut, setSigningOut] = useState(false);
   const [error, setError] = useState("");
+  const [switchingRole, setSwitchingRole] = useState(false);
+  const { session } = useAuth();
+  async function switchRole(role: Me["role"]) {
+    if (!session || !user || role === user.role) return;
+    setSwitchingRole(true);
+    setError("");
+    try {
+      const checked = await api<Me>("/me", session.access_token, undefined, {
+        headers: { "X-Workspace-Role": role },
+      });
+      if (checked.role !== role || !checked.availableRoles.includes(role))
+        throw new Error();
+      rememberRole(user.userId, role);
+      window.location.assign("/machines");
+    } catch {
+      setError(
+        "This role is unavailable. Your access may have changed. Return to your default role or try again.",
+      );
+      setSwitchingRole(false);
+    }
+  }
   async function signOut() {
     setSigningOut(true);
     setError("");
     try {
       const result = await getSupabase()?.auth.signOut({ scope: "local" });
       if (result?.error) throw result.error;
+      clearRoleSelection();
       router.replace("/login");
       router.refresh();
     } catch {
@@ -91,7 +115,15 @@ export function Shell({
               Process trends
             </Link>
           )}
-          {code && (<Link className={`nav-item ${inOrders ? "active" : ""}`} href={`/machines/${code}/work-orders`}><ClipboardList size={18} />Work orders</Link>)}
+          {code && (
+            <Link
+              className={`nav-item ${inOrders ? "active" : ""}`}
+              href={`/machines/${code}/work-orders`}
+            >
+              <ClipboardList size={18} />
+              Work orders
+            </Link>
+          )}
         </nav>
         <div className="sidebar-note">
           <ShieldCheck size={20} />
@@ -100,7 +132,7 @@ export function Shell({
         </div>
         <div className="sidebar-footer">
           <span className="tiny-dot" />
-          WH-C pilot · Process trends
+          WH-C pilot · Maintenance
         </div>
       </aside>
       <div className="workspace">
@@ -120,9 +152,29 @@ export function Shell({
             </span>
             <div>
               <strong>{user?.displayName || "Maintenance workspace"}</strong>
-              <small>
-                {user ? roleNames[user.role] : "Authenticated access"}
-              </small>
+              {user && (user.availableRoles?.length ?? 0) > 1 ? (
+                <label className="role-selector">
+                  <span>Active role</span>
+                  <select
+                    aria-label="Active role"
+                    value={user.role}
+                    disabled={switchingRole}
+                    onChange={(e) =>
+                      void switchRole(e.target.value as Me["role"])
+                    }
+                  >
+                    {user.availableRoles.map((role) => (
+                      <option key={role} value={role}>
+                        {roleNames[role]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : (
+                <small>
+                  {user ? roleNames[user.role] : "Authenticated access"}
+                </small>
+              )}
             </div>
             <Button
               variant="ghost"
