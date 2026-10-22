@@ -19,4 +19,6 @@ GRANT UPDATE (status, version, "technicianId", "startedAt", findings, "rootCause
 GRANT INSERT ON maintenance."MaintenancePlan", maintenance."MaintenanceOccurrence", maintenance."MaintenanceReminder", maintenance."MaintenanceReminderReceipt" TO :"runtime_role";
 GRANT UPDATE (active, version, "pauseReason", "nextSequence", "lastGeneratedAt", "updatedAt") ON maintenance."MaintenancePlan" TO :"runtime_role";
 GRANT UPDATE (version, "skippedAt", "skippedBy", "skipReason") ON maintenance."MaintenanceOccurrence" TO :"runtime_role";
-GRANT UPDATE ("performedAt") ON maintenance."WorkOrder" TO :"runtime_role";
+GRANT UPDATE ("performedAt", "investigationOutcome") ON maintenance."WorkOrder" TO :"runtime_role";
+
+GRANT INSERT ON maintenance."AnomalyReview" TO :"runtime_role";

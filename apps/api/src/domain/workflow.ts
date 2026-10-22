@@ -1,5 +1,5 @@
 // Shared workflow policy; persistence adds scoped queries, atomic versions and audit.
-import { Role } from "@prisma/client";
+import { InvestigationOutcome, Role } from "@prisma/client";
 import {
   BadRequestException,
   ConflictException,
@@ -21,8 +21,9 @@ export type Issue = {
   status: IssueStatus;
   version: number;
   reportedAt: string;
-  kind?: "BREAKDOWN" | "PLANNED";
+  kind?: "BREAKDOWN" | "PLANNED" | "INVESTIGATION";
   performedAt?: string | null;
+  investigationOutcome?: InvestigationOutcome | null;
   technicianId: string | null;
   findings: string | null;
   rootCause: string | null;
@@ -102,7 +103,9 @@ export function transition(
         next.restoredAt =
           null;
       next.status = "ASSIGNED";
-      if (issue.kind === "PLANNED") next.performedAt = null;
+      if (issue.kind === "PLANNED" || issue.kind === "INVESTIGATION")
+        next.performedAt = null;
+      next.investigationOutcome = null;
       break;
     case "start":
     case "submit":
@@ -118,10 +121,28 @@ export function transition(
       }
       state("IN_PROGRESS");
       next.findings = text("findings");
-      if (issue.kind === "PLANNED") {
+      if (issue.kind === "INVESTIGATION") {
+        const outcome = z
+          .nativeEnum(InvestigationOutcome)
+          .safeParse(input.investigationOutcome);
+        if (!outcome.success)
+          throw new BadRequestException("Select an investigation outcome.");
+        next.investigationOutcome = outcome.data;
+        if (
+          ["MAINTENANCE_REQUIRED", "SENSOR_CHECK_REQUIRED"].includes(
+            outcome.data,
+          )
+        )
+          text("preventiveAction");
+      } else if (input.investigationOutcome !== undefined) {
+        throw new BadRequestException(
+          "Investigation outcomes belong only to investigations.",
+        );
+      }
+      if (issue.kind === "PLANNED" || issue.kind === "INVESTIGATION") {
         if (input.rootCause !== undefined || input.restoredAt !== undefined)
           throw new BadRequestException(
-            "Planned maintenance does not record a breakdown cause or restoration time.",
+            "Planned maintenance and investigations do not record a breakdown cause or restoration time.",
           );
         next.rootCause = next.restoredAt = null;
         next.correctiveAction = text("correctiveAction");
@@ -137,7 +158,7 @@ export function transition(
           Date.parse(input.performedAt) > now.getTime()
         )
           throw new BadRequestException(
-            "Maintenance performed time must be between work-order creation and now.",
+            "Completion time must be between work-order creation and now.",
           );
         next.performedAt = new Date(input.performedAt).toISOString();
         next.status = "AWAITING_REVIEW";

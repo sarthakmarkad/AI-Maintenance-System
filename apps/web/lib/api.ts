@@ -69,3 +69,9 @@ export type MaintenancePlans = components["schemas"]["PlansDto"];
 export type MaintenanceOccurrence =
   components["schemas"]["CalendarOccurrenceDto"];
 export type MaintenanceReminders = components["schemas"]["RemindersDto"];
+export type AnomalyList = components["schemas"]["AnomalyListDto"];
+export type AnomalyFlag = components["schemas"]["AnomalyFlagDto"];
+export type AnomalyEvidence = components["schemas"]["AnomalyEvidenceDto"];
+export type AnomalyMarker = components["schemas"]["AnomalyMarkerDto"];
+export type AnomalyReceipt = components["schemas"]["AnomalyReceiptDto"];
+export type AnomalyHistory = components["schemas"]["AnomalyHistoryDto"];

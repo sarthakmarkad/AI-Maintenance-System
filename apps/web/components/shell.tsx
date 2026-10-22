@@ -207,7 +207,7 @@ export function Shell({
           <span>
             Supreme Industries · Machine maintenance & performance intelligence
           </span>
-          <span>Local pilot / v0.5</span>
+          <span>Local pilot / v0.6</span>
         </footer>
       </div>
     </div>

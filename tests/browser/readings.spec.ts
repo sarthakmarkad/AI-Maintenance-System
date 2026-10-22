@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { setup, signIn } from "./helpers";
+import { emptyPatterns } from "./anomalies-fixtures";
 import { readingFixture } from "../../apps/api/src/tests/readings-fixtures";
 import {
   parseReadings,
@@ -84,6 +85,10 @@ async function mocks(
         status: 401,
         json: { message: "Session expired." },
       });
+      return;
+    }
+    if (path.includes("/anomalies")) {
+      await route.fulfill({ json: emptyPatterns() });
       return;
     }
     if (path.endsWith("/trends")) {

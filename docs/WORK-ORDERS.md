@@ -58,8 +58,29 @@ Lists use newest report time and UUID as a stable keyset, with counts across all
 
 The migration and restricted runtime grants are applied to local operational and isolated test databases. Actual Administrator reads were verified in Codex's built-in browser using hosted Auth and the real API. No fake incidents or role changes were added to operational data. Full workflow authorization, concurrency, rollback, long-history paging and SQL protections are verified against the separate test database; desktop/mobile action forms use intercepted test fixtures. The same existing hosted identity now has six explicitly granted pilot views at the user’s request; this does not establish independent-person approval separation. Separate staff identities still need live acceptance.
 
-Notifications, attachments, original workbook storage, scheduled maintenance, calendars, exports, KPI definitions and AI diagnosis/RCA drafting remain future work. Supabase-hosted operational database migration and deployment are still pending. Nothing is published.
+Attachments, original workbook storage, exports, KPI definitions and AI diagnosis/RCA drafting remain future work. Planned maintenance and in-app reminders are implemented as described in CALENDAR.md. Supabase-hosted operational database migration and deployment are still pending. Nothing is published.
 
 ## Planned work extension (M5)
 
 BREAKDOWN behavior remains as above. Explicit maintenance-head release from a calendar occurrence creates an assigned PLANNED order with SCHEDULE history and immutable occurrence linkage. Planned submission requires findings, work performed (correctiveAction in the REST contract) and an explicit performedAt; follow-up recommendations are optional. It rejects breakdown root-cause/restoration fields. The same head review/return and approved closure permissions apply; the calendar marks completion only on CLOSED. Due, performed, submitted, reviewed and closed instants remain separate. See CALENDAR.md.
+
+## Investigation work orders (statistical flags)
+
+1. The active Maintenance head reviews a synthetic statistical flag as **Needs investigation**, with a reason. Saving retains immutable evidence and does not release work in the UI.
+2. The head explicitly selects **Open investigation** on the reviewed flag or in **Saved review history**, chooses an eligible machine-granted technician and confirms assignment. Earlier reviews without an order are supported. Dismissed reviews cannot open work.
+3. The assigned technician opens the linked order, selects the **Technician** role view, starts the investigation, and submits inspection findings, checks/work performed, investigation outcome and actual completion time in IST.
+4. The head reviews findings and outcome, approves or returns with a reason. Returned work can be resubmitted or reasonedly reassigned. The supervisor or head closes approved work.
+
+All scoped roles see the investigation link and current status on reviewed flags/history. Work-order detail retains the source review, reviewer/time and exact synthetic baseline/sample evidence. The original review stays immutable. The pilot display name “Pilot administrator” identifies the same user across roles; it does not confer engineering authority in Administrator view. Only that user's trusted Technician view can act on its assignment.
+
+Outcomes: **Maintenance required**, **Sensor check required**, **Operating change explained**, **No fault found**, **Inconclusive**. The first two require explicit follow-up recommendations/next steps. Work performed may describe inspection only; no repair or fault must be invented. Investigations reject root-cause and service-restoration fields. Completion, submission, approval and closure remain independent times. Closing an investigation does not complete any recommended maintenance/sensor follow-up or create it automatically. There is no validated downtime/production-loss attribution from synthetic evidence.
+
+Release creates an assigned INVESTIGATION order, scoped review linkage, immutable INVESTIGATE event and audit atomically. Concurrent exact retries create one order; changed opening-assignment requests conflict. Retry comparisons use the original immutable opening fingerprint and remain valid after reassignment. Reassignment uses the existing versioned action; it clears current completion/outcome fields while preserving every earlier submission in history. Runtime/SQL checks enforce investigation-only outcomes and mandatory follow-up; new investigation submissions require an outcome. Legacy submissions keep an unrecorded outcome instead of fabricated backfill.
+
+REST additions:
+
+- `POST /api/machines/WH-C/readings/anomalies/reviews/:id/investigation` with `{technicianId}`: head-only explicit release from a saved review; no browser-authored evidence or role fields.
+- The earlier `POST .../reviews` form with an explicit technician remains supported for compatible combined review/open requests. With a technician, review + order + events/audits commit together; without one, only review + audit persist.
+- `submit` on INVESTIGATION requires `findings`, `correctiveAction` (checks/work performed), `performedAt`, `investigationOutcome`, and `preventiveAction` (next steps) when maintenance/sensor work remains. `preventiveAction` is otherwise optional.
+
+Browser acceptance reads existing user-created records only. Workflow writes and failure injection are tested in the isolated `_test` database; hosted separate-person acceptance remains pending. See VERIFICATION.md for current evidence.

@@ -13,6 +13,9 @@ import { WorkOrdersService } from "./work-orders/service";
 import { CalendarController } from "./calendar/controller";
 import { CalendarService } from "./calendar/service";
 import { CalendarWorker } from "./calendar/worker";
+import { AnomaliesController } from "./anomalies/controller";
+import { AnomaliesService } from "./anomalies/service";
+import { StatisticalEngine } from "./anomalies/engine";
 import { CONFIG, parseConfig, type Config } from "./config";
 import { Database } from "./database";
 import { REPOSITORY, PrismaRepository } from "./repository";
@@ -33,6 +36,7 @@ export function appModule(config: Config) {
       ReadingsController,
       WorkOrdersController,
       CalendarController,
+      AnomaliesController,
     ],
     providers: [
       { provide: CONFIG, useValue: config },
@@ -46,6 +50,8 @@ export function appModule(config: Config) {
       WorkOrdersService,
       CalendarService,
       CalendarWorker,
+      AnomaliesService,
+      StatisticalEngine,
     ],
   })
   class AppModule {}
@@ -77,9 +83,9 @@ export function configure(
     new DocumentBuilder()
       .setTitle("Supreme Maintenance API")
       .setDescription(
-        "Milestones 1–5. Scoped registry, imports/trends, maintenance work orders and fixed-date planned maintenance with in-app reminders.",
+        "Milestones 1–6. Scoped registry, imports/trends, maintenance work orders, planned maintenance and reviewed statistical patterns.",
       )
-      .setVersion("0.5.0")
+      .setVersion("0.6.0")
       .addBearerAuth()
       .build(),
   );

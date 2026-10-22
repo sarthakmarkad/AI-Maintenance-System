@@ -2855,12 +2855,493 @@
           "Planned maintenance"
         ]
       }
+    },
+    "/api/machines/{code}/readings/anomalies": {
+      "get": {
+        "operationId": "AnomaliesController_list",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "after",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "PENDING",
+                "REVIEWED"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "kind",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "SUDDEN_CHANGE",
+                "SUSTAINED_SHIFT",
+                "DRIFT"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "parameter",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "hotTempC",
+                "coldTempC",
+                "pressureBar"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnomalyListDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Statistical pattern review"
+        ]
+      }
+    },
+    "/api/machines/{code}/readings/anomalies/reviews": {
+      "post": {
+        "operationId": "AnomaliesController_review",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnomalyReviewInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnomalyReceiptDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Statistical pattern review"
+        ]
+      },
+      "get": {
+        "operationId": "AnomaliesController_history",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "after",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnomalyHistoryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Statistical pattern review"
+        ]
+      }
+    },
+    "/api/machines/{code}/readings/anomalies/reviews/{id}/investigation": {
+      "post": {
+        "operationId": "AnomaliesController_openInvestigation",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenInvestigationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnomalyReceiptDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Statistical pattern review"
+        ]
+      }
     }
   },
   "info": {
     "title": "Supreme Maintenance API",
     "description": "",
-    "version": "0.5.0",
+    "version": "0.6.0",
     "contact": {}
   },
   "tags": [],
@@ -4143,6 +4624,168 @@
           "displayName"
         ]
       },
+      "AnomalySampleDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "sourceId": {
+            "type": "string"
+          },
+          "sourceRow": {
+            "type": "number"
+          },
+          "importId": {
+            "type": "string"
+          },
+          "measuredAt": {
+            "type": "string"
+          },
+          "receivedAt": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "sourceId",
+          "sourceRow",
+          "importId",
+          "measuredAt",
+          "receivedAt",
+          "value"
+        ]
+      },
+      "AnomalyEvidenceDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "policyVersion": {
+            "type": "string"
+          },
+          "parameter": {
+            "type": "string",
+            "enum": [
+              "hotTempC",
+              "coldTempC",
+              "pressureBar"
+            ]
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "SUDDEN_CHANGE",
+              "SUSTAINED_SHIFT",
+              "DRIFT"
+            ]
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "UP",
+              "DOWN"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "measuredAt": {
+            "type": "string"
+          },
+          "availableAt": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          },
+          "baselineMedian": {
+            "type": "number"
+          },
+          "baselineMad": {
+            "type": "number"
+          },
+          "scale": {
+            "type": "number"
+          },
+          "threshold": {
+            "type": "number"
+          },
+          "change": {
+            "type": "number"
+          },
+          "slope": {
+            "type": "number",
+            "nullable": true
+          },
+          "baseline": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnomalySampleDto"
+            }
+          },
+          "samples": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnomalySampleDto"
+            }
+          }
+        },
+        "required": [
+          "key",
+          "policyVersion",
+          "parameter",
+          "kind",
+          "direction",
+          "name",
+          "unit",
+          "measuredAt",
+          "availableAt",
+          "value",
+          "baselineMedian",
+          "baselineMad",
+          "scale",
+          "threshold",
+          "change",
+          "slope",
+          "baseline",
+          "samples"
+        ]
+      },
+      "WorkOrderInvestigationDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "reviewer": {
+            "$ref": "#/components/schemas/WorkOrderPersonDto"
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/AnomalyEvidenceDto"
+          }
+        },
+        "required": [
+          "id",
+          "reason",
+          "createdAt",
+          "reviewer",
+          "evidence"
+        ]
+      },
       "WorkOrderEventDto": {
         "type": "object",
         "properties": {
@@ -4157,6 +4800,7 @@
             "enum": [
               "REPORT",
               "SCHEDULE",
+              "INVESTIGATE",
               "ASSIGN",
               "START",
               "SUBMIT",
@@ -4226,11 +4870,17 @@
       "WorkOrderReportedDto": {
         "type": "object",
         "properties": {
+          "anomalyReviewId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
           "kind": {
             "type": "string",
             "enum": [
               "BREAKDOWN",
-              "PLANNED"
+              "PLANNED",
+              "INVESTIGATION"
             ]
           },
           "maintenanceOccurrence": {
@@ -4323,6 +4973,26 @@
                 "close"
               ]
             }
+          },
+          "investigationOutcome": {
+            "type": "string",
+            "enum": [
+              "MAINTENANCE_REQUIRED",
+              "SENSOR_CHECK_REQUIRED",
+              "OPERATING_CHANGE_EXPLAINED",
+              "NO_FAULT_FOUND",
+              "INCONCLUSIVE"
+            ],
+            "nullable": true
+          },
+          "investigationReview": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/WorkOrderInvestigationDto"
+              }
+            ]
           },
           "performedAt": {
             "type": "string",
@@ -4399,6 +5069,7 @@
           }
         },
         "required": [
+          "anomalyReviewId",
           "kind",
           "maintenanceOccurrence",
           "id",
@@ -4414,6 +5085,8 @@
           "restoredAt",
           "closedAt",
           "allowedActions",
+          "investigationOutcome",
+          "investigationReview",
           "performedAt",
           "description",
           "startedAt",
@@ -4435,11 +5108,17 @@
       "WorkOrderSummaryDto": {
         "type": "object",
         "properties": {
+          "anomalyReviewId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
           "kind": {
             "type": "string",
             "enum": [
               "BREAKDOWN",
-              "PLANNED"
+              "PLANNED",
+              "INVESTIGATION"
             ]
           },
           "maintenanceOccurrence": {
@@ -4535,6 +5214,7 @@
           }
         },
         "required": [
+          "anomalyReviewId",
           "kind",
           "maintenanceOccurrence",
           "id",
@@ -4599,11 +5279,17 @@
       "WorkOrderDto": {
         "type": "object",
         "properties": {
+          "anomalyReviewId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
           "kind": {
             "type": "string",
             "enum": [
               "BREAKDOWN",
-              "PLANNED"
+              "PLANNED",
+              "INVESTIGATION"
             ]
           },
           "maintenanceOccurrence": {
@@ -4696,6 +5382,26 @@
                 "close"
               ]
             }
+          },
+          "investigationOutcome": {
+            "type": "string",
+            "enum": [
+              "MAINTENANCE_REQUIRED",
+              "SENSOR_CHECK_REQUIRED",
+              "OPERATING_CHANGE_EXPLAINED",
+              "NO_FAULT_FOUND",
+              "INCONCLUSIVE"
+            ],
+            "nullable": true
+          },
+          "investigationReview": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/WorkOrderInvestigationDto"
+              }
+            ]
           },
           "performedAt": {
             "type": "string",
@@ -4769,6 +5475,7 @@
           }
         },
         "required": [
+          "anomalyReviewId",
           "kind",
           "maintenanceOccurrence",
           "id",
@@ -4784,6 +5491,8 @@
           "restoredAt",
           "closedAt",
           "allowedActions",
+          "investigationOutcome",
+          "investigationReview",
           "performedAt",
           "description",
           "startedAt",
@@ -4823,6 +5532,17 @@
       "WorkOrderActionDto": {
         "type": "object",
         "properties": {
+          "investigationOutcome": {
+            "type": "string",
+            "enum": [
+              "MAINTENANCE_REQUIRED",
+              "SENSOR_CHECK_REQUIRED",
+              "OPERATING_CHANGE_EXPLAINED",
+              "NO_FAULT_FOUND",
+              "INCONCLUSIVE"
+            ],
+            "description": "INVESTIGATION submit only; required. Maintenance/sensor follow-up outcomes also require preventiveAction with next steps."
+          },
           "version": {
             "type": "number",
             "minimum": 1
@@ -4842,25 +5562,25 @@
           },
           "rootCause": {
             "type": "string",
-            "description": "Required on BREAKDOWN submit only; human RCA, 3–4,000 characters. Rejected for planned maintenance."
+            "description": "Required on BREAKDOWN submit only; human RCA, 3–4,000 characters. Rejected for planned maintenance and investigations."
           },
           "correctiveAction": {
             "type": "string",
-            "description": "Required on submit; corrective action for breakdowns, work performed for planned maintenance; 3–4,000 characters."
+            "description": "Required on submit; corrective action for breakdowns, checks/work performed for planned maintenance and investigations; 3–4,000 characters."
           },
           "preventiveAction": {
             "type": "string",
-            "description": "Required on BREAKDOWN submit; optional planned maintenance follow-up; 3–4,000 characters when provided."
+            "description": "Required on BREAKDOWN submit; optional planned/investigation follow-up (mandatory for maintenance/sensor investigation outcomes); 3–4,000 characters when provided."
           },
           "restoredAt": {
             "type": "string",
             "format": "date-time",
-            "description": "BREAKDOWN submit only; explicit offset timestamp between report and submission. Rejected for planned maintenance."
+            "description": "BREAKDOWN submit only; explicit offset timestamp between report and submission. Rejected for planned maintenance and investigations."
           },
           "performedAt": {
             "type": "string",
             "format": "date-time",
-            "description": "Planned submission only; explicit maintenance performed time. Planned work requires findings/work performed, permits optional follow-up and rejects breakdown RCA/restoration fields."
+            "description": "PLANNED/INVESTIGATION submission only; explicit completion time between creation and submission. Findings/work performed are required; breakdown RCA/restoration fields are rejected."
           },
           "note": {
             "type": "string",
@@ -5379,6 +6099,458 @@
         },
         "required": [
           "read"
+        ]
+      },
+      "AnomalyEligibilityDto": {
+        "type": "object",
+        "properties": {
+          "SUDDEN_CHANGE": {
+            "type": "number"
+          },
+          "SUSTAINED_SHIFT": {
+            "type": "number"
+          },
+          "DRIFT": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "SUDDEN_CHANGE",
+          "SUSTAINED_SHIFT",
+          "DRIFT"
+        ]
+      },
+      "AnomalyMarkerDto": {
+        "type": "object",
+        "properties": {
+          "parameter": {
+            "type": "string",
+            "enum": [
+              "hotTempC",
+              "coldTempC",
+              "pressureBar"
+            ]
+          },
+          "measuredAt": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "parameter",
+          "measuredAt",
+          "value"
+        ]
+      },
+      "AnomalyReceiptDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "INVESTIGATE",
+              "DISMISSED"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "reviewedBy": {
+            "type": "string"
+          },
+          "reviewerName": {
+            "type": "string"
+          },
+          "actorRole": {
+            "type": "string",
+            "enum": [
+              "MAINTENANCE_HEAD"
+            ]
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "workOrderId": {
+            "type": "string",
+            "nullable": true
+          },
+          "workOrderStatus": {
+            "type": "string",
+            "enum": [
+              "REPORTED",
+              "ASSIGNED",
+              "IN_PROGRESS",
+              "AWAITING_REVIEW",
+              "APPROVED",
+              "CLOSED"
+            ],
+            "nullable": true
+          },
+          "technicianId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "decision",
+          "reason",
+          "reviewedBy",
+          "reviewerName",
+          "actorRole",
+          "createdAt",
+          "workOrderId",
+          "workOrderStatus",
+          "technicianId"
+        ]
+      },
+      "AnomalyFlagDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "policyVersion": {
+            "type": "string"
+          },
+          "parameter": {
+            "type": "string",
+            "enum": [
+              "hotTempC",
+              "coldTempC",
+              "pressureBar"
+            ]
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "SUDDEN_CHANGE",
+              "SUSTAINED_SHIFT",
+              "DRIFT"
+            ]
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "UP",
+              "DOWN"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "measuredAt": {
+            "type": "string"
+          },
+          "availableAt": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          },
+          "baselineMedian": {
+            "type": "number"
+          },
+          "baselineMad": {
+            "type": "number"
+          },
+          "scale": {
+            "type": "number"
+          },
+          "threshold": {
+            "type": "number"
+          },
+          "change": {
+            "type": "number"
+          },
+          "slope": {
+            "type": "number",
+            "nullable": true
+          },
+          "baseline": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnomalySampleDto"
+            }
+          },
+          "samples": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnomalySampleDto"
+            }
+          },
+          "review": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AnomalyReceiptDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "key",
+          "policyVersion",
+          "parameter",
+          "kind",
+          "direction",
+          "name",
+          "unit",
+          "measuredAt",
+          "availableAt",
+          "value",
+          "baselineMedian",
+          "baselineMad",
+          "scale",
+          "threshold",
+          "change",
+          "slope",
+          "baseline",
+          "samples",
+          "review"
+        ]
+      },
+      "AnomalyListDto": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "SYNTHETIC"
+            ]
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "policyVersion": {
+            "type": "string"
+          },
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "evaluatedAt": {
+            "type": "string"
+          },
+          "canReview": {
+            "type": "boolean"
+          },
+          "observations": {
+            "type": "number"
+          },
+          "eligible": {
+            "$ref": "#/components/schemas/AnomalyEligibilityDto"
+          },
+          "insufficientHistory": {
+            "type": "number"
+          },
+          "total": {
+            "type": "number"
+          },
+          "pending": {
+            "type": "number"
+          },
+          "reviewed": {
+            "type": "number"
+          },
+          "matching": {
+            "type": "number"
+          },
+          "markers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnomalyMarkerDto"
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnomalyFlagDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "source",
+          "timezone",
+          "policyVersion",
+          "from",
+          "to",
+          "evaluatedAt",
+          "canReview",
+          "observations",
+          "eligible",
+          "insufficientHistory",
+          "total",
+          "pending",
+          "reviewed",
+          "matching",
+          "markers",
+          "items",
+          "nextCursor"
+        ]
+      },
+      "AnomalyReviewInputDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "measuredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "INVESTIGATE",
+              "DISMISSED"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 2000
+          },
+          "technicianId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Optional explicit combined review/open action for INVESTIGATE; otherwise open from the saved review. Rejected for dismissals."
+          }
+        },
+        "required": [
+          "key",
+          "measuredAt",
+          "decision",
+          "reason"
+        ]
+      },
+      "OpenInvestigationDto": {
+        "type": "object",
+        "properties": {
+          "technicianId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Active technician with machine access. Exact retries return the existing order; reassignment uses the versioned order action."
+          }
+        },
+        "required": [
+          "technicianId"
+        ]
+      },
+      "AnomalyHistoryItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "INVESTIGATE",
+              "DISMISSED"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "reviewedBy": {
+            "type": "string"
+          },
+          "reviewerName": {
+            "type": "string"
+          },
+          "actorRole": {
+            "type": "string",
+            "enum": [
+              "MAINTENANCE_HEAD"
+            ]
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "workOrderId": {
+            "type": "string",
+            "nullable": true
+          },
+          "workOrderStatus": {
+            "type": "string",
+            "enum": [
+              "REPORTED",
+              "ASSIGNED",
+              "IN_PROGRESS",
+              "AWAITING_REVIEW",
+              "APPROVED",
+              "CLOSED"
+            ],
+            "nullable": true
+          },
+          "technicianId": {
+            "type": "string",
+            "nullable": true
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/AnomalyEvidenceDto"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "decision",
+          "reason",
+          "reviewedBy",
+          "reviewerName",
+          "actorRole",
+          "createdAt",
+          "workOrderId",
+          "workOrderStatus",
+          "technicianId",
+          "evidence"
+        ]
+      },
+      "AnomalyHistoryDto": {
+        "type": "object",
+        "properties": {
+          "canOpenInvestigation": {
+            "type": "boolean"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnomalyHistoryItemDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "canOpenInvestigation",
+          "items",
+          "nextCursor"
         ]
       }
     }

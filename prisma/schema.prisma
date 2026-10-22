@@ -81,6 +81,7 @@ model Membership {
   scheduledOccurrences MaintenanceOccurrence[] @relation("OccurrenceTechnician")
   skippedOccurrences MaintenanceOccurrence[] @relation("OccurrenceSkipper")
   reminderReceipts MaintenanceReminderReceipt[]
+  anomalyReviews AnomalyReview[]
   @@unique([orgId,userId])
   @@unique([orgId, id])
   @@index([orgId, role, active])
@@ -122,6 +123,7 @@ model Machine {
   workOrders WorkOrder[]
   maintenancePlans MaintenancePlan[]
   maintenanceOccurrences MaintenanceOccurrence[]
+  anomalyReviews AnomalyReview[]
   @@unique([orgId, id])
   @@unique([orgId, code])
   @@index([orgId, departmentId])
@@ -327,7 +329,9 @@ model WorkOrder {
   title String @db.VarChar(160)
   kind WorkOrderKind @default(BREAKDOWN)
   occurrenceId String? @unique @db.Uuid
+  anomalyReviewId String? @unique @db.Uuid
   performedAt DateTime? @db.Timestamptz(3)
+  investigationOutcome InvestigationOutcome?
   description String @db.Text
   priority WorkOrderPriority @default(NORMAL)
   impact ReportedImpact
@@ -357,7 +361,9 @@ model WorkOrder {
   closer Membership? @relation("OrderCloser",fields:[orgId,closedBy],references:[orgId,userId],onDelete:Restrict)
   events WorkOrderEvent[]
   occurrence MaintenanceOccurrence? @relation(fields:[orgId,machineId,occurrenceId],references:[orgId,machineId,id],onDelete:Restrict)
+  anomalyReview AnomalyReview? @relation(fields:[orgId,machineId,anomalyReviewId],references:[orgId,machineId,id],onDelete:Restrict)
   @@unique([orgId,machineId,occurrenceId])
+  @@unique([orgId,machineId,anomalyReviewId])
   @@unique([orgId,machineId,id])
   @@unique([orgId,reportedBy,requestId])
   @@index([orgId,machineId,reportedAt,id])
@@ -368,6 +374,16 @@ model WorkOrder {
 enum WorkOrderKind {
   BREAKDOWN
   PLANNED
+  INVESTIGATION
+  @@schema("maintenance")
+}
+
+enum InvestigationOutcome {
+  MAINTENANCE_REQUIRED
+  SENSOR_CHECK_REQUIRED
+  OPERATING_CHANGE_EXPLAINED
+  NO_FAULT_FOUND
+  INCONCLUSIVE
   @@schema("maintenance")
 }
 enum MaintenanceFrequency {
@@ -489,5 +505,32 @@ model WorkOrderEvent {
   actor Membership @relation(fields:[orgId,actorId],references:[orgId,userId],onDelete:Restrict)
   @@unique([orderId,version])
   @@index([orgId,machineId,orderId,version])
+  @@schema("maintenance")
+}
+
+enum AnomalyDecision {
+  INVESTIGATE
+  DISMISSED
+  @@schema("maintenance")
+}
+model AnomalyReview {
+  id String @id @default(uuid()) @db.Uuid
+  orgId String @db.Uuid
+  machineId String @db.Uuid
+  key String @db.VarChar(64)
+  policyVersion String @db.VarChar(64)
+  measuredAt DateTime @db.Timestamptz(3)
+  decision AnomalyDecision
+  reason String @db.VarChar(2000)
+  reviewedBy String @db.Uuid
+  actorRole Role
+  evidence Json
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  machine Machine @relation(fields:[orgId,machineId],references:[orgId,id],onDelete:Restrict)
+  reviewer Membership @relation(fields:[orgId,reviewedBy],references:[orgId,userId],onDelete:Restrict)
+  workOrder WorkOrder?
+  @@unique([orgId,machineId,key])
+  @@unique([orgId,machineId,id])
+  @@index([orgId,machineId,createdAt,id])
   @@schema("maintenance")
 }

@@ -28,8 +28,10 @@ import {
   type ReadingPreview,
   type ReadingTrends,
   type ReadingCommit,
+  type AnomalyMarker,
 } from "@/lib/api";
 import { Button } from "./ui/button";
+import { AnomaliesWorkspace } from "./anomalies-workspace";
 import { useAuth } from "./auth-provider";
 const number = (v: number | null) =>
   v === null ? "—" : v.toLocaleString("en-IN", { maximumFractionDigits: 3 });
@@ -58,6 +60,7 @@ export function ReadingsWorkspace({
   user: Me;
   token: string;
 }) {
+  const [markers, setMarkers] = useState<AnomalyMarker[]>([]);
   const router = useRouter(),
     { expire } = useAuth();
   const base = `/machines/${encodeURIComponent(machine.code)}/readings`;
@@ -530,7 +533,16 @@ export function ReadingsWorkspace({
                     >
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart
-                          data={data.points}
+                          data={data.points.map((point) => ({
+                            ...point,
+                            statisticalFlag: markers.some(
+                              (m) =>
+                                m.parameter === p.key &&
+                                m.measuredAt === point.measuredAt,
+                            )
+                              ? point[p.key as ParamKey]
+                              : null,
+                          }))}
                           margin={{ top: 12, right: 24, left: 4, bottom: 5 }}
                         >
                           <CartesianGrid
@@ -554,9 +566,11 @@ export function ReadingsWorkspace({
                           />
                           <Tooltip
                             labelFormatter={(v) => time(String(v))}
-                            formatter={(v) => [
+                            formatter={(v, name) => [
                               `${number(Number(v))} ${p.unit}`,
-                              p.name,
+                              name === "Statistical flag"
+                                ? "Statistical flag"
+                                : p.name,
                             ]}
                           />
                           <ReferenceArea
@@ -586,15 +600,38 @@ export function ReadingsWorkspace({
                             connectNulls={false}
                             isAnimationActive={false}
                           />
+                          <Line
+                            dataKey="statisticalFlag"
+                            name="Statistical flag"
+                            stroke="none"
+                            dot={{
+                              r: 4,
+                              fill: "#b45b38",
+                              stroke: "#ffffff",
+                              strokeWidth: 1,
+                            }}
+                            activeDot={{ r: 6 }}
+                            connectNulls={false}
+                            isAnimationActive={false}
+                          />
                         </LineChart>
                       </ResponsiveContainer>
                     </div>
                     <p className="chart-footnote">
                       Shaded band: invented review rule. This is not an approved
-                      operating band or safety limit.
+                      operating band or safety limit. Colored dots mark
+                      statistical flags for the selected pattern filters.
                     </p>
                   </section>
                 ))}
+                <AnomaliesWorkspace
+                  key={`${data.from}:${data.to}:${data.lastReceivedAt}`}
+                  code={machine.code}
+                  token={token}
+                  from={data.from}
+                  to={data.to}
+                  onMarkers={setMarkers}
+                />
 
                 <section className="panel">
                   <div className="panel-heading">

@@ -9,6 +9,7 @@ import {
 } from "../../apps/api/src/domain/workflow";
 import type { Principal } from "../../apps/api/src/repository";
 import { setup, signIn, userId } from "./helpers";
+import { flag } from "./anomalies-fixtures";
 const id = "c25dfdba-fb43-47d5-8055-34d10a22834a",
   otherTech = "b85ea48d-309b-4f2b-89b7-910c357acb03";
 const base = "/machines/WH-C/work-orders";
@@ -181,13 +182,16 @@ async function mocks(
     reportRetry?: boolean;
     conflict?: boolean;
     expired?: boolean;
+    kind?: "BREAKDOWN" | "INVESTIGATION";
   } = {},
 ) {
   const role = options.role ?? Role.MAINTENANCE_HEAD;
   await setup(page, role);
   let o: Model | null = options.empty
     ? null
-    : fixture(options.status ?? "REPORTED");
+    : options.kind === "INVESTIGATION"
+      ? investigationFixture(options.status ?? "REPORTED")
+      : fixture(options.status ?? "REPORTED");
   const reportBodies: any[] = [],
     actions: string[] = [];
   let failed = false;
@@ -571,4 +575,148 @@ test("work-order expiry returns to sign-in and status filters expose empty resul
   await other.goto(base);
   await expect(other).toHaveURL(/\/login\?reason=expired$/);
   await other.close();
+});
+
+function investigationFixture(status: Issue["status"]) {
+  const o = fixture(status);
+  return {
+    ...o,
+    kind: "INVESTIGATION",
+    investigationOutcome: null,
+    investigationReview: {
+      id: "bbaf1720-4936-4e35-8d96-14f6805be423",
+      reason: "TEST inspect the sensor wiring and operating context.",
+      reviewer: { userId, displayName: "TEST maintenance head" },
+      createdAt: "2026-09-01T02:30:00.000Z",
+      evidence: flag,
+    },
+    title: "Investigate Hot temperature sudden change",
+    description: "TEST inspect the sensor wiring and operating context.",
+    impact: "OBSERVATION",
+    maintenanceOccurrence: null,
+    observedAt: "2026-09-01T02:00:00.000Z",
+  } as Model;
+}
+test("technician completes an investigation without breakdown RCA or restoration", async ({
+  page,
+}) => {
+  const state = await mocks(page, {
+    role: Role.TECHNICIAN,
+    status: "ASSIGNED",
+    kind: "INVESTIGATION",
+  });
+  await open(page);
+  await expect(
+    page.getByText("Statistical investigation", { exact: true }),
+  ).toBeVisible();
+  const source = page.getByRole("region", {
+    name: "Investigation source evidence",
+    exact: true,
+  });
+  await source.getByText("View supporting readings", { exact: true }).click();
+  await expect(
+    source.getByRole("cell", { name: "Evaluated sample", exact: true }),
+  ).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await source.screenshot({
+    path: `test-results/work-order-source-${test.info().project.name}.png`,
+  });
+  await source.getByText("View supporting readings", { exact: true }).click();
+  await page.screenshot({
+    path: `test-results/work-order-typography-${test.info().project.name}.png`,
+    fullPage: true,
+  });
+  await page
+    .getByRole("button", { name: "Start investigation", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Confirm start", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Submit investigation", exact: true })
+    .click();
+  await expect(
+    page.getByLabel("Human root-cause analysis", { exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByLabel("Service restored (IST)", { exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByLabel("Investigation completed (IST)", { exact: true }),
+  ).toBeVisible();
+  await page
+    .getByLabel("Investigation outcome", { exact: true })
+    .selectOption("NO_FAULT_FOUND");
+  await page
+    .getByLabel("Inspection findings", { exact: true })
+    .fill("TEST connector was loose; reading consistent after reseat.");
+  await page
+    .getByLabel("Work performed", { exact: true })
+    .fill("TEST reseated connector and verified the reading.");
+  await page
+    .getByLabel("Investigation completed (IST)", { exact: true })
+    .fill("2026-09-01T09:00:01");
+  await page
+    .getByRole("button", { name: "Submit for review", exact: true })
+    .click();
+  await expect(
+    page.locator(".work-status").filter({ hasText: "Awaiting review" }),
+  ).toBeVisible();
+  const order = state.order();
+  expect(order.kind).toBe("INVESTIGATION");
+  expect(order.investigationOutcome).toBe("NO_FAULT_FOUND");
+  expect(order.performedAt).toBe("2026-09-01T03:30:01.000Z");
+  expect(order.restoredAt).toBeNull();
+  expect(order.rootCause).toBeNull();
+  expect(state.actions).toEqual(["start", "submit"]);
+});
+
+test("investigation requiring sensor work cannot submit until explicit follow-up is recorded", async ({
+  page,
+}) => {
+  const state = await mocks(page, {
+    role: Role.TECHNICIAN,
+    status: "IN_PROGRESS",
+    kind: "INVESTIGATION",
+  });
+  await open(page);
+  await page
+    .getByRole("button", { name: "Submit investigation", exact: true })
+    .click();
+  await page
+    .getByLabel("Investigation outcome", { exact: true })
+    .selectOption("SENSOR_CHECK_REQUIRED");
+  await page
+    .getByLabel("Inspection findings", { exact: true })
+    .fill("TEST evidence is insufficient to rule out sensor error");
+  await page
+    .getByLabel("Work performed", { exact: true })
+    .fill("TEST inspected wiring without repair");
+  await page
+    .getByLabel("Investigation completed (IST)", { exact: true })
+    .fill("2026-09-01T09:00:01");
+  await page
+    .getByRole("button", { name: "Submit for review", exact: true })
+    .click();
+  expect(state.actions).toEqual([]);
+  await page
+    .getByLabel("Follow-up recommendations (required next steps)", {
+      exact: true,
+    })
+    .fill("TEST head to arrange calibration before drawing conclusions");
+  await page
+    .getByRole("button", { name: "Submit for review", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", {
+      name: "Investigation findings & outcome",
+      exact: true,
+    }),
+  ).toBeVisible();
+  expect(state.order().investigationOutcome).toBe("SENSOR_CHECK_REQUIRED");
+  expect(state.actions).toEqual(["submit"]);
 });

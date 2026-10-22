@@ -420,6 +420,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/machines/{code}/readings/anomalies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AnomaliesController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/readings/anomalies/reviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AnomaliesController_history"];
+        put?: never;
+        post: operations["AnomaliesController_review"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/readings/anomalies/reviews/{id}/investigation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AnomaliesController_openInvestigation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -760,11 +808,50 @@ export interface components {
             userId: string;
             displayName: string;
         };
+        AnomalySampleDto: {
+            id: string;
+            sourceId: string;
+            sourceRow: number;
+            importId: string;
+            measuredAt: string;
+            receivedAt: string;
+            value: number;
+        };
+        AnomalyEvidenceDto: {
+            key: string;
+            policyVersion: string;
+            /** @enum {string} */
+            parameter: "hotTempC" | "coldTempC" | "pressureBar";
+            /** @enum {string} */
+            kind: "SUDDEN_CHANGE" | "SUSTAINED_SHIFT" | "DRIFT";
+            /** @enum {string} */
+            direction: "UP" | "DOWN";
+            name: string;
+            unit: string;
+            measuredAt: string;
+            availableAt: string;
+            value: number;
+            baselineMedian: number;
+            baselineMad: number;
+            scale: number;
+            threshold: number;
+            change: number;
+            slope: number | null;
+            baseline: components["schemas"]["AnomalySampleDto"][];
+            samples: components["schemas"]["AnomalySampleDto"][];
+        };
+        WorkOrderInvestigationDto: {
+            id: string;
+            reason: string;
+            createdAt: string;
+            reviewer: components["schemas"]["WorkOrderPersonDto"];
+            evidence: components["schemas"]["AnomalyEvidenceDto"];
+        };
         WorkOrderEventDto: {
             id: string;
             version: number;
             /** @enum {string} */
-            action: "REPORT" | "SCHEDULE" | "ASSIGN" | "START" | "SUBMIT" | "APPROVE" | "RETURN" | "CLOSE";
+            action: "REPORT" | "SCHEDULE" | "INVESTIGATE" | "ASSIGN" | "START" | "SUBMIT" | "APPROVE" | "RETURN" | "CLOSE";
             /** @enum {string|null} */
             fromStatus: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED" | null;
             /** @enum {string} */
@@ -779,8 +866,10 @@ export interface components {
             };
         };
         WorkOrderReportedDto: {
+            /** Format: uuid */
+            anomalyReviewId: string | null;
             /** @enum {string} */
-            kind: "BREAKDOWN" | "PLANNED";
+            kind: "BREAKDOWN" | "PLANNED" | "INVESTIGATION";
             maintenanceOccurrence: components["schemas"]["WorkOrderOccurrenceDto"] | null;
             /** Format: uuid */
             id: string;
@@ -803,6 +892,9 @@ export interface components {
             /** Format: date-time */
             closedAt: string | null;
             allowedActions: ("assign" | "start" | "submit" | "approve" | "return" | "close")[];
+            /** @enum {string|null} */
+            investigationOutcome: "MAINTENANCE_REQUIRED" | "SENSOR_CHECK_REQUIRED" | "OPERATING_CHANGE_EXPLAINED" | "NO_FAULT_FOUND" | "INCONCLUSIVE" | null;
+            investigationReview: components["schemas"]["WorkOrderInvestigationDto"] | null;
             performedAt: string | null;
             description: string;
             startedAt: string | null;
@@ -821,8 +913,10 @@ export interface components {
             alreadyReported: boolean;
         };
         WorkOrderSummaryDto: {
+            /** Format: uuid */
+            anomalyReviewId: string | null;
             /** @enum {string} */
-            kind: "BREAKDOWN" | "PLANNED";
+            kind: "BREAKDOWN" | "PLANNED" | "INVESTIGATION";
             maintenanceOccurrence: components["schemas"]["WorkOrderOccurrenceDto"] | null;
             /** Format: uuid */
             id: string;
@@ -858,8 +952,10 @@ export interface components {
             items: components["schemas"]["WorkOrderPersonDto"][];
         };
         WorkOrderDto: {
+            /** Format: uuid */
+            anomalyReviewId: string | null;
             /** @enum {string} */
-            kind: "BREAKDOWN" | "PLANNED";
+            kind: "BREAKDOWN" | "PLANNED" | "INVESTIGATION";
             maintenanceOccurrence: components["schemas"]["WorkOrderOccurrenceDto"] | null;
             /** Format: uuid */
             id: string;
@@ -882,6 +978,9 @@ export interface components {
             /** Format: date-time */
             closedAt: string | null;
             allowedActions: ("assign" | "start" | "submit" | "approve" | "return" | "close")[];
+            /** @enum {string|null} */
+            investigationOutcome: "MAINTENANCE_REQUIRED" | "SENSOR_CHECK_REQUIRED" | "OPERATING_CHANGE_EXPLAINED" | "NO_FAULT_FOUND" | "INCONCLUSIVE" | null;
+            investigationReview: components["schemas"]["WorkOrderInvestigationDto"] | null;
             performedAt: string | null;
             description: string;
             startedAt: string | null;
@@ -903,6 +1002,11 @@ export interface components {
             nextBeforeVersion: number | null;
         };
         WorkOrderActionDto: {
+            /**
+             * @description INVESTIGATION submit only; required. Maintenance/sensor follow-up outcomes also require preventiveAction with next steps.
+             * @enum {string}
+             */
+            investigationOutcome?: "MAINTENANCE_REQUIRED" | "SENSOR_CHECK_REQUIRED" | "OPERATING_CHANGE_EXPLAINED" | "NO_FAULT_FOUND" | "INCONCLUSIVE";
             version: number;
             /**
              * Format: uuid
@@ -913,20 +1017,20 @@ export interface components {
             reason?: string;
             /** @description Required on submit; 3–4,000 characters. */
             findings?: string;
-            /** @description Required on BREAKDOWN submit only; human RCA, 3–4,000 characters. Rejected for planned maintenance. */
+            /** @description Required on BREAKDOWN submit only; human RCA, 3–4,000 characters. Rejected for planned maintenance and investigations. */
             rootCause?: string;
-            /** @description Required on submit; corrective action for breakdowns, work performed for planned maintenance; 3–4,000 characters. */
+            /** @description Required on submit; corrective action for breakdowns, checks/work performed for planned maintenance and investigations; 3–4,000 characters. */
             correctiveAction?: string;
-            /** @description Required on BREAKDOWN submit; optional planned maintenance follow-up; 3–4,000 characters when provided. */
+            /** @description Required on BREAKDOWN submit; optional planned/investigation follow-up (mandatory for maintenance/sensor investigation outcomes); 3–4,000 characters when provided. */
             preventiveAction?: string;
             /**
              * Format: date-time
-             * @description BREAKDOWN submit only; explicit offset timestamp between report and submission. Rejected for planned maintenance.
+             * @description BREAKDOWN submit only; explicit offset timestamp between report and submission. Rejected for planned maintenance and investigations.
              */
             restoredAt?: string;
             /**
              * Format: date-time
-             * @description Planned submission only; explicit maintenance performed time. Planned work requires findings/work performed, permits optional follow-up and rejects breakdown RCA/restoration fields.
+             * @description PLANNED/INVESTIGATION submission only; explicit completion time between creation and submission. Findings/work performed are required; breakdown RCA/restoration fields are rejected.
              */
             performedAt?: string;
             /** @description approve/close only; optional 3–4,000-character note. Extra fields for each action are rejected. */
@@ -1070,6 +1174,119 @@ export interface components {
         };
         ReminderReadDto: {
             read: boolean;
+        };
+        AnomalyEligibilityDto: {
+            SUDDEN_CHANGE: number;
+            SUSTAINED_SHIFT: number;
+            DRIFT: number;
+        };
+        AnomalyMarkerDto: {
+            /** @enum {string} */
+            parameter: "hotTempC" | "coldTempC" | "pressureBar";
+            measuredAt: string;
+            value: number;
+        };
+        AnomalyReceiptDto: {
+            id: string;
+            key: string;
+            /** @enum {string} */
+            decision: "INVESTIGATE" | "DISMISSED";
+            reason: string;
+            reviewedBy: string;
+            reviewerName: string;
+            /** @enum {string} */
+            actorRole: "MAINTENANCE_HEAD";
+            createdAt: string;
+            workOrderId: string | null;
+            /** @enum {string|null} */
+            workOrderStatus: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED" | null;
+            technicianId: string | null;
+        };
+        AnomalyFlagDto: {
+            key: string;
+            policyVersion: string;
+            /** @enum {string} */
+            parameter: "hotTempC" | "coldTempC" | "pressureBar";
+            /** @enum {string} */
+            kind: "SUDDEN_CHANGE" | "SUSTAINED_SHIFT" | "DRIFT";
+            /** @enum {string} */
+            direction: "UP" | "DOWN";
+            name: string;
+            unit: string;
+            measuredAt: string;
+            availableAt: string;
+            value: number;
+            baselineMedian: number;
+            baselineMad: number;
+            scale: number;
+            threshold: number;
+            change: number;
+            slope: number | null;
+            baseline: components["schemas"]["AnomalySampleDto"][];
+            samples: components["schemas"]["AnomalySampleDto"][];
+            review: components["schemas"]["AnomalyReceiptDto"] | null;
+        };
+        AnomalyListDto: {
+            /** @enum {string} */
+            source: "SYNTHETIC";
+            timezone: string;
+            policyVersion: string;
+            from: string;
+            to: string;
+            evaluatedAt: string;
+            canReview: boolean;
+            observations: number;
+            eligible: components["schemas"]["AnomalyEligibilityDto"];
+            insufficientHistory: number;
+            total: number;
+            pending: number;
+            reviewed: number;
+            matching: number;
+            markers: components["schemas"]["AnomalyMarkerDto"][];
+            items: components["schemas"]["AnomalyFlagDto"][];
+            nextCursor: string | null;
+        };
+        AnomalyReviewInputDto: {
+            key: string;
+            /** Format: date-time */
+            measuredAt: string;
+            /** @enum {string} */
+            decision: "INVESTIGATE" | "DISMISSED";
+            reason: string;
+            /**
+             * Format: uuid
+             * @description Optional explicit combined review/open action for INVESTIGATE; otherwise open from the saved review. Rejected for dismissals.
+             */
+            technicianId?: string;
+        };
+        OpenInvestigationDto: {
+            /**
+             * Format: uuid
+             * @description Active technician with machine access. Exact retries return the existing order; reassignment uses the versioned order action.
+             */
+            technicianId: string;
+        };
+        AnomalyHistoryItemDto: {
+            id: string;
+            key: string;
+            /** @enum {string} */
+            decision: "INVESTIGATE" | "DISMISSED";
+            reason: string;
+            reviewedBy: string;
+            reviewerName: string;
+            /** @enum {string} */
+            actorRole: "MAINTENANCE_HEAD";
+            createdAt: string;
+            workOrderId: string | null;
+            /** @enum {string|null} */
+            workOrderStatus: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED" | null;
+            technicianId: string | null;
+            evidence: components["schemas"]["AnomalyEvidenceDto"];
+        };
+        AnomalyHistoryDto: {
+            canOpenInvestigation: boolean;
+            items: components["schemas"]["AnomalyHistoryItemDto"][];
+            nextCursor: string | null;
         };
     };
     responses: never;
@@ -2892,6 +3109,300 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReminderReadDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    AnomaliesController_list: {
+        parameters: {
+            query?: {
+                after?: string;
+                status?: "PENDING" | "REVIEWED";
+                kind?: "SUDDEN_CHANGE" | "SUSTAINED_SHIFT" | "DRIFT";
+                parameter?: "hotTempC" | "coldTempC" | "pressureBar";
+                to?: string;
+                from?: string;
+            };
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnomalyListDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    AnomaliesController_history: {
+        parameters: {
+            query?: {
+                after?: string;
+            };
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnomalyHistoryDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    AnomaliesController_review: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnomalyReviewInputDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnomalyReceiptDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    AnomaliesController_openInvestigation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OpenInvestigationDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnomalyReceiptDto"];
                 };
             };
             400: {

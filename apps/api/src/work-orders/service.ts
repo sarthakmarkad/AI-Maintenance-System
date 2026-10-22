@@ -13,6 +13,7 @@ import {
   WorkOrderStatus,
   WorkOrderPriority,
   ReportedImpact,
+  InvestigationOutcome,
   type MaintenanceOccurrence,
 } from "@prisma/client";
 import { createHash, randomUUID } from "node:crypto";
@@ -59,6 +60,7 @@ export const actionSchemas = {
       preventiveAction: text.optional(),
       restoredAt: z.string().datetime({ offset: true }).optional(),
       performedAt: z.string().datetime({ offset: true }).optional(),
+      investigationOutcome: z.nativeEnum(InvestigationOutcome).optional(),
     })
     .strict(),
   approve: z.object({ version, note: text.optional() }).strict(),
@@ -95,6 +97,13 @@ export const plannedFingerprint = (
   technicianId: string,
 ) =>
   createHash("sha256").update(`${occurrenceId}:${technicianId}`).digest("hex");
+export const investigationFingerprint = (
+  reviewId: string,
+  technicianId: string,
+) =>
+  createHash("sha256")
+    .update(`investigation:${reviewId}:${technicianId}`)
+    .digest("hex");
 export function allowedActions(
   order: Pick<Issue, "status" | "technicianId">,
   user: Principal,
@@ -184,6 +193,7 @@ export class WorkOrdersService {
     return {
       id: o.id,
       kind: o.kind,
+      anomalyReviewId: o.anomalyReviewId,
       maintenanceOccurrence: o.occurrence
         ? {
             id: o.occurrence.id,
@@ -228,11 +238,31 @@ export class WorkOrdersService {
       orderBy: { version: "desc" },
       take: 51,
     });
+    const sourceReview = o.anomalyReviewId
+      ? await tx.anomalyReview.findFirst({
+          where: {
+            orgId: o.orgId,
+            machineId: o.machineId,
+            id: o.anomalyReviewId,
+          },
+          include: { reviewer: person },
+        })
+      : null;
     return {
       ...this.summary(o, user),
       description: o.description,
       startedAt: o.startedAt?.toISOString() ?? null,
       performedAt: o.performedAt?.toISOString() ?? null,
+      investigationOutcome: o.investigationOutcome,
+      investigationReview: sourceReview
+        ? {
+            id: sourceReview.id,
+            reason: sourceReview.reason,
+            createdAt: sourceReview.createdAt.toISOString(),
+            reviewer: ref(sourceReview.reviewer),
+            evidence: sourceReview.evidence,
+          }
+        : null,
       findings: o.findings,
       rootCause: o.rootCause,
       correctiveAction: o.correctiveAction,
@@ -448,6 +478,73 @@ export class WorkOrdersService {
     );
     return order.id;
   }
+  async createInvestigation(
+    tx: Prisma.TransactionClient,
+    user: Principal,
+    code: string,
+    review: { id: string; key: string; measuredAt: Date; reason: string },
+    technicianId: string,
+    title: string,
+  ) {
+    const c = await this.context(tx, user, code);
+    if (c.user.role !== Role.MAINTENANCE_HEAD)
+      throw new ForbiddenException(
+        "Only the maintenance head can open an investigation.",
+      );
+    const technician = await tx.membership.findFirst({
+      where: {
+        orgId: c.user.orgId,
+        userId: technicianId,
+        active: true,
+        ...technicianMembership,
+        machineAccess: {
+          some: { orgId: c.user.orgId, machineId: c.machine.id },
+        },
+      },
+      include: { user: true },
+    });
+    if (!technician)
+      throw new BadRequestException(
+        "Select an active technician with access to this machine.",
+      );
+    const now = new Date();
+    const order = await tx.workOrder.create({
+      data: {
+        ...c.scope,
+        requestId: randomUUID(),
+        reportFingerprint: investigationFingerprint(review.id, technicianId),
+        title,
+        description: review.reason,
+        kind: "INVESTIGATION",
+        anomalyReviewId: review.id,
+        impact: "OBSERVATION",
+        priority: "NORMAL",
+        observedAt: review.measuredAt,
+        status: "ASSIGNED",
+        technicianId,
+        reportedBy: c.user.userId,
+        reportedAt: now,
+        updatedAt: now,
+      },
+      include,
+    });
+    await this.event(
+      tx,
+      order,
+      c.user,
+      "INVESTIGATE",
+      null,
+      {
+        anomalyReviewId: review.id,
+        key: review.key,
+        measuredAt: review.measuredAt.toISOString(),
+        technicianId,
+        technicianName: technician.user.displayName,
+      },
+      now,
+    );
+    return order.id;
+  }
   async list(user: Principal, code: string, q: z.output<typeof listQuery>) {
     return this.db.$transaction(
       async (tx) => {
@@ -650,6 +747,7 @@ export class WorkOrdersService {
               preventiveAction: next.preventiveAction,
               restoredAt: date(next.restoredAt),
               performedAt: date(next.performedAt ?? null),
+              investigationOutcome: next.investigationOutcome ?? null,
               reviewedAt: date(next.reviewedAt),
               reviewedBy: next.reviewedBy,
               closedAt: date(next.closedAt),
@@ -688,7 +786,10 @@ export class WorkOrdersService {
                 ? {
                     findings: next.findings,
                     preventiveAction: next.preventiveAction,
-                    ...(o.kind === "PLANNED"
+                    ...(o.kind === "INVESTIGATION"
+                      ? { investigationOutcome: next.investigationOutcome }
+                      : {}),
+                    ...(o.kind === "PLANNED" || o.kind === "INVESTIGATION"
                       ? {
                           performedAt: next.performedAt,
                           workPerformed: next.correctiveAction,

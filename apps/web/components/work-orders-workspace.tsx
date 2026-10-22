@@ -1,4 +1,5 @@
 "use client";
+import { Evidence } from "./anomalies-workspace";
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -72,6 +73,12 @@ const plannedActionLabels: Record<string, string> = {
   approve: "Approve maintenance",
   assign: "Reassign technician",
 };
+const investigationActionLabels: Record<string, string> = {
+  start: "Start investigation",
+  submit: "Submit investigation",
+  approve: "Approve investigation",
+  assign: "Reassign technician",
+};
 const confirmation: Record<string, string> = {
   assign: "Save assignment",
   start: "Confirm start",
@@ -96,8 +103,21 @@ const fieldLabels: Record<string, string> = {
   observedAt: "First observed",
   performedAt: "Maintenance performed",
   workPerformed: "Work performed",
+  investigationOutcome: "Investigation outcome",
+  anomalyReviewId: "Source review ID",
+  measuredAt: "Flag measurement time",
+  key: "Evidence fingerprint",
   dueAt: "Planned due time",
 };
+const outcomes: Record<string, string> = {
+  MAINTENANCE_REQUIRED: "Maintenance required",
+  SENSOR_CHECK_REQUIRED: "Sensor check required",
+  OPERATING_CHANGE_EXPLAINED: "Operating change explained",
+  NO_FAULT_FOUND: "No fault found",
+  INCONCLUSIVE: "Inconclusive",
+};
+const completionOnly = (kind: string) =>
+  kind === "PLANNED" || kind === "INVESTIGATION";
 const evidenceLabel = (key: string, planned: boolean) =>
   planned
     ? ({
@@ -371,6 +391,8 @@ export function WorkOrdersWorkspace({
                   <span className="pill">{label(order.priority)} priority</span>
                   {order.kind === "PLANNED" ? (
                     <span className="pill">Planned maintenance</span>
+                  ) : order.kind === "INVESTIGATION" ? (
+                    <span className="pill">Statistical investigation</span>
                   ) : (
                     <span className="pill">
                       Reported impact: {label(order.impact)}
@@ -380,7 +402,11 @@ export function WorkOrdersWorkspace({
               </div>
               <p className="work-prose">{order.description}</p>
               <small>
-                {order.kind === "PLANNED" ? "Scheduled by" : "Reported by"}{" "}
+                {order.kind === "PLANNED"
+                  ? "Scheduled by"
+                  : order.kind === "INVESTIGATION"
+                    ? "Opened by"
+                    : "Reported by"}{" "}
                 {order.reporter.displayName} · {time(order.reportedAt)}
               </small>
               {order.maintenanceOccurrence && (
@@ -393,6 +419,37 @@ export function WorkOrdersWorkspace({
                 </Link>
               )}
             </section>
+            {order.investigationReview && (
+              <section
+                className="panel work-source-review"
+                aria-label="Investigation source evidence"
+              >
+                <div className="panel-heading">
+                  <h2>Retained statistical review</h2>
+                </div>
+                <div className="work-source-body">
+                  <p className="work-prose">
+                    {order.investigationReview.reason}
+                  </p>
+                  <p className="work-source-meta">
+                    {order.investigationReview.reviewer.displayName} ·
+                    Maintenance head ·{" "}
+                    {time(order.investigationReview.createdAt)}
+                  </p>
+                  <p className="work-source-note">
+                    Synthetic evidence for investigation. This is not a
+                    confirmed breakdown or cause of production loss.
+                  </p>
+                  <Evidence flag={order.investigationReview.evidence} />
+                  <Link
+                    className="text-button"
+                    href={`/machines/${machine.code}/readings`}
+                  >
+                    Process trends & saved reviews
+                  </Link>
+                </div>
+              </section>
+            )}
             <ol className="work-stages" aria-label="Work order stages">
               {statuses.map((s, i) => (
                 <li
@@ -422,7 +479,9 @@ export function WorkOrdersWorkspace({
                     <dt>
                       {order.kind === "PLANNED"
                         ? "Planned due time"
-                        : "First observed"}
+                        : order.kind === "INVESTIGATION"
+                          ? "Flag measurement time"
+                          : "First observed"}
                     </dt>
                     <dd>
                       {time(
@@ -436,7 +495,9 @@ export function WorkOrdersWorkspace({
                     <dt>
                       {order.kind === "PLANNED"
                         ? "Work order created"
-                        : "Reported"}
+                        : order.kind === "INVESTIGATION"
+                          ? "Investigation created"
+                          : "Reported"}
                     </dt>
                     <dd>{time(order.reportedAt)}</dd>
                   </div>
@@ -444,7 +505,9 @@ export function WorkOrdersWorkspace({
                     <dt>
                       {order.kind === "PLANNED"
                         ? "Maintenance started"
-                        : "Repair started"}
+                        : order.kind === "INVESTIGATION"
+                          ? "Investigation started"
+                          : "Repair started"}
                     </dt>
                     <dd>{time(order.startedAt)}</dd>
                   </div>
@@ -452,11 +515,13 @@ export function WorkOrdersWorkspace({
                     <dt>
                       {order.kind === "PLANNED"
                         ? "Maintenance performed"
-                        : "Service restored"}
+                        : order.kind === "INVESTIGATION"
+                          ? "Investigation completed"
+                          : "Service restored"}
                     </dt>
                     <dd>
                       {time(
-                        order.kind === "PLANNED"
+                        completionOnly(order.kind)
                           ? order.performedAt
                           : order.restoredAt,
                       )}
@@ -491,11 +556,30 @@ export function WorkOrdersWorkspace({
                   <h2>
                     {order.kind === "PLANNED"
                       ? "Maintenance completion evidence"
-                      : "Current repair & human RCA"}
+                      : order.kind === "INVESTIGATION"
+                        ? "Investigation findings & outcome"
+                        : "Current repair & human RCA"}
                   </h2>
                   <ClipboardList size={17} />
                 </div>
                 <div className="work-evidence">
+                  {order.kind === "INVESTIGATION" && (
+                    <div>
+                      <h3>Investigation outcome</h3>
+                      <p>
+                        {order.investigationOutcome
+                          ? outcomes[order.investigationOutcome]
+                          : order.submittedAt
+                            ? "Not recorded in earlier submission"
+                            : "Not submitted"}
+                      </p>
+                      <p>
+                        Approval and closure cover this investigation. Any
+                        recommended maintenance or sensor work needs a separate
+                        authorized follow-up.
+                      </p>
+                    </div>
+                  )}
                   {[
                     "findings",
                     "rootCause",
@@ -503,11 +587,14 @@ export function WorkOrdersWorkspace({
                     "preventiveAction",
                   ]
                     .filter(
-                      (key) => order.kind !== "PLANNED" || key !== "rootCause",
+                      (key) =>
+                        !completionOnly(order.kind) || key !== "rootCause",
                     )
                     .map((key) => (
                       <div key={key}>
-                        <h3>{evidenceLabel(key, order.kind === "PLANNED")}</h3>
+                        <h3>
+                          {evidenceLabel(key, completionOnly(order.kind))}
+                        </h3>
                         <p className="work-prose">
                           {order[key as "findings"] ?? "Not submitted"}
                         </p>
@@ -586,10 +673,13 @@ export function WorkOrdersWorkspace({
                                   "observedAt",
                                   "performedAt",
                                   "dueAt",
+                                  "measuredAt",
                                 ].includes(key) && typeof value === "string"
                                   ? time(value)
                                   : typeof value === "string"
-                                    ? value
+                                    ? key === "investigationOutcome"
+                                      ? (outcomes[value] ?? value)
+                                      : value
                                     : JSON.stringify(value)}
                               </dd>
                             </div>
@@ -700,7 +790,9 @@ export function WorkOrdersWorkspace({
                         {label(o.priority)} priority ·{" "}
                         {o.kind === "PLANNED"
                           ? "Planned maintenance"
-                          : label(o.impact)}
+                          : o.kind === "INVESTIGATION"
+                            ? "Statistical investigation"
+                            : label(o.impact)}
                       </small>
                       <ArrowRight size={18} />
                     </div>
@@ -869,7 +961,7 @@ function ActionForm({
   act: (action: string, body: Record<string, unknown>) => Promise<void>;
   onFailure: (e: unknown) => Promise<void>;
 }) {
-  const planned = order.kind === "PLANNED";
+  const planned = completionOnly(order.kind);
   const [action, setAction] = useState(""),
     [technicians, setTechnicians] = useState<EligibleTechnicians["items"]>([]),
     [rosterLoading, setRosterLoading] = useState(false),
@@ -883,7 +975,8 @@ function ActionForm({
     [correctiveAction, setCorrective] = useState(order.correctiveAction ?? ""),
     [preventiveAction, setPreventive] = useState(order.preventiveAction ?? ""),
     [restored, setRestored] = useState(localInput(order.restoredAt)),
-    [performed, setPerformed] = useState(localInput(order.performedAt ?? null));
+    [performed, setPerformed] = useState(localInput(order.performedAt ?? null)),
+    [outcome, setOutcome] = useState(order.investigationOutcome ?? "");
   useEffect(() => {
     if (action !== "assign") return;
     const abort = new AbortController();
@@ -919,6 +1012,9 @@ function ActionForm({
                 ...(planned
                   ? {
                       performedAt: instant(performed),
+                      ...(order.kind === "INVESTIGATION"
+                        ? { investigationOutcome: outcome }
+                        : {}),
                       ...(preventiveAction.trim() ? { preventiveAction } : {}),
                     }
                   : {
@@ -950,7 +1046,7 @@ function ActionForm({
           <p>
             {order.status === "CLOSED"
               ? "This work order is closed. Its report and history remain available."
-              : "No workflow action is available to your role or assignment at this stage."}
+              : "No workflow action is available to your role or assignment at this stage. Assigned pilot users must select the Technician role to start or submit work."}
           </p>
         ) : (
           <>
@@ -962,9 +1058,13 @@ function ActionForm({
                   disabled={busy || conflict}
                   onClick={() => setAction(a)}
                 >
-                  {planned
-                    ? (plannedActionLabels[a] ?? actionLabels[a] ?? label(a))
-                    : (actionLabels[a] ?? label(a))}
+                  {order.kind === "INVESTIGATION"
+                    ? (investigationActionLabels[a] ??
+                      actionLabels[a] ??
+                      label(a))
+                    : planned
+                      ? (plannedActionLabels[a] ?? actionLabels[a] ?? label(a))
+                      : (actionLabels[a] ?? label(a))}
                 </Button>
               ))}
             </div>
@@ -1040,12 +1140,33 @@ function ActionForm({
                 {action === "start" && (
                   <p>
                     {planned
-                      ? "Confirm that you are starting the assigned maintenance. The performed time and review are recorded separately."
+                      ? order.kind === "INVESTIGATION"
+                        ? "Confirm that you are starting the assigned investigation. Completion time is recorded separately from engineering review."
+                        : "Confirm that you are starting the assigned maintenance. The performed time and review are recorded separately."
                       : "Confirm that you are starting the assigned repair. The start time will be recorded separately from restoration."}
                   </p>
                 )}
                 {action === "submit" && (
                   <>
+                    {order.kind === "INVESTIGATION" && (
+                      <label>
+                        Investigation outcome
+                        <select
+                          aria-label="Investigation outcome"
+                          required
+                          value={outcome}
+                          disabled={busy}
+                          onChange={(e) => setOutcome(e.target.value)}
+                        >
+                          <option value="">Select outcome</option>
+                          {Object.entries(outcomes).map(([key, name]) => (
+                            <option key={key} value={key}>
+                              {name}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    )}
                     {[
                       ["findings", findings, setFindings],
                       ["rootCause", rootCause, setRootCause],
@@ -1056,8 +1177,24 @@ function ActionForm({
                       .map(([key, value, setter]) => (
                         <label key={String(key)}>
                           {evidenceLabel(String(key), planned)}
+                          {order.kind === "INVESTIGATION" &&
+                          key === "preventiveAction" &&
+                          [
+                            "MAINTENANCE_REQUIRED",
+                            "SENSOR_CHECK_REQUIRED",
+                          ].includes(outcome)
+                            ? " (required next steps)"
+                            : ""}
                           <textarea
-                            required={!planned || key !== "preventiveAction"}
+                            required={
+                              !planned ||
+                              key !== "preventiveAction" ||
+                              (order.kind === "INVESTIGATION" &&
+                                [
+                                  "MAINTENANCE_REQUIRED",
+                                  "SENSOR_CHECK_REQUIRED",
+                                ].includes(outcome))
+                            }
                             minLength={3}
                             maxLength={4000}
                             rows={3}
@@ -1073,7 +1210,9 @@ function ActionForm({
                       ))}
                     <label>
                       {planned
-                        ? "Maintenance performed (IST)"
+                        ? order.kind === "INVESTIGATION"
+                          ? "Investigation completed (IST)"
+                          : "Maintenance performed (IST)"
                         : "Service restored (IST)"}
                       <input
                         required
@@ -1090,7 +1229,9 @@ function ActionForm({
                     </label>
                     <p>
                       {planned
-                        ? "Enter the actual maintenance performed time, between work-order creation and now. Routine maintenance does not require a breakdown cause or restoration time. This submission requests engineering review."
+                        ? order.kind === "INVESTIGATION"
+                          ? "Enter when the inspection was completed, between investigation creation and now. Investigations do not record a breakdown cause or restoration time. This submission requests engineering review."
+                          : "Enter the actual maintenance performed time, between work-order creation and now. Routine maintenance does not require a breakdown cause or restoration time. This submission requests engineering review."
                         : "Enter the actual restoration time, between report time and now. This submission requests engineering review."}
                     </p>
                   </>
@@ -1114,9 +1255,13 @@ function ActionForm({
                     <p>
                       {action === "approve"
                         ? planned
-                          ? "Review the performed work and inspection findings before recording engineering approval."
+                          ? order.kind === "INVESTIGATION"
+                            ? "Review the inspection findings and outcome before recording engineering approval."
+                            : "Review the performed work and inspection findings before recording engineering approval."
                           : "Review the repair evidence and human RCA before recording engineering approval."
-                        : "Confirm administrative closure of the approved work. Restoration and approval timestamps stay unchanged."}
+                        : order.kind === "INVESTIGATION"
+                          ? "Close the approved investigation. Recommended maintenance or sensor work remains a separate follow-up; closure does not mean that work was completed."
+                          : "Confirm administrative closure of the approved work. Restoration and approval timestamps stay unchanged."}
                     </p>
                     <label>
                       {action === "approve"

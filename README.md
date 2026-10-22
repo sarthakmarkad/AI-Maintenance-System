@@ -1,12 +1,12 @@
 # Supreme Maintenance Intelligence
 
-Local milestones 1–5 for Supreme Industries' **WH-C**, the newer Windmöller & Hölscher blown-film line. Its exact model is unknown. This repository implements authenticated access, production workbook import and dashboards, synthetic hourly trends, role-controlled maintenance work orders, and fixed-date planned maintenance with in-app reminders. Further platform milestones remain in scope.
+Local milestones 1–6 for Supreme Industries' **WH-C**, the newer Windmöller & Hölscher blown-film line. Its exact model is unknown. This repository implements authenticated access, production workbook import and dashboards, synthetic hourly trends, role-controlled maintenance work orders, and fixed-date planned maintenance with in-app reminders, and explainable statistical pattern review. Further platform milestones remain in scope.
 
 ## Start here
 
 The project lives at `~/Documents/Projects/Maintenance` (the filesystem also resolves the user's lowercase `projects` path). No code is built in the ChatGPT project mirror.
 
-Prerequisites: Node 22.12–24, npm 11. Native PostgreSQL 16 is available on this computer; Docker is an alternative.
+Prerequisites: Node 22.12–24, npm 11, Python 3.9+ available as `python3` on PATH. Native PostgreSQL 16 is available on this computer; Docker is an alternative.
 
 ```sh
 cd ~/Documents/Projects/Maintenance
@@ -90,15 +90,16 @@ Database tests require `TEST_DATABASE_URL` (owner) and `TEST_RUNTIME_DATABASE_UR
 | Path | Purpose |
 |---|---|
 | `apps/web` | Next.js App Router, Supabase login, protected registry/machine pages, Excel review, production dashboard, synthetic process trends, maintenance workflow and calendar, Tailwind/shadcn-style components and Recharts |
-| `apps/api` | NestJS REST, verified identity, trusted membership lookup, scoped machine queries, errors/logging/health/Swagger, bounded XLSX parser, staged imports, production totals, synthetic reading trends and versioned work-order actions and durable schedule/reminder processing |
+| `apps/api` | NestJS REST, verified identity, trusted membership lookup, scoped machine queries, errors/logging/health/Swagger, bounded XLSX parser, staged imports, production totals, synthetic reading trends, scoped statistical review, versioned work-order actions and durable schedule/reminder processing |
 | `packages/api-client` | Generated OpenAPI response types consumed by frontend |
+| `services/statistics` | Isolated, standard-library Python worker for causal synthetic pattern rules; launched by NestJS |
 | `prisma` | Reviewed foundation schema, migration, relational constraints and indexes |
 | `scripts` | Seed, trusted account provisioning, isolated database and contract generation |
 | `infra` | Local PostgreSQL Compose option and narrow runtime grants |
 | `docs` | Decisions, data boundaries, complete scope map and verification evidence |
 | `Maintenance_Handoff` | Ignored, unchanged local reference material and original workbooks |
 
-Production XLSX uploads are parsed in memory; source rows and reconciled daily records persist in PostgreSQL. Original file-byte storage is deferred to private Supabase Storage. Recharts renders saved quantities with gaps. A bounded NestJS calendar worker persists occurrence cursors and in-app reminders in PostgreSQL. No Redis queue, Python service, pgvector or AI provider is introduced. Future service directories will be added with their implementation.
+Production XLSX uploads are parsed in memory; source rows and reconciled daily records persist in PostgreSQL. Original file-byte storage is deferred to private Supabase Storage. Recharts renders saved quantities with gaps. A bounded NestJS calendar worker persists occurrence cursors and in-app reminders in PostgreSQL. A separate bounded Python process evaluates synthetic statistical patterns on demand, without database/provider credentials. No Redis queue, pgvector or AI provider is introduced. Future service directories will be added with their implementation.
 
 ## Current boundary and next milestone
 
@@ -122,4 +123,6 @@ Persistent **breakdown reporting and work orders** are implemented at [WH-C Work
 
 The [WH-C Maintenance calendar](http://localhost:3000/machines/WH-C/calendar) supports daily/weekly/monthly plans, technician assignment, upcoming/due/overdue views, explicit planned work-order release, reasoned skips, pause/resume and in-app reminders. Select **Maintenance head** to create the first real plan; no company schedule is invented. Planned technician completion records performed work/time and keeps human review/closure, without fabricated breakdown RCA. Dates stay fixed as requested. Jobs run while the local API is running and catch up after restart. See [calendar rules and limits](docs/CALENDAR.md).
 
-Next: a separate statistical anomaly service. Reported temperature/pressure ranges remain unverified and are not safe limits or normal bands. All 20 intended areas remain in scope.
+**Statistical patterns** now appear below the three charts on [WH-C Process trends](http://localhost:3000/machines/WH-C/readings). Sudden-change, sustained-shift and gradual-drift flags explain the prior baseline and supporting readings, with chart markers, filters and paging. Only the active Maintenance head view can retain an investigation/dismissal decision with a reason. Reviews preserve exact evidence. The head can explicitly open and assign an investigation from a retained review; the technician records findings/outcome, the head reviews, and the head/supervisor closes. Review history links current progress. Detection never creates a breakdown or work order automatically. See [policy, Python setup and limits](docs/STATISTICAL-PATTERNS.md).
+
+Next: agree verified downtime/runtime definitions for maintenance KPIs before calculating availability or repair metrics. Reported temperature/pressure ranges remain unverified and are not safe limits or normal bands. All 20 intended areas remain in scope.

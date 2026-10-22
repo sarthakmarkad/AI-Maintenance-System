@@ -48,3 +48,11 @@ Real PostgreSQL HTTP tests exercise one identity through all six views, a comple
 ## Calendar permissions (M5)
 
 All six views read the scoped calendar. Only Maintenance head creates/pauses/resumes plans, releases assigned planned work orders or skips unreleased occurrences. Heads/supervisors see scoped actionable reminders; technicians see reminders for their assigned work, and read receipts are separate per identity/role. Administrator has no calendar management authority. Planned work still requires assigned-technician completion, head review and supervisor/head approved closure. See CALENDAR.md.
+
+## Statistical pattern permissions (M6)
+
+All six roles can inspect scoped synthetic pattern evidence and saved review history. Only the active Maintenance head view can record an investigation/dismissal decision with a required reason. Supervisor and Administrator have read-only access. The server recalculates submitted evidence keys, preserves the actual actor/role and writes review/audit atomically. No statistical flag creates an incident or grants repair/approval authority. See STATISTICAL-PATTERNS.md.
+
+## Investigation handoff
+
+Only active Maintenance head can release an investigation from a saved INVESTIGATE review and select an eligible technician. All scoped roles can see the link/status and retained evidence. Assignment to a multi-role pilot identity does not grant Administrator repair powers: select Technician to start/submit that user's assigned work. Head alone approves/returns; head or supervisor closes approved investigations. Historical review release uses the same trusted scope checks even when the analysis worker is unavailable. No new grants or permission unions are introduced.

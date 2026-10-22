@@ -114,6 +114,50 @@ test("unassigned technician, cross-organization actor and stale versions are rej
     status(409),
   );
 });
+test("investigation submission records findings and completion time without breakdown RCA or restoration", () => {
+  const investigation = {
+    ...base,
+    kind: "INVESTIGATION" as const,
+    status: "IN_PROGRESS" as const,
+    technicianId: tech.userId,
+  };
+  const submitted = transition(
+    investigation,
+    tech,
+    "submit",
+    {
+      version: 1,
+      findings: "Sensor wiring checked; reading consistent",
+      correctiveAction: "Cleaned connector and retested",
+      performedAt: "2026-09-01T03:00:00Z",
+      investigationOutcome: "NO_FAULT_FOUND",
+    },
+    [],
+    now,
+  );
+  assert.equal(submitted.status, "AWAITING_REVIEW");
+  assert.equal(submitted.restoredAt, null);
+  assert.throws(
+    () =>
+      transition(
+        investigation,
+        tech,
+        "submit",
+        {
+          version: 1,
+          findings: "Sensor wiring checked",
+          correctiveAction: "Cleaned connector",
+          performedAt: "2026-09-01T03:00:00Z",
+          investigationOutcome: "NO_FAULT_FOUND",
+          rootCause: "Not a breakdown",
+        },
+        [],
+        now,
+      ),
+    status(400),
+  );
+});
+
 test("closure requires approval; return requires a reason; invalid restoration does not mutate state", () => {
   assert.throws(
     () => transition(base, supervisor, "close", { version: 1 }),
@@ -160,4 +204,73 @@ test("closure requires approval; return requires a reason; invalid restoration d
   );
   assert.equal(issue.findings, null);
   assert.equal(issue.version, 1);
+});
+
+test("investigation outcomes allow inconclusive/no-fault findings and require next steps when work remains", () => {
+  const issue = {
+    ...base,
+    kind: "INVESTIGATION" as const,
+    status: "IN_PROGRESS" as const,
+    technicianId: tech.userId,
+  };
+  const input = {
+    version: 1,
+    findings: "Inspection checked available evidence",
+    correctiveAction: "Inspection only; no repair performed",
+    performedAt: "2026-09-01T03:00:00Z",
+  };
+  for (const investigationOutcome of [
+    "INCONCLUSIVE",
+    "NO_FAULT_FOUND",
+    "OPERATING_CHANGE_EXPLAINED",
+    "MAINTENANCE_REQUIRED",
+    "SENSOR_CHECK_REQUIRED",
+  ]) {
+    const needsFollowUp = [
+      "MAINTENANCE_REQUIRED",
+      "SENSOR_CHECK_REQUIRED",
+    ].includes(investigationOutcome);
+    if (needsFollowUp)
+      assert.throws(
+        () =>
+          transition(
+            issue,
+            tech,
+            "submit",
+            { ...input, investigationOutcome },
+            [],
+            now,
+          ),
+        status(400),
+      );
+    const next = transition(
+      issue,
+      tech,
+      "submit",
+      {
+        ...input,
+        investigationOutcome,
+        ...(needsFollowUp
+          ? { preventiveAction: "Head to authorize follow-up work" }
+          : {}),
+      },
+      [],
+      now,
+    );
+    assert.equal(next.investigationOutcome, investigationOutcome);
+    assert.equal(next.rootCause, null);
+    assert.equal(next.restoredAt, null);
+  }
+  assert.throws(
+    () =>
+      transition(
+        { ...issue, kind: "PLANNED" },
+        tech,
+        "submit",
+        { ...input, investigationOutcome: "NO_FAULT_FOUND" },
+        [],
+        now,
+      ),
+    status(400),
+  );
 });

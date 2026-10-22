@@ -19,3 +19,5 @@ Work in this repository root. Read README.md and docs/DECISIONS.md before change
 
 - Read docs/TEAM-ACCESS.md before auth/role changes. A requested active role must match trusted grants; never combine roles or infer authority from Google/email metadata. Read docs/GOOGLE-SIGN-IN-SETUP.md before provider changes; no client secrets in frontend config.
 - Read docs/CALENDAR.md before calendar/scheduler changes. Keep fixed IST anchors, immutable occurrence snapshots, duplicate-safe generation/reminders, explicit head release, and planned completion distinct from breakdown RCA/restoration. Never seed invented company schedules into operational data.
+
+- Read docs/STATISTICAL-PATTERNS.md before anomaly changes. Keep causal prior-only windows, explicit missing-history coverage, synthetic provenance, policy/evidence fingerprints, head-only immutable reviews and atomic audit; do not create incidents from statistical flags automatically.
