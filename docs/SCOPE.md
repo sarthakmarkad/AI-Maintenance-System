@@ -1,6 +1,6 @@
 # Scope retained from the handoff
 
-SRS v1.0 is the official baseline; its full text is unavailable here. This list is the handoff's intended overall functional scope, not a reconstruction of original authoritative requirements. Milestones 1–8 are intermediate deliveries.
+SRS v1.0 is the official baseline; its full text is unavailable here. This list is the handoff's intended overall functional scope, not a reconstruction of original authoritative requirements. Milestones 1–9 are intermediate deliveries.
 
 | Functional area | Current status / intended delivery |
 |---|---|
@@ -19,10 +19,10 @@ SRS v1.0 is the official baseline; its full text is unavailable here. This list 
 | 13 AI-assisted RCA drafting | Later: mandatory human approval |
 | 14 Maintenance KPIs | Later: agreed definitions and verified units/runtime |
 | 15 Management analytics | Later |
-| 16 Reports/exports | Later |
+| 16 Reports/exports | M9: scoped PDF/Excel work-order, planned-task and investigation registers; individual full-history/attachment-manifest reports |
 | 17 Backend role-based access | M1: verified identity, trusted roles, org/record scope |
 | 18 Notifications | M5: scoped due-stage in-app reminders/read receipts; external/other event delivery later |
-| 19 Protected audit trail | M1–8: immutable seed/provisioning/import and work-order/calendar action/job and statistical review and attachment events |
-| 20 REST API/OpenAPI | M1–8: authenticated registry/import/trend/work-order/calendar/reminder/statistical-review/performance/private-attachment endpoints, Swagger and generated frontend types |
+| 19 Protected audit trail | M1–9: immutable seed/provisioning/import and work-order/calendar action/job and statistical review and attachment/export events |
+| 20 REST API/OpenAPI | M1–9: authenticated registry/import/trend/work-order/calendar/reminder/statistical-review/performance/private-attachment/report endpoints, Swagger and generated frontend types |
 
 Equipment-reliability placeholders are omitted from the current delivery at the owner’s request. Industrial validation/AI diagnosis remain later work. Calendar/role/work-order acceptance across independent staff identities remains distinct from the single-identity pilot. Supabase-hosted operational persistence is still pending. See STATISTICAL-PATTERNS.md, CALENDAR.md and WORK-ORDERS.md for implemented pilot choices and verification boundaries.

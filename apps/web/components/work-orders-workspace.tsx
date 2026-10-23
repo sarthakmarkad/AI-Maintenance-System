@@ -1,6 +1,7 @@
 "use client";
 import { Evidence } from "./anomalies-workspace";
 import { WorkOrderAttachments } from "./work-order-attachments";
+import { WorkOrderReportButtons } from "./reports-workspace";
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -423,6 +424,15 @@ export function WorkOrdersWorkspace({
                 </Link>
               )}
             </section>
+            <WorkOrderReportButtons
+              key={`report-${order.id}`}
+              code={machine.code}
+              id={order.id}
+              version={order.version}
+              token={token}
+              disabled={busy || conflict}
+              onFailure={failure}
+            />
             {order.investigationReview && (
               <section
                 className="panel work-source-review"

@@ -97,3 +97,4 @@ export type AnomalyReceipt = components["schemas"]["AnomalyReceiptDto"];
 export type AnomalyHistory = components["schemas"]["AnomalyHistoryDto"];
 
 export type MaintenancePerformance = components["schemas"]["PerformanceDto"];
+export type MaintenanceReport = components["schemas"]["ReportPreviewDto"];

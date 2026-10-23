@@ -64,3 +64,7 @@ All six roles can read Maintenance performance within their existing machine/org
 ## Attachment permissions (M8)
 
 All six roles can download work-order photos/PDFs within existing machine/organization scope. Only the reporting Operator on REPORTED work or the assigned Technician on IN_PROGRESS work can upload. Other technicians/operators, Maintenance head, Supervisor, Management and Administrator do not upload. Review requires a stable evidence set: submitted/approved/closed work is read-only for attachments; head return enables assigned-technician additions. Upload/download recheck current trusted access, including revocations. No new grants or role unions are introduced. See ATTACHMENTS.md.
+
+## Maintenance report permissions (M9)
+
+All six active roles can preview/export PDF/Excel reports within their existing organization/machine read scope; Operator/Technician still require explicit machine grants. Individual exports require the displayed order version. Source transactions and post-render delivery both recheck live trusted access; forged/revoked roles and foreign records cannot receive report bytes. Export audit uses existing protected append permissions and grants no operational/engineering authority. See REPORTS.md for role activity and acceptance boundaries.

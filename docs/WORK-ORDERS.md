@@ -58,7 +58,7 @@ Lists use newest report time and UUID as a stable keyset, with counts across all
 
 The migration and restricted runtime grants are applied to local operational and isolated test databases. Actual Administrator reads were verified in Codex's built-in browser using hosted Auth and the real API. No fake incidents or role changes were added to operational data. Full workflow authorization, concurrency, rollback, long-history paging and SQL protections are verified against the separate test database; desktop/mobile action forms use intercepted test fixtures. The same existing hosted identity now has six explicitly granted pilot views at the user’s request; this does not establish independent-person approval separation. Separate staff identities still need live acceptance.
 
-Private work-order attachments are implemented as described in ATTACHMENTS.md. Original workbook storage, exports, KPI definitions and AI diagnosis/RCA drafting remain future work. Planned maintenance and in-app reminders are implemented as described in CALENDAR.md. Supabase-hosted operational database migration and deployment are still pending. Nothing is published.
+Private work-order attachments are implemented as described in ATTACHMENTS.md. Original workbook storage, KPI definitions and AI diagnosis/RCA drafting remain future work. Planned maintenance and in-app reminders are implemented as described in CALENDAR.md. Supabase-hosted operational database migration and deployment are still pending. Nothing is published.
 
 ## Planned work extension (M5)
 
@@ -88,3 +88,7 @@ Browser acceptance reads existing user-created records only. Workflow writes and
 ## Private evidence attachments (M8)
 
 The reporting operator can add photos/PDFs on REPORTED work; the assigned technician can add them on IN_PROGRESS work of every kind. Saving evidence increments the shared work-order version, appends ATTACH history/audit and preserves the exact bytes/metadata atomically. Evidence is frozen after submission; return before adding more. All scoped roles can download throughout the history. No delete/replace or new engineering rights are added. See [ATTACHMENTS.md](ATTACHMENTS.md) for limits, retry behavior, private PostgreSQL storage and verification boundaries.
+
+## PDF and Excel work-order reports (M9)
+
+Work-order detail offers a version-checked report download with current human fields, kind-specific independent times, the complete immutable event history, retained source review and attachment manifest. Earlier submissions remain separate; attachment file bytes are excluded. Aggregate reports use created/closed dates and current status, and are distinct from individual history exports. All scoped roles can export with existing read rights; files do not approve work or complete follow-up actions. See REPORTS.md.

@@ -1,6 +1,6 @@
 # Supreme Maintenance Intelligence
 
-Local milestones 1–8 for Supreme Industries' **WH-C**, the newer Windmöller & Hölscher blown-film line. Its exact model is unknown. This repository implements authenticated access, production workbook import and dashboards, synthetic hourly trends, role-controlled maintenance work orders, and fixed-date planned maintenance with in-app reminders, explainable statistical pattern review, maintenance workflow performance, and private work-order attachments. Further platform milestones remain in scope.
+Local milestones 1–9 for Supreme Industries' **WH-C**, the newer Windmöller & Hölscher blown-film line. Its exact model is unknown. This repository implements authenticated access, production workbook import and dashboards, synthetic hourly trends, role-controlled maintenance work orders, and fixed-date planned maintenance with in-app reminders, explainable statistical pattern review, maintenance workflow performance, private work-order attachments, and PDF/Excel maintenance reports. Further platform milestones remain in scope.
 
 ## Start here
 
@@ -130,3 +130,5 @@ The [WH-C Maintenance calendar](http://localhost:3000/machines/WH-C/calendar) su
 The dashboard focuses on maintenance workflow performance. MTTR, MTBF and machine-availability cards are omitted at the owner’s request. Reported temperature/pressure ranges remain unverified and are not safe limits or normal bands. All 20 intended areas remain in scope.
 
 **Private work-order attachments** are available under **Photos & documents** on each work-order detail page. The reporting operator can add evidence before assignment; the assigned technician can add it after starting work and before submission. JPEG/PNG/PDF files are limited to 5 MB each and 20 per order. All scoped roles can download; submitted evidence is frozen until return. Uploads, versioned history and audit save together in the private local PostgreSQL database. See [attachment permissions, storage and limits](docs/ATTACHMENTS.md).
+
+**Maintenance reports** are available at [WH-C Reports](http://localhost:3000/machines/WH-C/reports). Preview work-order, planned-maintenance and investigation registers with explicit IST dates, then download a PDF summary or full-current-field Excel workbook. Work-order detail also exports a complete-history PDF/Excel report and attachment manifest. All six roles use existing trusted scope; previews/versions guard stale downloads, and generated exports append protected audit. Keep `apps/api/assets/fonts` with packaged API builds. See [report definitions, workflow and limits](docs/REPORTS.md).

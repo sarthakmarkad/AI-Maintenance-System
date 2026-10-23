@@ -24,6 +24,7 @@ import { ProductionWorkspace } from "./production-workspace";
 import { ReadingsWorkspace } from "./readings-workspace";
 import { WorkOrdersWorkspace } from "./work-orders-workspace";
 import { PerformanceWorkspace } from "./performance-workspace";
+import { ReportsWorkspace } from "./reports-workspace";
 import { CalendarWorkspace } from "./calendar-workspace";
 import { clearRoleSelection } from "@/lib/role-selection";
 type Result =
@@ -37,6 +38,7 @@ export function MachineWorkspace({
   workOrders = false,
   calendar = false,
   performance = false,
+  reports = false,
   orderId,
 }: {
   code?: string;
@@ -45,6 +47,7 @@ export function MachineWorkspace({
   workOrders?: boolean;
   calendar?: boolean;
   performance?: boolean;
+  reports?: boolean;
   orderId?: string;
 }) {
   const { session, loading, expired, expire } = useAuth();
@@ -130,7 +133,13 @@ export function MachineWorkspace({
           </Button>
         </section>
       ) : code && result.machines[0] ? (
-        performance ? (
+        reports ? (
+          <ReportsWorkspace
+            machine={result.machines[0]}
+            user={result.user}
+            token={session.access_token}
+          />
+        ) : performance ? (
           <PerformanceWorkspace
             machine={result.machines[0]}
             user={result.user}
@@ -387,6 +396,11 @@ function MachineDetail({
             <Button asChild variant="outline">
               <Link href={`/machines/${machine.code}/performance`}>
                 Maintenance performance
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href={`/machines/${machine.code}/reports`}>
+                Maintenance reports
               </Link>
             </Button>
           </div>

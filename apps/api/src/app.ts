@@ -23,6 +23,8 @@ import {
   AttachmentUploadLimit,
 } from "./attachments/controller";
 import { AttachmentsService } from "./attachments/service";
+import { ReportsController, ReportExportLimit } from "./reports/controller";
+import { ReportsService } from "./reports/service";
 import { CONFIG, parseConfig, type Config } from "./config";
 import { Database } from "./database";
 import { REPOSITORY, PrismaRepository } from "./repository";
@@ -46,6 +48,7 @@ export function appModule(config: Config) {
       AnomaliesController,
       PerformanceController,
       AttachmentsController,
+      ReportsController,
     ],
     providers: [
       { provide: CONFIG, useValue: config },
@@ -64,6 +67,8 @@ export function appModule(config: Config) {
       PerformanceService,
       AttachmentsService,
       AttachmentUploadLimit,
+      ReportsService,
+      ReportExportLimit,
     ],
   })
   class AppModule {}
@@ -95,9 +100,9 @@ export function configure(
     new DocumentBuilder()
       .setTitle("Supreme Maintenance API")
       .setDescription(
-        "Milestones 1–8. Scoped registry, imports/trends, maintenance work orders with private attachments, planned maintenance, reviewed statistical patterns and maintenance performance.",
+        "Milestones 1–9. Scoped registry, imports/trends, maintenance work orders with private attachments, planned maintenance, reviewed statistical patterns, maintenance performance and private PDF/Excel reports.",
       )
-      .setVersion("0.8.0")
+      .setVersion("0.9.0")
       .addBearerAuth()
       .build(),
   );

@@ -12,6 +12,7 @@ import {
   ClipboardList,
   CalendarDays,
   ChartNoAxesCombined,
+  FileText,
 } from "lucide-react";
 import { getSupabase } from "@/lib/supabase";
 import { api, type Me } from "@/lib/api";
@@ -42,6 +43,7 @@ export function Shell({
   const inReadings = pathname.includes("/readings");
   const inOrders = pathname.includes("/work-orders");
   const inPerformance = pathname.includes("/performance");
+  const inReports = pathname.includes("/reports");
   const inCalendar = pathname.includes("/calendar");
   const [signingOut, setSigningOut] = useState(false);
   const [error, setError] = useState("");
@@ -94,7 +96,7 @@ export function Shell({
         <div className="workspace-label">PILOT WORKSPACE</div>
         <nav aria-label="Main navigation">
           <Link
-            className={`nav-item ${inProduction || inReadings || inOrders || inCalendar || inPerformance ? "" : "active"}`}
+            className={`nav-item ${inProduction || inReadings || inOrders || inCalendar || inPerformance || inReports ? "" : "active"}`}
             href="/machines"
           >
             <Boxes size={18} />
@@ -144,6 +146,15 @@ export function Shell({
             >
               <ChartNoAxesCombined size={18} />
               Maintenance performance
+            </Link>
+          )}
+          {code && (
+            <Link
+              className={`nav-item ${inReports ? "active" : ""}`}
+              href={`/machines/${code}/reports`}
+            >
+              <FileText size={18} />
+              Maintenance reports
             </Link>
           )}
         </nav>
