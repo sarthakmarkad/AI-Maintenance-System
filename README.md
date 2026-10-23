@@ -1,6 +1,6 @@
 # Supreme Maintenance Intelligence
 
-Local milestones 1–6 for Supreme Industries' **WH-C**, the newer Windmöller & Hölscher blown-film line. Its exact model is unknown. This repository implements authenticated access, production workbook import and dashboards, synthetic hourly trends, role-controlled maintenance work orders, and fixed-date planned maintenance with in-app reminders, and explainable statistical pattern review. Further platform milestones remain in scope.
+Local milestones 1–7 for Supreme Industries' **WH-C**, the newer Windmöller & Hölscher blown-film line. Its exact model is unknown. This repository implements authenticated access, production workbook import and dashboards, synthetic hourly trends, role-controlled maintenance work orders, and fixed-date planned maintenance with in-app reminders, explainable statistical pattern review, and maintenance workflow performance. Further platform milestones remain in scope.
 
 ## Start here
 
@@ -125,4 +125,6 @@ The [WH-C Maintenance calendar](http://localhost:3000/machines/WH-C/calendar) su
 
 **Statistical patterns** now appear below the three charts on [WH-C Process trends](http://localhost:3000/machines/WH-C/readings). Sudden-change, sustained-shift and gradual-drift flags explain the prior baseline and supporting readings, with chart markers, filters and paging. Only the active Maintenance head view can retain an investigation/dismissal decision with a reason. Reviews preserve exact evidence. The head can explicitly open and assign an investigation from a retained review; the technician records findings/outcome, the head reviews, and the head/supervisor closes. Review history links current progress. Detection never creates a breakdown or work order automatically. See [policy, Python setup and limits](docs/STATISTICAL-PATTERNS.md).
 
-Next: agree verified downtime/runtime definitions for maintenance KPIs before calculating availability or repair metrics. Reported temperature/pressure ranges remain unverified and are not safe limits or normal bands. All 20 intended areas remain in scope.
+**Maintenance performance** is available at [WH-C Maintenance performance](http://localhost:3000/machines/WH-C/performance). All six scoped roles can inspect workload, older backlog, created/closed activity, generated planned-task completion and investigation outcomes. The technician sees its own open-assignment count. Open source records for role-authorized action; the dashboard is read-only. See [definitions, workflow and role activities](docs/MAINTENANCE-PERFORMANCE.md).
+
+The dashboard focuses on maintenance workflow performance. MTTR, MTBF and machine-availability cards are omitted at the owner’s request. Reported temperature/pressure ranges remain unverified and are not safe limits or normal bands. All 20 intended areas remain in scope.

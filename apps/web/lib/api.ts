@@ -75,3 +75,5 @@ export type AnomalyEvidence = components["schemas"]["AnomalyEvidenceDto"];
 export type AnomalyMarker = components["schemas"]["AnomalyMarkerDto"];
 export type AnomalyReceipt = components["schemas"]["AnomalyReceiptDto"];
 export type AnomalyHistory = components["schemas"]["AnomalyHistoryDto"];
+
+export type MaintenancePerformance = components["schemas"]["PerformanceDto"];

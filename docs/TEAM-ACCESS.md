@@ -17,7 +17,7 @@ All views read records only within their organization. Operators and technicians
 | Plant management | No | No | No | No | No | No |
 | Administrator | Yes | No | No | No | No | No |
 
-Management currently has read-only access; future management analytics are still pending. Administrator does not inherit engineering powers. An identity deliberately granted both Administrator and Maintenance head can act as a head only while that separately granted role is active. The pilot user can therefore perform several responsibilities sequentially; this does not provide independent-person approval separation. Production use should provision individual staff identities and grant only their actual responsibilities.
+Management has read-only access, including the maintenance performance dashboard; validated equipment reliability analytics remain pending. Administrator does not inherit engineering powers. An identity deliberately granted both Administrator and Maintenance head can act as a head only while that separately granted role is active. The pilot user can therefore perform several responsibilities sequentially; this does not provide independent-person approval separation. Production use should provision individual staff identities and grant only their actual responsibilities.
 
 ## How selection is enforced
 
@@ -56,3 +56,7 @@ All six roles can inspect scoped synthetic pattern evidence and saved review his
 ## Investigation handoff
 
 Only active Maintenance head can release an investigation from a saved INVESTIGATE review and select an eligible technician. All scoped roles can see the link/status and retained evidence. Assignment to a multi-role pilot identity does not grant Administrator repair powers: select Technician to start/submit that user's assigned work. Head alone approves/returns; head or supervisor closes approved investigations. Historical review release uses the same trusted scope checks even when the analysis worker is unavailable. No new grants or permission unions are introduced.
+
+## Maintenance performance permissions (M7)
+
+All six roles can read Maintenance performance within their existing machine/organization scope; operators/technicians still require explicit machine access. Technician's own open-assignment count uses the verified identity. The dashboard has no operational mutation endpoint or controls: links open existing pages, where current trusted role, assignment, state and version checks decide allowed actions. Head manages assignments/review, supervisor closes approved work, operator reports, technician handles own assignments, management inspects, and Administrator remains without engineering authority. Definitions and the complete role workflow are in MAINTENANCE-PERFORMANCE.md.

@@ -13,7 +13,7 @@ async function main() {
       app,
       new DocumentBuilder()
         .setTitle("Supreme Maintenance API")
-        .setVersion("0.6.0")
+        .setVersion("0.7.0")
         .addBearerAuth()
         .build(),
     );

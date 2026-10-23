@@ -468,6 +468,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/machines/{code}/performance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["PerformanceController_dashboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1287,6 +1303,78 @@ export interface components {
             canOpenInvestigation: boolean;
             items: components["schemas"]["AnomalyHistoryItemDto"][];
             nextCursor: string | null;
+        };
+        PerformanceCountDto: {
+            key: string;
+            count: number;
+        };
+        PerformanceCohortDto: {
+            total: number;
+            statuses: components["schemas"]["PerformanceCountDto"][];
+            kinds: components["schemas"]["PerformanceCountDto"][];
+        };
+        PerformanceOpenOrderDto: {
+            id: string;
+            title: string;
+            /** @enum {string} */
+            kind: "BREAKDOWN" | "PLANNED" | "INVESTIGATION";
+            /** @enum {string} */
+            status: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED";
+            reportedAt: string;
+            ageHours: number;
+            technicianName: string | null;
+        };
+        PerformanceCurrentDto: {
+            total: number;
+            overduePlanned: number | null;
+            statuses: components["schemas"]["PerformanceCountDto"][];
+            oldestAgeHours: number | null;
+            myOpen: number | null;
+            items: components["schemas"]["PerformanceOpenOrderDto"][];
+        };
+        PerformanceActivityDto: {
+            date: string;
+            created: number;
+            closed: number;
+        };
+        PerformancePlannedDto: {
+            applicable: boolean;
+            due: number;
+            skipped: number;
+            eligible: number;
+            completed: number;
+            onTime: number;
+            late: number;
+            open: number;
+            completionPercent: number | null;
+            onTimePercent: number | null;
+            scheduling: components["schemas"]["ScheduleStatusDto"];
+        };
+        PerformanceOutcomeDto: {
+            key: string;
+            count: number;
+            approvedOrClosed: number;
+        };
+        PerformanceInvestigationsDto: {
+            total: number;
+            unsubmitted: number;
+            legacyUnrecorded: number;
+            outcomes: components["schemas"]["PerformanceOutcomeDto"][];
+        };
+        PerformanceDto: {
+            policyVersion: string;
+            timezone: string;
+            from: string;
+            to: string;
+            /** @enum {string|null} */
+            kind: "BREAKDOWN" | "PLANNED" | "INVESTIGATION" | null;
+            generatedAt: string;
+            cohort: components["schemas"]["PerformanceCohortDto"];
+            current: components["schemas"]["PerformanceCurrentDto"];
+            activity: components["schemas"]["PerformanceActivityDto"][];
+            closedInRange: number;
+            planned: components["schemas"]["PerformancePlannedDto"];
+            investigations: components["schemas"]["PerformanceInvestigationsDto"];
         };
     };
     responses: never;
@@ -3438,6 +3526,73 @@ export interface operations {
                 };
             };
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    PerformanceController_dashboard: {
+        parameters: {
+            query?: {
+                kind?: "BREAKDOWN" | "PLANNED" | "INVESTIGATION";
+                /** @description Inclusive IST date, not beyond today. Current backlog ignores these dates. */
+                to?: string;
+                /** @description Inclusive IST creation/due/activity date. Both dates required together; max 366 days. */
+                from?: string;
+            };
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PerformanceDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

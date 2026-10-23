@@ -11,6 +11,7 @@ import {
   Activity,
   ClipboardList,
   CalendarDays,
+  ChartNoAxesCombined,
 } from "lucide-react";
 import { getSupabase } from "@/lib/supabase";
 import { api, type Me } from "@/lib/api";
@@ -40,6 +41,7 @@ export function Shell({
   const inProduction = pathname.includes("/production");
   const inReadings = pathname.includes("/readings");
   const inOrders = pathname.includes("/work-orders");
+  const inPerformance = pathname.includes("/performance");
   const inCalendar = pathname.includes("/calendar");
   const [signingOut, setSigningOut] = useState(false);
   const [error, setError] = useState("");
@@ -92,7 +94,7 @@ export function Shell({
         <div className="workspace-label">PILOT WORKSPACE</div>
         <nav aria-label="Main navigation">
           <Link
-            className={`nav-item ${inProduction || inReadings || inOrders || inCalendar ? "" : "active"}`}
+            className={`nav-item ${inProduction || inReadings || inOrders || inCalendar || inPerformance ? "" : "active"}`}
             href="/machines"
           >
             <Boxes size={18} />
@@ -133,6 +135,15 @@ export function Shell({
             >
               <CalendarDays size={18} />
               Maintenance calendar
+            </Link>
+          )}
+          {code && (
+            <Link
+              className={`nav-item ${inPerformance ? "active" : ""}`}
+              href={`/machines/${code}/performance`}
+            >
+              <ChartNoAxesCombined size={18} />
+              Maintenance performance
             </Link>
           )}
         </nav>
@@ -207,7 +218,7 @@ export function Shell({
           <span>
             Supreme Industries · Machine maintenance & performance intelligence
           </span>
-          <span>Local pilot / v0.6</span>
+          <span>Local pilot / v0.7</span>
         </footer>
       </div>
     </div>

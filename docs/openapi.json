@@ -3336,12 +3336,129 @@
           "Statistical pattern review"
         ]
       }
+    },
+    "/api/machines/{code}/performance": {
+      "get": {
+        "operationId": "PerformanceController_dashboard",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "kind",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "BREAKDOWN",
+                "PLANNED",
+                "INVESTIGATION"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "description": "Inclusive IST date, not beyond today. Current backlog ignores these dates.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "Inclusive IST creation/due/activity date. Both dates required together; max 366 days.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Maintenance performance"
+        ]
+      }
     }
   },
   "info": {
     "title": "Supreme Maintenance API",
     "description": "",
-    "version": "0.6.0",
+    "version": "0.7.0",
     "contact": {}
   },
   "tags": [],
@@ -6551,6 +6668,316 @@
           "canOpenInvestigation",
           "items",
           "nextCursor"
+        ]
+      },
+      "PerformanceCountDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "key",
+          "count"
+        ]
+      },
+      "PerformanceCohortDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number"
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PerformanceCountDto"
+            }
+          },
+          "kinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PerformanceCountDto"
+            }
+          }
+        },
+        "required": [
+          "total",
+          "statuses",
+          "kinds"
+        ]
+      },
+      "PerformanceOpenOrderDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "BREAKDOWN",
+              "PLANNED",
+              "INVESTIGATION"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "REPORTED",
+              "ASSIGNED",
+              "IN_PROGRESS",
+              "AWAITING_REVIEW",
+              "APPROVED",
+              "CLOSED"
+            ]
+          },
+          "reportedAt": {
+            "type": "string"
+          },
+          "ageHours": {
+            "type": "number"
+          },
+          "technicianName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "kind",
+          "status",
+          "reportedAt",
+          "ageHours",
+          "technicianName"
+        ]
+      },
+      "PerformanceCurrentDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number"
+          },
+          "overduePlanned": {
+            "type": "number",
+            "nullable": true
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PerformanceCountDto"
+            }
+          },
+          "oldestAgeHours": {
+            "type": "number",
+            "nullable": true
+          },
+          "myOpen": {
+            "type": "number",
+            "nullable": true
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PerformanceOpenOrderDto"
+            }
+          }
+        },
+        "required": [
+          "total",
+          "overduePlanned",
+          "statuses",
+          "oldestAgeHours",
+          "myOpen",
+          "items"
+        ]
+      },
+      "PerformanceActivityDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "created": {
+            "type": "number"
+          },
+          "closed": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "date",
+          "created",
+          "closed"
+        ]
+      },
+      "PerformancePlannedDto": {
+        "type": "object",
+        "properties": {
+          "applicable": {
+            "type": "boolean"
+          },
+          "due": {
+            "type": "number"
+          },
+          "skipped": {
+            "type": "number"
+          },
+          "eligible": {
+            "type": "number"
+          },
+          "completed": {
+            "type": "number"
+          },
+          "onTime": {
+            "type": "number"
+          },
+          "late": {
+            "type": "number"
+          },
+          "open": {
+            "type": "number"
+          },
+          "completionPercent": {
+            "type": "number",
+            "nullable": true
+          },
+          "onTimePercent": {
+            "type": "number",
+            "nullable": true
+          },
+          "scheduling": {
+            "$ref": "#/components/schemas/ScheduleStatusDto"
+          }
+        },
+        "required": [
+          "applicable",
+          "due",
+          "skipped",
+          "eligible",
+          "completed",
+          "onTime",
+          "late",
+          "open",
+          "completionPercent",
+          "onTimePercent",
+          "scheduling"
+        ]
+      },
+      "PerformanceOutcomeDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "count": {
+            "type": "number"
+          },
+          "approvedOrClosed": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "key",
+          "count",
+          "approvedOrClosed"
+        ]
+      },
+      "PerformanceInvestigationsDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number"
+          },
+          "unsubmitted": {
+            "type": "number"
+          },
+          "legacyUnrecorded": {
+            "type": "number"
+          },
+          "outcomes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PerformanceOutcomeDto"
+            }
+          }
+        },
+        "required": [
+          "total",
+          "unsubmitted",
+          "legacyUnrecorded",
+          "outcomes"
+        ]
+      },
+      "PerformanceDto": {
+        "type": "object",
+        "properties": {
+          "policyVersion": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "BREAKDOWN",
+              "PLANNED",
+              "INVESTIGATION"
+            ],
+            "nullable": true
+          },
+          "generatedAt": {
+            "type": "string"
+          },
+          "cohort": {
+            "$ref": "#/components/schemas/PerformanceCohortDto"
+          },
+          "current": {
+            "$ref": "#/components/schemas/PerformanceCurrentDto"
+          },
+          "activity": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PerformanceActivityDto"
+            }
+          },
+          "closedInRange": {
+            "type": "number"
+          },
+          "planned": {
+            "$ref": "#/components/schemas/PerformancePlannedDto"
+          },
+          "investigations": {
+            "$ref": "#/components/schemas/PerformanceInvestigationsDto"
+          }
+        },
+        "required": [
+          "policyVersion",
+          "timezone",
+          "from",
+          "to",
+          "kind",
+          "generatedAt",
+          "cohort",
+          "current",
+          "activity",
+          "closedInRange",
+          "planned",
+          "investigations"
         ]
       }
     }
