@@ -60,3 +60,7 @@ Only active Maintenance head can release an investigation from a saved INVESTIGA
 ## Maintenance performance permissions (M7)
 
 All six roles can read Maintenance performance within their existing machine/organization scope; operators/technicians still require explicit machine access. Technician's own open-assignment count uses the verified identity. The dashboard has no operational mutation endpoint or controls: links open existing pages, where current trusted role, assignment, state and version checks decide allowed actions. Head manages assignments/review, supervisor closes approved work, operator reports, technician handles own assignments, management inspects, and Administrator remains without engineering authority. Definitions and the complete role workflow are in MAINTENANCE-PERFORMANCE.md.
+
+## Attachment permissions (M8)
+
+All six roles can download work-order photos/PDFs within existing machine/organization scope. Only the reporting Operator on REPORTED work or the assigned Technician on IN_PROGRESS work can upload. Other technicians/operators, Maintenance head, Supervisor, Management and Administrator do not upload. Review requires a stable evidence set: submitted/approved/closed work is read-only for attachments; head return enables assigned-technician additions. Upload/download recheck current trusted access, including revocations. No new grants or role unions are introduced. See ATTACHMENTS.md.

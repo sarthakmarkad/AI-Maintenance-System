@@ -12,12 +12,12 @@ export class ApiError extends Error {
     super(message);
   }
 }
-export async function api<T>(
+async function apiResponse(
   path: string,
   token: string,
   signal?: AbortSignal,
   init?: RequestInit,
-): Promise<T> {
+): Promise<Response> {
   const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
   let response: Response;
   try {
@@ -40,16 +40,36 @@ export async function api<T>(
       "We could not reach the maintenance service. Check your connection and try again.",
     );
   }
-  const body = await response.json().catch(() => null);
-  if (!response.ok)
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
     throw new ApiError(
       response.status,
       body?.message ||
         "The maintenance service could not complete this request.",
       response.headers.get("x-request-id") || undefined,
     );
-  return body as T;
+  }
+  return response;
 }
+export async function api<T>(
+  path: string,
+  token: string,
+  signal?: AbortSignal,
+  init?: RequestInit,
+): Promise<T> {
+  return (await apiResponse(path, token, signal, init))
+    .json()
+    .catch(() => null) as Promise<T>;
+}
+export async function apiBlob(
+  path: string,
+  token: string,
+  signal?: AbortSignal,
+): Promise<Blob> {
+  return (await apiResponse(path, token, signal)).blob();
+}
+export type WorkOrderAttachment = components["schemas"]["AttachmentDto"];
+export type AttachmentReceipt = components["schemas"]["AttachmentReceiptDto"];
 
 export type ProductionPreview = components["schemas"]["ProductionPreviewDto"];
 export type WorkbookInfo = components["schemas"]["WorkbookInfoDto"];

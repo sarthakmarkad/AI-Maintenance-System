@@ -58,7 +58,7 @@ Lists use newest report time and UUID as a stable keyset, with counts across all
 
 The migration and restricted runtime grants are applied to local operational and isolated test databases. Actual Administrator reads were verified in Codex's built-in browser using hosted Auth and the real API. No fake incidents or role changes were added to operational data. Full workflow authorization, concurrency, rollback, long-history paging and SQL protections are verified against the separate test database; desktop/mobile action forms use intercepted test fixtures. The same existing hosted identity now has six explicitly granted pilot views at the user’s request; this does not establish independent-person approval separation. Separate staff identities still need live acceptance.
 
-Attachments, original workbook storage, exports, KPI definitions and AI diagnosis/RCA drafting remain future work. Planned maintenance and in-app reminders are implemented as described in CALENDAR.md. Supabase-hosted operational database migration and deployment are still pending. Nothing is published.
+Private work-order attachments are implemented as described in ATTACHMENTS.md. Original workbook storage, exports, KPI definitions and AI diagnosis/RCA drafting remain future work. Planned maintenance and in-app reminders are implemented as described in CALENDAR.md. Supabase-hosted operational database migration and deployment are still pending. Nothing is published.
 
 ## Planned work extension (M5)
 
@@ -84,3 +84,7 @@ REST additions:
 - `submit` on INVESTIGATION requires `findings`, `correctiveAction` (checks/work performed), `performedAt`, `investigationOutcome`, and `preventiveAction` (next steps) when maintenance/sensor work remains. `preventiveAction` is otherwise optional.
 
 Browser acceptance reads existing user-created records only. Workflow writes and failure injection are tested in the isolated `_test` database; hosted separate-person acceptance remains pending. See VERIFICATION.md for current evidence.
+
+## Private evidence attachments (M8)
+
+The reporting operator can add photos/PDFs on REPORTED work; the assigned technician can add them on IN_PROGRESS work of every kind. Saving evidence increments the shared work-order version, appends ATTACH history/audit and preserves the exact bytes/metadata atomically. Evidence is frozen after submission; return before adding more. All scoped roles can download throughout the history. No delete/replace or new engineering rights are added. See [ATTACHMENTS.md](ATTACHMENTS.md) for limits, retry behavior, private PostgreSQL storage and verification boundaries.

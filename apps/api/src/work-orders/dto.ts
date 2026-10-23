@@ -8,6 +8,7 @@ import {
   InvestigationOutcome,
 } from "@prisma/client";
 import { AnomalyEvidenceDto } from "../anomalies/dto";
+import { AttachmentDto } from "../attachments/dto";
 export class WorkOrderPersonDto {
   @ApiProperty({ format: "uuid" }) userId!: string;
   @ApiProperty() displayName!: string;
@@ -26,6 +27,7 @@ export class WorkOrderEventDto {
       "APPROVE",
       "RETURN",
       "CLOSE",
+      "ATTACH",
     ],
   })
   action!: string;
@@ -76,6 +78,10 @@ export class WorkOrderInvestigationDto {
   @ApiProperty({ type: AnomalyEvidenceDto }) evidence!: AnomalyEvidenceDto;
 }
 export class WorkOrderDto extends WorkOrderSummaryDto {
+  @ApiProperty({ type: [AttachmentDto] }) attachments!: AttachmentDto[];
+  @ApiProperty() canUploadAttachment!: boolean;
+  @ApiProperty() attachmentLimit!: number;
+  @ApiProperty() attachmentMaxBytes!: number;
   @ApiProperty({ type: String, enum: InvestigationOutcome, nullable: true })
   investigationOutcome!: string | null;
   @ApiProperty({ type: WorkOrderInvestigationDto, nullable: true })

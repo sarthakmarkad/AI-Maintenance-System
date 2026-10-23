@@ -76,6 +76,7 @@ model Membership {
   reviewedOrders WorkOrder[] @relation("OrderReviewer")
   closedOrders WorkOrder[] @relation("OrderCloser")
   orderEvents WorkOrderEvent[]
+  orderAttachments WorkOrderAttachment[]
   createdPlans MaintenancePlan[] @relation("PlanCreator")
   technicianPlans MaintenancePlan[] @relation("PlanTechnician")
   scheduledOccurrences MaintenanceOccurrence[] @relation("OccurrenceTechnician")
@@ -360,6 +361,7 @@ model WorkOrder {
   reviewer Membership? @relation("OrderReviewer",fields:[orgId,reviewedBy],references:[orgId,userId],onDelete:Restrict)
   closer Membership? @relation("OrderCloser",fields:[orgId,closedBy],references:[orgId,userId],onDelete:Restrict)
   events WorkOrderEvent[]
+  attachments WorkOrderAttachment[]
   occurrence MaintenanceOccurrence? @relation(fields:[orgId,machineId,occurrenceId],references:[orgId,machineId,id],onDelete:Restrict)
   anomalyReview AnomalyReview? @relation(fields:[orgId,machineId,anomalyReviewId],references:[orgId,machineId,id],onDelete:Restrict)
   @@unique([orgId,machineId,occurrenceId])
@@ -503,8 +505,37 @@ model WorkOrderEvent {
   at DateTime @default(now()) @db.Timestamptz(3)
   order WorkOrder @relation(fields:[orgId,machineId,orderId],references:[orgId,machineId,id],onDelete:Restrict)
   actor Membership @relation(fields:[orgId,actorId],references:[orgId,userId],onDelete:Restrict)
+  attachment WorkOrderAttachment?
   @@unique([orderId,version])
   @@index([orgId,machineId,orderId,version])
+  @@schema("maintenance")
+}
+
+model WorkOrderAttachment {
+  id String @id @default(uuid()) @db.Uuid
+  orgId String @db.Uuid
+  machineId String @db.Uuid
+  orderId String @db.Uuid
+  orderVersion Int
+  requestId String @db.Uuid
+  fingerprint String @db.VarChar(64)
+  filename String @db.VarChar(160)
+  description String @db.VarChar(1000)
+  mediaType String @db.VarChar(32)
+  byteSize Int
+  sha256 String @db.VarChar(64)
+  content Bytes
+  uploadedBy String @db.Uuid
+  uploaderName String @db.VarChar(120)
+  actorRole Role
+  status WorkOrderStatus
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  order WorkOrder @relation(fields:[orgId,machineId,orderId],references:[orgId,machineId,id],onDelete:Restrict,onUpdate:NoAction,map:"WorkOrderAttachment_order_fkey")
+  uploader Membership @relation(fields:[orgId,uploadedBy],references:[orgId,userId],onDelete:Restrict,onUpdate:NoAction,map:"WorkOrderAttachment_uploader_fkey")
+  event WorkOrderEvent @relation(fields:[orderId,orderVersion],references:[orderId,version],onDelete:Restrict,onUpdate:NoAction,map:"WorkOrderAttachment_event_fkey")
+  @@unique([orderId,orderVersion])
+  @@unique([orgId,orderId,uploadedBy,requestId])
+  @@index([orgId,machineId,orderId,createdAt,id])
   @@schema("maintenance")
 }
 

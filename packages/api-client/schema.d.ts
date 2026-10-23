@@ -484,6 +484,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/machines/{code}/work-orders/{orderId}/attachments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AttachmentsController_upload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/work-orders/{orderId}/attachments/{id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AttachmentsController_download"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -824,6 +856,28 @@ export interface components {
             userId: string;
             displayName: string;
         };
+        AttachmentUploaderDto: {
+            userId: string;
+            displayName: string;
+        };
+        AttachmentDto: {
+            /** Format: uuid */
+            id: string;
+            orderVersion: number;
+            filename: string;
+            description: string;
+            /** @enum {string} */
+            mediaType: "image/jpeg" | "image/png" | "application/pdf";
+            byteSize: number;
+            sha256: string;
+            uploader: components["schemas"]["AttachmentUploaderDto"];
+            /** @enum {string} */
+            actorRole: "OPERATOR" | "TECHNICIAN" | "MAINTENANCE_HEAD" | "SUPERVISOR" | "MANAGEMENT" | "ADMINISTRATOR";
+            /** @enum {string} */
+            status: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED";
+            /** Format: date-time */
+            createdAt: string;
+        };
         AnomalySampleDto: {
             id: string;
             sourceId: string;
@@ -867,7 +921,7 @@ export interface components {
             id: string;
             version: number;
             /** @enum {string} */
-            action: "REPORT" | "SCHEDULE" | "INVESTIGATE" | "ASSIGN" | "START" | "SUBMIT" | "APPROVE" | "RETURN" | "CLOSE";
+            action: "REPORT" | "SCHEDULE" | "INVESTIGATE" | "ASSIGN" | "START" | "SUBMIT" | "APPROVE" | "RETURN" | "CLOSE" | "ATTACH";
             /** @enum {string|null} */
             fromStatus: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED" | null;
             /** @enum {string} */
@@ -908,6 +962,10 @@ export interface components {
             /** Format: date-time */
             closedAt: string | null;
             allowedActions: ("assign" | "start" | "submit" | "approve" | "return" | "close")[];
+            attachments: components["schemas"]["AttachmentDto"][];
+            canUploadAttachment: boolean;
+            attachmentLimit: number;
+            attachmentMaxBytes: number;
             /** @enum {string|null} */
             investigationOutcome: "MAINTENANCE_REQUIRED" | "SENSOR_CHECK_REQUIRED" | "OPERATING_CHANGE_EXPLAINED" | "NO_FAULT_FOUND" | "INCONCLUSIVE" | null;
             investigationReview: components["schemas"]["WorkOrderInvestigationDto"] | null;
@@ -994,6 +1052,10 @@ export interface components {
             /** Format: date-time */
             closedAt: string | null;
             allowedActions: ("assign" | "start" | "submit" | "approve" | "return" | "close")[];
+            attachments: components["schemas"]["AttachmentDto"][];
+            canUploadAttachment: boolean;
+            attachmentLimit: number;
+            attachmentMaxBytes: number;
             /** @enum {string|null} */
             investigationOutcome: "MAINTENANCE_REQUIRED" | "SENSOR_CHECK_REQUIRED" | "OPERATING_CHANGE_EXPLAINED" | "NO_FAULT_FOUND" | "INCONCLUSIVE" | null;
             investigationReview: components["schemas"]["WorkOrderInvestigationDto"] | null;
@@ -1375,6 +1437,10 @@ export interface components {
             closedInRange: number;
             planned: components["schemas"]["PerformancePlannedDto"];
             investigations: components["schemas"]["PerformanceInvestigationsDto"];
+        };
+        AttachmentReceiptDto: {
+            attachment: components["schemas"]["AttachmentDto"];
+            alreadyUploaded: boolean;
         };
     };
     responses: never;
@@ -3593,6 +3659,174 @@ export interface operations {
                 };
             };
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    AttachmentsController_upload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                    /** Format: uuid */
+                    requestId: string;
+                    version: number;
+                    description: string;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttachmentReceiptDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    AttachmentsController_download: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                orderId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/octet-stream": string;
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

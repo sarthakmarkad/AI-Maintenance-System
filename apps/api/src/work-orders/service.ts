@@ -17,6 +17,13 @@ import {
   type MaintenanceOccurrence,
 } from "@prisma/client";
 import { createHash, randomUUID } from "node:crypto";
+import {
+  attachmentMetadata,
+  attachmentSelect,
+  canAttach,
+  MAX_ATTACHMENTS,
+  MAX_ATTACHMENT_BYTES,
+} from "../attachments/policy";
 import { z } from "zod";
 import { Database } from "../database";
 import type { Principal } from "../repository";
@@ -238,6 +245,12 @@ export class WorkOrdersService {
       orderBy: { version: "desc" },
       take: 51,
     });
+    const attachments = await tx.workOrderAttachment.findMany({
+      where: { orgId: o.orgId, machineId: o.machineId, orderId: o.id },
+      select: attachmentSelect,
+      orderBy: [{ orderVersion: "asc" }],
+      take: MAX_ATTACHMENTS,
+    });
     const sourceReview = o.anomalyReviewId
       ? await tx.anomalyReview.findFirst({
           where: {
@@ -250,6 +263,11 @@ export class WorkOrdersService {
       : null;
     return {
       ...this.summary(o, user),
+      attachments: attachments.map(attachmentMetadata),
+      canUploadAttachment:
+        canAttach(o, user) && attachments.length < MAX_ATTACHMENTS,
+      attachmentLimit: MAX_ATTACHMENTS,
+      attachmentMaxBytes: MAX_ATTACHMENT_BYTES,
       description: o.description,
       startedAt: o.startedAt?.toISOString() ?? null,
       performedAt: o.performedAt?.toISOString() ?? null,

@@ -3312,3 +3312,133 @@ button {
     flex-direction: column;
   }
 }
+
+/* Work-order evidence uses the established maintenance panel typography. */
+.work-attachments {
+  margin: 24px 0;
+}
+.work-attachments .panel-heading h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.work-attachments-body {
+  padding: 24px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.attachment-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.attachment-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border);
+}
+.attachment-list li:first-child {
+  padding-top: 0;
+}
+.attachment-list li > svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+  color: var(--muted);
+}
+.attachment-info {
+  min-width: 0;
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+.attachment-info strong {
+  font-size: 14px;
+}
+.attachment-info p {
+  margin: 4px 0 8px;
+  white-space: pre-wrap;
+}
+.attachment-info small {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+}
+.attachment-empty,
+.attachment-retention,
+.attachment-guidance,
+.attachment-form > p {
+  color: var(--muted);
+}
+.attachment-retention {
+  margin: 16px 0;
+  font-size: 12px;
+}
+.attachment-form {
+  display: grid;
+  gap: 14px;
+  padding-top: 20px;
+  margin-top: 20px;
+  border-top: 1px solid var(--border);
+}
+.attachment-form h3,
+.attachment-form > p {
+  margin: 0;
+}
+.attachment-form h3 {
+  font-size: 15px;
+  font-weight: 600;
+}
+.attachment-form label {
+  display: grid;
+  gap: 8px;
+  font-weight: 600;
+}
+.attachment-form input,
+.attachment-form textarea {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  border: 1px solid #d5dfd7;
+  border-radius: 6px;
+  background: #fcfdfb;
+  padding: 11px 12px;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 400;
+}
+.attachment-form textarea {
+  resize: vertical;
+}
+.attachment-form input::file-selector-button {
+  border: 1px solid #d5dfd7;
+  border-radius: 4px;
+  background: white;
+  padding: 5px 9px;
+  margin-right: 10px;
+  font: inherit;
+  color: var(--ink);
+  cursor: pointer;
+}
+.attachment-form > button {
+  justify-self: start;
+}
+@media (max-width: 640px) {
+  .attachment-form input,
+  .attachment-form textarea {
+    font-size: 16px;
+  }
+  .work-attachments-body {
+    padding: 16px;
+  }
+  .attachment-list li {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .attachment-list li > button {
+    margin-left: 30px;
+  }
+  .attachment-info {
+    flex-basis: calc(100% - 36px);
+  }
+}

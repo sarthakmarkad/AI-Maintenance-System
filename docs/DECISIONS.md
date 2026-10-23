@@ -112,3 +112,9 @@ The owner requested removing the unnecessary MTTR/MTBF feature after discussing 
 ## Workflow timing removal — 23 October 2026
 
 At the owner's request, removed the confusing Workflow timing section from Maintenance performance along with the unused timing aggregates, history query and API DTO fields. Backlog age, work-order timestamps/history, role permissions, activity counts, planned-task closure and investigation outcomes remain intact. No operational workflow or stored evidence changed.
+
+## Private work-order evidence — milestone 8, 23 October 2026
+
+Added bounded JPEG/PNG/PDF attachments, retained as private PostgreSQL bytea with immutable actor/stage/version/hash metadata. Chose the current private operational database for the local pilot so file, event, version and audit commit atomically without additional hosted credentials or a runtime filesystem store. Private object storage/scanning/retention/restore acceptance remains separate deployed work; original workbook retention is unchanged. This supersedes any general implication that every file feature must first introduce Supabase Storage, while preserving private storage and the existing workbook-specific deferral.
+
+Reporting operator adds evidence before assignment; assigned technician adds it during IN_PROGRESS. Submitted evidence freezes for engineering review; head return reopens technician additions. Heads/supervisors/management/admin read/download within existing scope. Uploads advance the shared version without modifying workflow evidence; exact retry fingerprints, capped counts, scoped relations, immutable ATTACH history, audit and deferred SQL evidence checks protect the handoff. All six role permissions and independent timing rules remain intact. Limits (5 MiB/file, 20/order) and supported formats are pilot decisions, not reconstructed SRS requirements. See ATTACHMENTS.md. No public storage, Auth bypass, new identity, automatic diagnosis or deployment was added.

@@ -1,5 +1,6 @@
 "use client";
 import { Evidence } from "./anomalies-workspace";
+import { WorkOrderAttachments } from "./work-order-attachments";
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -108,6 +109,9 @@ const fieldLabels: Record<string, string> = {
   measuredAt: "Flag measurement time",
   key: "Evidence fingerprint",
   dueAt: "Planned due time",
+  filename: "File name",
+  description: "Attachment description",
+  byteSize: "File size (bytes)",
 };
 const outcomes: Record<string, string> = {
   MAINTENANCE_REQUIRED: "Maintenance required",
@@ -609,6 +613,23 @@ export function WorkOrdersWorkspace({
                 </div>
               </section>
             </div>
+            <WorkOrderAttachments
+              key={order.id}
+              order={order}
+              base={base}
+              token={token}
+              disabled={busy || conflict}
+              onBusy={setBusy}
+              onFailure={failure}
+              onUploaded={() => {
+                lastVersion.current = null;
+                setOrder(null);
+                setSuccess(
+                  "Attachment and upload history saved. Latest work order loaded.",
+                );
+                setAttempt((n) => n + 1);
+              }}
+            />
             <ActionForm
               key={`${order.id}-${order.version}`}
               order={order}
@@ -636,7 +657,10 @@ export function WorkOrdersWorkspace({
                     <div>
                       <div className="work-event-heading">
                         <h3>
-                          {label(event.action)} · v{event.version}
+                          {event.action === "ATTACH"
+                            ? "Attachment added"
+                            : label(event.action)}{" "}
+                          · v{event.version}
                         </h3>
                         <time>{time(event.at)}</time>
                       </div>
@@ -655,6 +679,14 @@ export function WorkOrdersWorkspace({
                           .filter(
                             ([key, v]) =>
                               v !== null &&
+                              !(
+                                event.action === "ATTACH" &&
+                                [
+                                  "attachmentId",
+                                  "sha256",
+                                  "mediaType",
+                                ].includes(key)
+                              ) &&
                               !(
                                 event.action === "SCHEDULE" &&
                                 [
@@ -870,6 +902,10 @@ function ReportForm({
         <h2>Report a breakdown or issue</h2>
       </div>
       <form className="work-form" onSubmit={submit} aria-label="Issue report">
+        <p>
+          Save the report first, then add photos or inspection documents on its
+          work-order page before assignment.
+        </p>
         <label>
           Issue title
           <input

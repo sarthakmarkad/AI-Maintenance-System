@@ -1,6 +1,6 @@
 # Supreme Maintenance Intelligence
 
-Local milestones 1–7 for Supreme Industries' **WH-C**, the newer Windmöller & Hölscher blown-film line. Its exact model is unknown. This repository implements authenticated access, production workbook import and dashboards, synthetic hourly trends, role-controlled maintenance work orders, and fixed-date planned maintenance with in-app reminders, explainable statistical pattern review, and maintenance workflow performance. Further platform milestones remain in scope.
+Local milestones 1–8 for Supreme Industries' **WH-C**, the newer Windmöller & Hölscher blown-film line. Its exact model is unknown. This repository implements authenticated access, production workbook import and dashboards, synthetic hourly trends, role-controlled maintenance work orders, and fixed-date planned maintenance with in-app reminders, explainable statistical pattern review, maintenance workflow performance, and private work-order attachments. Further platform milestones remain in scope.
 
 ## Start here
 
@@ -99,7 +99,7 @@ Database tests require `TEST_DATABASE_URL` (owner) and `TEST_RUNTIME_DATABASE_UR
 | `docs` | Decisions, data boundaries, complete scope map and verification evidence |
 | `Maintenance_Handoff` | Ignored, unchanged local reference material and original workbooks |
 
-Production XLSX uploads are parsed in memory; source rows and reconciled daily records persist in PostgreSQL. Original file-byte storage is deferred to private Supabase Storage. Recharts renders saved quantities with gaps. A bounded NestJS calendar worker persists occurrence cursors and in-app reminders in PostgreSQL. A separate bounded Python process evaluates synthetic statistical patterns on demand, without database/provider credentials. No Redis queue, pgvector or AI provider is introduced. Future service directories will be added with their implementation.
+Work-order photos/documents are retained privately in PostgreSQL with immutable metadata; see [attachment workflow and limits](docs/ATTACHMENTS.md). Production XLSX uploads are parsed in memory; source rows and reconciled daily records persist in PostgreSQL. Original file-byte storage is deferred to private Supabase Storage. Recharts renders saved quantities with gaps. A bounded NestJS calendar worker persists occurrence cursors and in-app reminders in PostgreSQL. A separate bounded Python process evaluates synthetic statistical patterns on demand, without database/provider credentials. No Redis queue, pgvector or AI provider is introduced. Future service directories will be added with their implementation.
 
 ## Current boundary and next milestone
 
@@ -128,3 +128,5 @@ The [WH-C Maintenance calendar](http://localhost:3000/machines/WH-C/calendar) su
 **Maintenance performance** is available at [WH-C Maintenance performance](http://localhost:3000/machines/WH-C/performance). All six scoped roles can inspect workload, older backlog, created/closed activity, generated planned-task completion and investigation outcomes. The technician sees its own open-assignment count. Open source records for role-authorized action; the dashboard is read-only. See [definitions, workflow and role activities](docs/MAINTENANCE-PERFORMANCE.md).
 
 The dashboard focuses on maintenance workflow performance. MTTR, MTBF and machine-availability cards are omitted at the owner’s request. Reported temperature/pressure ranges remain unverified and are not safe limits or normal bands. All 20 intended areas remain in scope.
+
+**Private work-order attachments** are available under **Photos & documents** on each work-order detail page. The reporting operator can add evidence before assignment; the assigned technician can add it after starting work and before submission. JPEG/PNG/PDF files are limited to 5 MB each and 20 per order. All scoped roles can download; submitted evidence is frozen until return. Uploads, versioned history and audit save together in the private local PostgreSQL database. See [attachment permissions, storage and limits](docs/ATTACHMENTS.md).

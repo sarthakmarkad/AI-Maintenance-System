@@ -22,3 +22,4 @@ GRANT UPDATE (version, "skippedAt", "skippedBy", "skipReason") ON maintenance."M
 GRANT UPDATE ("performedAt", "investigationOutcome") ON maintenance."WorkOrder" TO :"runtime_role";
 
 GRANT INSERT ON maintenance."AnomalyReview" TO :"runtime_role";
+GRANT INSERT ON maintenance."WorkOrderAttachment" TO :"runtime_role";

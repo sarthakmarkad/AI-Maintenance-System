@@ -3453,12 +3453,287 @@
           "Maintenance performance"
         ]
       }
+    },
+    "/api/machines/{code}/work-orders/{orderId}/attachments": {
+      "post": {
+        "operationId": "AttachmentsController_upload",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file",
+                  "requestId",
+                  "version",
+                  "description"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "requestId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "description": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 1000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentReceiptDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Work-order attachments"
+        ]
+      }
+    },
+    "/api/machines/{code}/work-orders/{orderId}/attachments/{id}/download": {
+      "get": {
+        "operationId": "AttachmentsController_download",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Work-order attachments"
+        ]
+      }
     }
   },
   "info": {
     "title": "Supreme Maintenance API",
     "description": "",
-    "version": "0.7.0",
+    "version": "0.8.0",
     "contact": {}
   },
   "tags": [],
@@ -4741,6 +5016,95 @@
           "displayName"
         ]
       },
+      "AttachmentUploaderDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId",
+          "displayName"
+        ]
+      },
+      "AttachmentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderVersion": {
+            "type": "number"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "mediaType": {
+            "type": "string",
+            "enum": [
+              "image/jpeg",
+              "image/png",
+              "application/pdf"
+            ]
+          },
+          "byteSize": {
+            "type": "number"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "uploader": {
+            "$ref": "#/components/schemas/AttachmentUploaderDto"
+          },
+          "actorRole": {
+            "type": "string",
+            "enum": [
+              "OPERATOR",
+              "TECHNICIAN",
+              "MAINTENANCE_HEAD",
+              "SUPERVISOR",
+              "MANAGEMENT",
+              "ADMINISTRATOR"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "REPORTED",
+              "ASSIGNED",
+              "IN_PROGRESS",
+              "AWAITING_REVIEW",
+              "APPROVED",
+              "CLOSED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "orderVersion",
+          "filename",
+          "description",
+          "mediaType",
+          "byteSize",
+          "sha256",
+          "uploader",
+          "actorRole",
+          "status",
+          "createdAt"
+        ]
+      },
       "AnomalySampleDto": {
         "type": "object",
         "properties": {
@@ -4923,7 +5287,8 @@
               "SUBMIT",
               "APPROVE",
               "RETURN",
-              "CLOSE"
+              "CLOSE",
+              "ATTACH"
             ]
           },
           "fromStatus": {
@@ -5091,6 +5456,21 @@
               ]
             }
           },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttachmentDto"
+            }
+          },
+          "canUploadAttachment": {
+            "type": "boolean"
+          },
+          "attachmentLimit": {
+            "type": "number"
+          },
+          "attachmentMaxBytes": {
+            "type": "number"
+          },
           "investigationOutcome": {
             "type": "string",
             "enum": [
@@ -5202,6 +5582,10 @@
           "restoredAt",
           "closedAt",
           "allowedActions",
+          "attachments",
+          "canUploadAttachment",
+          "attachmentLimit",
+          "attachmentMaxBytes",
           "investigationOutcome",
           "investigationReview",
           "performedAt",
@@ -5500,6 +5884,21 @@
               ]
             }
           },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttachmentDto"
+            }
+          },
+          "canUploadAttachment": {
+            "type": "boolean"
+          },
+          "attachmentLimit": {
+            "type": "number"
+          },
+          "attachmentMaxBytes": {
+            "type": "number"
+          },
           "investigationOutcome": {
             "type": "string",
             "enum": [
@@ -5608,6 +6007,10 @@
           "restoredAt",
           "closedAt",
           "allowedActions",
+          "attachments",
+          "canUploadAttachment",
+          "attachmentLimit",
+          "attachmentMaxBytes",
           "investigationOutcome",
           "investigationReview",
           "performedAt",
@@ -6978,6 +7381,21 @@
           "closedInRange",
           "planned",
           "investigations"
+        ]
+      },
+      "AttachmentReceiptDto": {
+        "type": "object",
+        "properties": {
+          "attachment": {
+            "$ref": "#/components/schemas/AttachmentDto"
+          },
+          "alreadyUploaded": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "attachment",
+          "alreadyUploaded"
         ]
       }
     }
