@@ -26,6 +26,8 @@ import {
 } from "./attachments/controller";
 import { AttachmentsService } from "./attachments/service";
 import { ReportsController, ReportExportLimit } from "./reports/controller";
+import { DocumentsController } from "./documents/controller";
+import { DocumentsService } from "./documents/service";
 import { ReportsService } from "./reports/service";
 import { CONFIG, parseConfig, type Config } from "./config";
 import { Database } from "./database";
@@ -52,6 +54,7 @@ export function appModule(config: Config) {
       AttachmentsController,
       ReportsController,
       NotificationsController,
+      DocumentsController,
     ],
     providers: [
       { provide: CONFIG, useValue: config },
@@ -72,6 +75,7 @@ export function appModule(config: Config) {
       AttachmentUploadLimit,
       ReportsService,
       NotificationsService,
+      DocumentsService,
       ReportExportLimit,
     ],
   })

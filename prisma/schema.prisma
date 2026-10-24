@@ -76,6 +76,7 @@ model Membership {
   reviewedOrders WorkOrder[] @relation("OrderReviewer")
   closedOrders WorkOrder[] @relation("OrderCloser")
   orderEvents WorkOrderEvent[]
+  documentEvents MachineDocumentEvent[]
   orderAttachments WorkOrderAttachment[]
   createdPlans MaintenancePlan[] @relation("PlanCreator")
   technicianPlans MaintenancePlan[] @relation("PlanTechnician")
@@ -122,6 +123,7 @@ model Machine {
   productionDays ProductionDay[]
   readingImports ReadingImport[]
   processReadings ProcessReading[]
+  documents MachineDocument[]
   workOrders WorkOrder[]
   maintenancePlans MaintenancePlan[]
   maintenanceOccurrences MaintenanceOccurrence[]
@@ -582,5 +584,61 @@ model WorkOrderNotificationReceipt {
   reader Membership @relation(fields:[orgId,userId],references:[orgId,userId],onDelete:Restrict,onUpdate:NoAction,map:"WorkOrderNotificationReceipt_reader_fkey")
   @@unique([eventId,userId,role])
   @@index([orgId,machineId,userId,role])
+  @@schema("maintenance")
+}
+
+// Immutable logical metadata, version files and events; only aggregate version advances.
+model MachineDocument {
+  id String @id @default(uuid()) @db.Uuid
+  orgId String @db.Uuid
+  machineId String @db.Uuid
+  title String @db.VarChar(160)
+  kind String @db.VarChar(16)
+  version Int @default(1)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  machine Machine @relation(fields:[orgId,machineId], references:[orgId,id], onDelete:Restrict)
+  files MachineDocumentFile[]
+  events MachineDocumentEvent[]
+  @@unique([orgId,machineId,id])
+  @@index([orgId,machineId,createdAt,id])
+  @@schema("maintenance")
+}
+model MachineDocumentFile {
+  id String @id @default(uuid()) @db.Uuid
+  orgId String @db.Uuid
+  machineId String @db.Uuid
+  documentId String @db.Uuid
+  number Int
+  filename String @db.VarChar(160)
+  description String @db.VarChar(1000)
+  byteSize Int
+  sha256 String @db.VarChar(64)
+  content Bytes
+  document MachineDocument @relation(fields:[orgId,machineId,documentId], references:[orgId,machineId,id], onDelete:Restrict)
+  events MachineDocumentEvent[]
+  @@unique([orgId,machineId,documentId,id])
+  @@unique([documentId,number])
+  @@schema("maintenance")
+}
+model MachineDocumentEvent {
+  id String @id @default(uuid()) @db.Uuid
+  orgId String @db.Uuid
+  machineId String @db.Uuid
+  documentId String @db.Uuid
+  fileId String @db.Uuid
+  revision Int
+  action String @db.VarChar(16)
+  reason String @db.VarChar(1000)
+  actorId String @db.Uuid
+  actorName String @db.VarChar(120)
+  actorRole Role
+  requestId String @db.Uuid
+  fingerprint String @db.VarChar(64)
+  at DateTime @default(now()) @db.Timestamptz(3)
+  document MachineDocument @relation(fields:[orgId,machineId,documentId], references:[orgId,machineId,id], onDelete:Restrict)
+  file MachineDocumentFile @relation(fields:[orgId,machineId,documentId,fileId], references:[orgId,machineId,documentId,id], onDelete:Restrict)
+  actor Membership @relation(fields:[orgId,actorId], references:[orgId,userId], onDelete:Restrict)
+  @@unique([documentId,revision])
+  @@unique([orgId,machineId,actorId,requestId])
   @@schema("maintenance")
 }

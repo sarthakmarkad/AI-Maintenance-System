@@ -44,6 +44,7 @@ export function Shell({
   const inReadings = pathname.includes("/readings");
   const inOrders = pathname.includes("/work-orders");
   const inPerformance = pathname.includes("/performance");
+  const inDocuments = pathname.includes("/documents");
   const inReports = pathname.includes("/reports");
   const inCalendar = pathname.includes("/calendar");
   const [signingOut, setSigningOut] = useState(false);
@@ -97,7 +98,7 @@ export function Shell({
         <div className="workspace-label">PILOT WORKSPACE</div>
         <nav aria-label="Main navigation">
           <Link
-            className={`nav-item ${inProduction || inReadings || inOrders || inCalendar || inPerformance || inReports ? "" : "active"}`}
+            className={`nav-item ${inProduction || inReadings || inOrders || inCalendar || inPerformance || inReports || inDocuments ? "" : "active"}`}
             href="/machines"
           >
             <Boxes size={18} />
@@ -156,6 +157,15 @@ export function Shell({
             >
               <FileText size={18} />
               Maintenance reports
+            </Link>
+          )}
+          {code && (
+            <Link
+              className={`nav-item ${inDocuments ? "active" : ""}`}
+              href={`/machines/${code}/documents`}
+            >
+              <FileText size={18} />
+              Manuals & SOPs
             </Link>
           )}
         </nav>

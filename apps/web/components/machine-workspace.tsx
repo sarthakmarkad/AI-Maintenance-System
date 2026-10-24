@@ -24,6 +24,7 @@ import { ProductionWorkspace } from "./production-workspace";
 import { ReadingsWorkspace } from "./readings-workspace";
 import { WorkOrdersWorkspace } from "./work-orders-workspace";
 import { PerformanceWorkspace } from "./performance-workspace";
+import { DocumentLibraryWorkspace } from "./document-library";
 import { ReportsWorkspace } from "./reports-workspace";
 import { CalendarWorkspace } from "./calendar-workspace";
 import { clearRoleSelection } from "@/lib/role-selection";
@@ -39,6 +40,7 @@ export function MachineWorkspace({
   calendar = false,
   performance = false,
   reports = false,
+  documents = false,
   orderId,
 }: {
   code?: string;
@@ -48,6 +50,7 @@ export function MachineWorkspace({
   calendar?: boolean;
   performance?: boolean;
   reports?: boolean;
+  documents?: boolean;
   orderId?: string;
 }) {
   const { session, loading, expired, expire } = useAuth();
@@ -133,7 +136,13 @@ export function MachineWorkspace({
           </Button>
         </section>
       ) : code && result.machines[0] ? (
-        reports ? (
+        documents ? (
+          <DocumentLibraryWorkspace
+            machine={result.machines[0]}
+            user={result.user}
+            token={session.access_token}
+          />
+        ) : reports ? (
           <ReportsWorkspace
             machine={result.machines[0]}
             user={result.user}

@@ -1,0 +1,161 @@
+.library {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+.library h2 {
+  font-size: 20px;
+  margin: 5px 0 10px;
+}
+.library h3 {
+  margin: 12px 0;
+}
+.library p {
+  line-height: 1.6;
+}
+.notice {
+  background: #eef5fb;
+  border: 1px solid #d3e2f1;
+  border-radius: 12px;
+  padding: 16px;
+  color: #304d65;
+}
+.card {
+  background: white;
+  border: 1px solid #dce3ea;
+  border-radius: 14px;
+  padding: 22px;
+  min-width: 0;
+}
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 14px;
+}
+.filters label {
+  flex: 1;
+  min-width: 160px;
+}
+.library label {
+  display: grid;
+  gap: 7px;
+  font-weight: 600;
+  font-size: 14px;
+}
+.library input,
+.library select,
+.library textarea {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #bccbd8;
+  border-radius: 8px;
+  padding: 11px;
+  background: white;
+  color: #203548;
+  font: inherit;
+}
+.library textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+.form {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.results {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+.file {
+  display: grid;
+  gap: 10px;
+  border: 1px solid #e0e6ed;
+  background: #f8fafc;
+  padding: 18px;
+  border-radius: 10px;
+  margin-top: 16px;
+  min-width: 0;
+}
+.file strong,
+.file code,
+.library h2 {
+  overflow-wrap: anywhere;
+}
+.file p {
+  margin: 0;
+}
+.file code {
+  font-size: 12px;
+  word-break: break-all;
+}
+.current,
+.badge {
+  justify-self: start;
+  display: inline-block;
+  border-radius: 20px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.current {
+  background: #dcefe5;
+  color: #175b3b;
+}
+.badge {
+  background: #f7e8cf;
+  color: #704d14;
+}
+.history {
+  margin-top: 18px;
+  border-top: 1px solid #dce3ea;
+}
+.events {
+  padding-left: 20px;
+  display: grid;
+  gap: 14px;
+  font-size: 13px;
+  color: #46596c;
+}
+.events p {
+  margin-top: 4px;
+}
+.library button {
+  white-space: normal;
+  min-height: 40px;
+}
+.library input:focus-visible,
+.library select:focus-visible,
+.library textarea:focus-visible {
+  outline: 3px solid #89b8e5;
+  outline-offset: 2px;
+}
+@media (max-width: 600px) {
+  .card {
+    padding: 16px;
+  }
+  .file {
+    padding: 12px;
+  }
+  .filters label {
+    min-width: 100%;
+  }
+  .row {
+    align-items: stretch;
+  }
+  .row > button {
+    flex: 1;
+  }
+  .library {
+    gap: 16px;
+  }
+}

@@ -25,3 +25,5 @@ GRANT INSERT ON maintenance."AnomalyReview" TO :"runtime_role";
 GRANT INSERT ON maintenance."WorkOrderAttachment" TO :"runtime_role";
 
 GRANT INSERT ON maintenance."WorkOrderNotificationReceipt" TO :"runtime_role";
+GRANT INSERT ON maintenance."MachineDocument", maintenance."MachineDocumentFile", maintenance."MachineDocumentEvent" TO :"runtime_role";
+GRANT UPDATE (version) ON maintenance."MachineDocument" TO :"runtime_role";
