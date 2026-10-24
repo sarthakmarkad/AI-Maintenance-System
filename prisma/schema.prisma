@@ -81,6 +81,7 @@ model Membership {
   technicianPlans MaintenancePlan[] @relation("PlanTechnician")
   scheduledOccurrences MaintenanceOccurrence[] @relation("OccurrenceTechnician")
   skippedOccurrences MaintenanceOccurrence[] @relation("OccurrenceSkipper")
+  notificationReceipts WorkOrderNotificationReceipt[]
   reminderReceipts MaintenanceReminderReceipt[]
   anomalyReviews AnomalyReview[]
   @@unique([orgId,userId])
@@ -505,7 +506,9 @@ model WorkOrderEvent {
   at DateTime @default(now()) @db.Timestamptz(3)
   order WorkOrder @relation(fields:[orgId,machineId,orderId],references:[orgId,machineId,id],onDelete:Restrict)
   actor Membership @relation(fields:[orgId,actorId],references:[orgId,userId],onDelete:Restrict)
+  notificationReceipts WorkOrderNotificationReceipt[]
   attachment WorkOrderAttachment?
+  @@unique([orgId,machineId,id])
   @@unique([orderId,version])
   @@index([orgId,machineId,orderId,version])
   @@schema("maintenance")
@@ -563,5 +566,21 @@ model AnomalyReview {
   @@unique([orgId,machineId,key])
   @@unique([orgId,machineId,id])
   @@index([orgId,machineId,createdAt,id])
+  @@schema("maintenance")
+}
+
+// Notifications derive from immutable workflow events; only explicit reads write.
+model WorkOrderNotificationReceipt {
+  id String @id @default(uuid()) @db.Uuid
+  orgId String @db.Uuid
+  machineId String @db.Uuid
+  eventId String @db.Uuid
+  userId String @db.Uuid
+  role Role
+  readAt DateTime @default(now()) @db.Timestamptz(3)
+  event WorkOrderEvent @relation(fields:[orgId,machineId,eventId],references:[orgId,machineId,id],onDelete:Restrict,onUpdate:NoAction,map:"WorkOrderNotificationReceipt_event_fkey")
+  reader Membership @relation(fields:[orgId,userId],references:[orgId,userId],onDelete:Restrict,onUpdate:NoAction,map:"WorkOrderNotificationReceipt_reader_fkey")
+  @@unique([eventId,userId,role])
+  @@index([orgId,machineId,userId,role])
   @@schema("maintenance")
 }

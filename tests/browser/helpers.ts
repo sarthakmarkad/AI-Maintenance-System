@@ -55,9 +55,11 @@ export async function setup(page: Page, role = "OPERATOR") {
     await route.fulfill({
       json: path.endsWith("/me")
         ? { ...me, role, availableRoles: [role] }
-        : path.endsWith("/WH-C")
-          ? machine
-          : { items: [machine], nextCursor: null },
+        : path.endsWith("/work-order-notifications")
+          ? { items: [], unread: 0, nextCursor: null }
+          : path.endsWith("/WH-C")
+            ? machine
+            : { items: [machine], nextCursor: null },
     });
   });
 }

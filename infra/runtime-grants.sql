@@ -23,3 +23,5 @@ GRANT UPDATE ("performedAt", "investigationOutcome") ON maintenance."WorkOrder" 
 
 GRANT INSERT ON maintenance."AnomalyReview" TO :"runtime_role";
 GRANT INSERT ON maintenance."WorkOrderAttachment" TO :"runtime_role";
+
+GRANT INSERT ON maintenance."WorkOrderNotificationReceipt" TO :"runtime_role";

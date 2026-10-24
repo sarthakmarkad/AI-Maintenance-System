@@ -4,6 +4,8 @@ import { NestFactory } from "@nestjs/core";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import helmet from "helmet";
 import { json } from "express";
+import { NotificationsController } from "./notifications/controller";
+import { NotificationsService } from "./notifications/service";
 import { ProductionController } from "./production/controller";
 import { ProductionService } from "./production/service";
 import { ReadingsController } from "./readings/controller";
@@ -49,6 +51,7 @@ export function appModule(config: Config) {
       PerformanceController,
       AttachmentsController,
       ReportsController,
+      NotificationsController,
     ],
     providers: [
       { provide: CONFIG, useValue: config },
@@ -68,6 +71,7 @@ export function appModule(config: Config) {
       AttachmentsService,
       AttachmentUploadLimit,
       ReportsService,
+      NotificationsService,
       ReportExportLimit,
     ],
   })

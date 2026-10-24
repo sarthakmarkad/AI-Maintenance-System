@@ -1,0 +1,63 @@
+.inbox {
+  border: 1px solid var(--border, #dce3e1);
+  border-radius: 12px;
+  background: var(--card, white);
+  padding: 10px 16px;
+  margin-bottom: 20px;
+  min-width: 0;
+}
+.inbox p {
+  margin: 10px 0;
+  font-size: 13px;
+}
+.heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.heading button {
+  white-space: normal;
+  height: auto;
+  min-height: 38px;
+  text-align: left;
+}
+.list {
+  list-style: none;
+  padding: 0;
+  max-height: 420px;
+  overflow: auto;
+}
+.list li {
+  border-top: 1px solid var(--border, #dce3e1);
+  padding: 16px 0;
+  overflow-wrap: anywhere;
+}
+.list small,
+.meta {
+  color: #53645c;
+  font-size: 12px;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.actions a {
+  color: #126147;
+  font-weight: 600;
+  text-decoration: underline;
+}
+.actions a[aria-disabled="true"] {
+  opacity: 0.55;
+}
+@media (max-width: 600px) {
+  .inbox {
+    padding: 10px;
+  }
+  .heading {
+    gap: 6px;
+  }
+}

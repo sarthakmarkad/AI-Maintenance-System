@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { WorkOrderNotifications } from "./work-order-notifications";
 import { useRouter, usePathname } from "next/navigation";
 import {
   Boxes,
@@ -224,7 +225,20 @@ export function Shell({
             {error}
           </p>
         )}
-        <main className="main-content">{children}</main>
+        <main className="main-content">
+          {code === "WH-C" &&
+            user &&
+            session &&
+            ["TECHNICIAN", "MAINTENANCE_HEAD"].includes(user.role) && (
+              <WorkOrderNotifications
+                key={`${user.userId}:${user.role}:${code}`}
+                code={code}
+                user={user}
+                token={session.access_token}
+              />
+            )}
+          {children}
+        </main>
         <footer className="workspace-footer">
           <span>
             Supreme Industries · Machine maintenance & performance intelligence
