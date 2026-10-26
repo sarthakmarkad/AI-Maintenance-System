@@ -1,14 +1,16 @@
 "use client";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { Download, FileText, Paperclip, Upload } from "lucide-react";
+import { Download, Eye, FileText, Paperclip, Upload } from "lucide-react";
 import {
   api,
   apiBlob,
   ApiError,
   type WorkOrder,
   type AttachmentReceipt,
+  type WorkOrderAttachment,
 } from "@/lib/api";
 import { Button } from "./ui/button";
+import { AttachmentPhotoViewer } from "./attachment-photo-viewer";
 const time = (value: string) =>
   new Intl.DateTimeFormat("en-IN", {
     timeZone: "Asia/Kolkata",
@@ -42,6 +44,7 @@ export function WorkOrderAttachments({
     [uploading, setUploading] = useState(false),
     [downloading, setDownloading] = useState(""),
     [error, setError] = useState("");
+  const [photo, setPhoto] = useState<WorkOrderAttachment | null>(null);
   const requestId = useRef(""),
     submitted = useRef(false),
     input = useRef<HTMLInputElement>(null);
@@ -180,16 +183,29 @@ export function WorkOrderAttachments({
                     {time(a.createdAt)} · Work order v{a.orderVersion}
                   </small>
                 </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={!!downloading}
-                  aria-label={`Download ${a.filename}`}
-                  onClick={() => void download(a.id, a.filename)}
-                >
-                  <Download size={15} />
-                  {downloading === a.id ? "Downloading…" : "Download"}
-                </Button>
+                <div className="attachment-actions">
+                  {["image/jpeg", "image/png"].includes(a.mediaType) && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={!!downloading}
+                      aria-label={`View ${a.filename}`}
+                      onClick={() => setPhoto(a)}
+                    >
+                      <Eye size={15} /> View
+                    </Button>
+                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={!!downloading}
+                    aria-label={`Download ${a.filename}`}
+                    onClick={() => void download(a.id, a.filename)}
+                  >
+                    <Download size={15} />
+                    {downloading === a.id ? "Downloading…" : "Download"}
+                  </Button>
+                </div>
               </li>
             ))}
           </ul>
@@ -264,6 +280,15 @@ export function WorkOrderAttachments({
           </p>
         )}
       </div>
+      {photo && (
+        <AttachmentPhotoViewer
+          attachment={photo}
+          path={`${base}/${order.id}/attachments/${photo.id}/download`}
+          token={token}
+          onClose={() => setPhoto(null)}
+          onFailure={failure}
+        />
+      )}
     </section>
   );
 }

@@ -191,6 +191,9 @@ test("assigned technician saves evidence, reloads versioned history and download
   await expect(
     page.getByRole("heading", { name: "Attachment added · v4" }),
   ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "View inspection.png" }),
+  ).toBeVisible();
   expect(f.requests).toHaveLength(1);
   expect(f.requests[0]).toContain('name="version"\r\n\r\n3');
   await page.reload();
@@ -375,4 +378,253 @@ test("expired download returns to login and never starts a download", async ({
   await page.getByRole("button", { name: "Download inspection.png" }).click();
   await expect(page).toHaveURL(/\/login\?reason=expired/);
   expect(downloaded).toBe(false);
+});
+
+async function samplePhoto(
+  page: Page,
+  mediaType: "image/png" | "image/jpeg" = "image/png",
+) {
+  const data = await page.evaluate((type) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1200;
+    canvas.height = 800;
+    const context = canvas.getContext("2d")!;
+    context.fillStyle = "#dcece3";
+    context.fillRect(0, 0, 1200, 800);
+    context.fillStyle = "#176b52";
+    context.fillRect(100, 190, 1000, 480);
+    context.fillStyle = "#142a2c";
+    context.font = "42px Arial";
+    context.fillText("SYNTHETIC PHOTO PREVIEW TEST", 110, 110);
+    return canvas.toDataURL(type).split(",")[1];
+  }, mediaType);
+  return Buffer.from(data, "base64");
+}
+async function trackPhotoUrls(page: Page) {
+  await page.addInitScript(() => {
+    const record = { created: [] as string[], revoked: [] as string[] };
+    (window as any).__photoUrls = record;
+    const create = URL.createObjectURL.bind(URL),
+      revoke = URL.revokeObjectURL.bind(URL);
+    URL.createObjectURL = (blob) => {
+      const url = create(blob);
+      record.created.push(url);
+      return url;
+    };
+    URL.revokeObjectURL = (url) => {
+      record.revoked.push(url);
+      revoke(url);
+    };
+  });
+}
+for (const mediaType of ["image/png", "image/jpeg"] as const) {
+  test(`${mediaType} evidence opens privately without a download and releases its URL on Escape`, async ({
+    page,
+  }, info) => {
+    await trackPhotoUrls(page);
+    const state = await fixture(page, {
+      existing: true,
+      role: "MANAGEMENT",
+      status: "CLOSED",
+    });
+    const filename =
+      mediaType === "image/png" ? "inspection.png" : "inspection.jpg";
+    state.o.attachments[0] = { ...state.o.attachments[0], filename, mediaType };
+    await page.reload();
+    const bytes = await samplePhoto(page, mediaType);
+    await page.route("**/attachments/*/download", async (route) => {
+      expect(route.request().headers().authorization).toMatch(/^Bearer /);
+      expect(route.request().url()).not.toContain("token=");
+      await route.fulfill({
+        body: bytes,
+        contentType: "application/octet-stream",
+        headers: {
+          "Content-Disposition": `attachment; filename="${filename}"`,
+        },
+      });
+    });
+    let downloads = 0;
+    page.on("download", () => {
+      downloads++;
+    });
+    const view = page.getByRole("button", {
+      name: `View ${filename}`,
+      exact: true,
+    });
+    await view.click();
+    const dialog = page.getByRole("dialog", { name: filename, exact: true });
+    await expect(dialog).toBeVisible();
+    const photo = dialog.getByRole("img", {
+      name: "TEST inspection photo",
+      exact: true,
+    });
+    await expect(photo).toBeVisible();
+    expect(
+      await photo.evaluate((img: HTMLImageElement) => img.naturalWidth),
+    ).toBe(1200);
+    const url = await photo.getAttribute("src");
+    expect(url).toMatch(/^blob:/);
+    expect(downloads).toBe(0);
+    const box = await dialog.boundingBox();
+    expect(box!.x).toBeGreaterThanOrEqual(0);
+    expect(box!.x + box!.width).toBeLessThanOrEqual(
+      page.viewportSize()!.width + 1,
+    );
+    if (mediaType === "image/png")
+      await page.screenshot({
+        path: info.outputPath("photo-preview.png"),
+        fullPage: true,
+      });
+    await page.keyboard.press("Escape");
+    await expect(dialog).toHaveCount(0);
+    await expect(view).toBeFocused();
+    await expect
+      .poll(() => page.evaluate(() => (window as any).__photoUrls.revoked))
+      .toContain(url);
+    await view.click();
+    await expect(
+      page
+        .getByRole("dialog")
+        .getByRole("img", { name: "TEST inspection photo", exact: true }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Close photo preview" }).click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    expect(downloads).toBe(0);
+  });
+}
+
+test("photo preview retries a failed request and preserves an unrelated evidence draft", async ({
+  page,
+}) => {
+  const state = await fixture(page, { existing: true });
+  await page
+    .getByLabel("What does this attachment show?")
+    .fill("TEST preserve my unsaved evidence description");
+  const bytes = await samplePhoto(page);
+  let calls = 0,
+    failing = true;
+  await page.route("**/attachments/*/download", (route) =>
+    (calls++, failing)
+      ? route.fulfill({
+          status: 503,
+          json: { message: "TEST preview temporarily unavailable" },
+        })
+      : route.fulfill({ body: bytes, contentType: "application/octet-stream" }),
+  );
+  await page.getByRole("button", { name: "View inspection.png" }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByRole("alert")).toContainText(
+    "temporarily unavailable",
+  );
+  const beforeRetry = calls;
+  failing = false;
+  await dialog.getByRole("button", { name: "Retry photo" }).click();
+  await expect(dialog.getByRole("img")).toBeVisible();
+  expect(calls).toBeGreaterThan(beforeRetry);
+  await dialog.getByRole("button", { name: "Close photo preview" }).click();
+  await expect(page.getByLabel("What does this attachment show?")).toHaveValue(
+    "TEST preserve my unsaved evidence description",
+  );
+  expect(state.requests).toHaveLength(0);
+});
+
+test("closing a loading preview cancels it without creating a late photo URL", async ({
+  page,
+}) => {
+  await trackPhotoUrls(page);
+  await fixture(page, { existing: true });
+  let release!: () => void,
+    completed = false;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/attachments/*/download", async (route) => {
+    await gate;
+    try {
+      await route.fulfill({
+        body: png,
+        contentType: "application/octet-stream",
+      });
+    } catch {
+      /* request was aborted on close */
+    } finally {
+      completed = true;
+    }
+  });
+  await page.getByRole("button", { name: "View inspection.png" }).click();
+  await expect(page.getByRole("dialog").getByRole("status")).toHaveText(
+    "Loading photo…",
+  );
+  await page.getByRole("button", { name: "Close photo preview" }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  release();
+  await expect.poll(() => completed).toBe(true);
+  expect(
+    await page.evaluate(() => (window as any).__photoUrls.created),
+  ).toHaveLength(0);
+});
+
+test("a malformed photo shows a recoverable preview error", async ({
+  page,
+}) => {
+  await fixture(page, { existing: true });
+  await page.route("**/attachments/*/download", (route) =>
+    route.fulfill({
+      body: Buffer.from("TEST invalid raster bytes"),
+      contentType: "application/octet-stream",
+    }),
+  );
+  await page.getByRole("button", { name: "View inspection.png" }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByRole("alert")).toContainText(
+    "photo could not be displayed",
+  );
+  await expect(
+    dialog.getByRole("button", { name: "Retry photo" }),
+  ).toBeEnabled();
+  await dialog.getByRole("button", { name: "Close photo preview" }).click();
+  await expect(
+    page.getByRole("button", { name: "Download inspection.png" }),
+  ).toBeEnabled();
+});
+
+for (const status of [401, 403]) {
+  test(`photo preview honors ${status} access denial without rendering bytes or downloading`, async ({
+    page,
+  }) => {
+    await trackPhotoUrls(page);
+    await fixture(page, { existing: true, downloadFail: status });
+    let downloads = 0;
+    page.on("download", () => {
+      downloads++;
+    });
+    await page.getByRole("button", { name: "View inspection.png" }).click();
+    if (status === 401) await expect(page).toHaveURL(/\/login\?reason=expired/);
+    else
+      await expect(page.getByRole("dialog").getByRole("alert")).toContainText(
+        "denied",
+      );
+    expect(
+      await page.evaluate(() => (window as any).__photoUrls.created),
+    ).toHaveLength(0);
+    expect(downloads).toBe(0);
+  });
+}
+
+test("PDF evidence keeps its download action without a raster preview", async ({
+  page,
+}) => {
+  const state = await fixture(page, { existing: true });
+  state.o.attachments[0] = {
+    ...state.o.attachments[0],
+    filename: "inspection.pdf",
+    mediaType: "application/pdf",
+  };
+  await page.reload();
+  await expect(
+    page.getByRole("button", { name: "Download inspection.pdf" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "View inspection.pdf" }),
+  ).toHaveCount(0);
 });

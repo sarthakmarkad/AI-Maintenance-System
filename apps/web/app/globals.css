@@ -3352,6 +3352,12 @@ button {
   flex: 1;
   overflow-wrap: anywhere;
 }
+.attachment-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex-shrink: 0;
+}
 .attachment-info strong {
   font-size: 14px;
 }
@@ -3435,7 +3441,7 @@ button {
     flex-wrap: wrap;
     gap: 10px;
   }
-  .attachment-list li > button {
+  .attachment-list li > .attachment-actions {
     margin-left: 30px;
   }
   .attachment-info {
