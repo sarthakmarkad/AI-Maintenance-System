@@ -18,6 +18,7 @@ export const notificationQuery = z
 export const notificationRead = z.object({}).strict();
 
 export type NotificationAction =
+  | "REPORT"
   | "ASSIGN"
   | "SCHEDULE"
   | "INVESTIGATE"
@@ -28,6 +29,8 @@ export function notificationMessage(
   reassigned: boolean,
 ) {
   switch (action) {
+    case "REPORT":
+      return "New breakdown reported. Review the reported symptoms and assign a technician.";
     case "SUBMIT":
       return "Submitted for maintenance-head review. Review the technician’s findings.";
     case "RETURN":
@@ -65,7 +68,8 @@ function eligible(
         (e.action IN ('ASSIGN','SCHEDULE','INVESTIGATE') AND o.status = 'ASSIGNED') OR
         (e.action = 'RETURN' AND o.status = 'IN_PROGRESS'))`
       : user.role === Role.MAINTENANCE_HEAD
-        ? Prisma.sql`e.action = 'SUBMIT' AND o.status = 'AWAITING_REVIEW'`
+        ? Prisma.sql`((e.action = 'REPORT' AND o.kind = 'BREAKDOWN' AND o.status = 'REPORTED') OR
+          (e.action = 'SUBMIT' AND o.status = 'AWAITING_REVIEW'))`
         : Prisma.sql`FALSE`;
   return Prisma.sql`e."orgId" = ${scope.orgId}::uuid AND e."machineId" = ${scope.machineId}::uuid
     AND (${recipient}) AND NOT EXISTS (

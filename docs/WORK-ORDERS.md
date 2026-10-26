@@ -92,3 +92,7 @@ The reporting operator can add photos/PDFs on REPORTED work; the assigned techni
 ## PDF and Excel work-order reports (M9)
 
 Work-order detail offers a version-checked report download with current human fields, kind-specific independent times, the complete immutable event history, retained source review and attachment manifest. Earlier submissions remain separate; attachment file bytes are excluded. Aggregate reports use created/closed dates and current status, and are distinct from individual history exports. All scoped roles can export with existing read rights; files do not approve work or complete follow-up actions. See REPORTS.md.
+
+## Work-order handoff notifications (M10)
+
+Active Technician views receive actionable assignments/releases and returned-work notifications for their own current assignments. Active Maintenance head views receive new/unassigned operator breakdown reports and submitted-work notifications. The source is immutable committed work-order history for all three kinds, including planned/investigation release; failed transactions create no alert. Read receipts are explicit, append-only and separate per verified identity and active role. Notifications do not change order versions, engineering authority or calendar reminders. See WORK-ORDER-NOTIFICATIONS.md for actionability, historical events and live-access rules.

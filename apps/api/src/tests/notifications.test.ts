@@ -26,6 +26,10 @@ test("notification requests reject forged recipient, organization, role and read
   );
 });
 test("handoff messages distinguish release, reassignment, review and return without claiming fault causes", () => {
+  assert.match(
+    notificationMessage("REPORT", false),
+    /New breakdown reported.*assign a technician/,
+  );
   assert.match(notificationMessage("ASSIGN", false), /^Assigned to you/);
   assert.match(notificationMessage("ASSIGN", true), /^Reassigned to you/);
   assert.match(

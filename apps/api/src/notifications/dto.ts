@@ -6,7 +6,7 @@ export class WorkOrderNotificationDto {
   @ApiProperty({ enum: ["BREAKDOWN", "PLANNED", "INVESTIGATION"] })
   kind!: string;
   @ApiProperty({
-    enum: ["ASSIGN", "SCHEDULE", "INVESTIGATE", "SUBMIT", "RETURN"],
+    enum: ["REPORT", "ASSIGN", "SCHEDULE", "INVESTIGATE", "SUBMIT", "RETURN"],
   })
   action!: string;
   @ApiProperty() eventVersion!: number;

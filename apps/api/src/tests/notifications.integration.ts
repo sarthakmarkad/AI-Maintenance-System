@@ -296,6 +296,94 @@ after(async () => {
   await Promise.all([db.$disconnect(), runtime.$disconnect()]);
 });
 
+test("operator breakdown reports notify scoped heads until assignment, including retries and attached evidence", async () => {
+  const input = {
+    requestId: randomUUID(),
+    title: "TEST high temperature report",
+    description: "TEST operator observation, not a real company incident.",
+    priority: "HIGH",
+    impact: "OBSERVATION",
+  };
+  const create = () => http().post(orders).set(headers("operator")).send(input);
+  const results = await Promise.all([create(), create()]);
+  for (const result of results) assert.equal(result.status, 201);
+  assert.equal(results[0].body.id, results[1].body.id);
+  let o = results[0].body;
+  const n = await itemFor(o, "head");
+  assert.equal(n.action, "REPORT");
+  assert.equal(n.eventVersion, 1);
+  assert.match(n.message, /New breakdown reported.*assign a technician/);
+  assert.equal(n.readAt, null);
+  for (const who of [
+    "tech",
+    "operator",
+    "admin",
+    "supervisor",
+    "management",
+    "foreign",
+  ] as Who[]) {
+    assert.equal(await itemFor(o, who), undefined);
+    await read(n.id, who).expect(404);
+  }
+  await read(n.id, "pilot", Role.ADMINISTRATOR).expect(404);
+  const receipts = await Promise.all([read(n.id, "head"), read(n.id, "head")]);
+  for (const receipt of receipts) assert.equal(receipt.status, 200);
+  assert.equal(receipts[0].body.readAt, receipts[1].body.readAt);
+  assert.equal((await itemFor(o, "head2")).readAt, null);
+  await read(n.id, "pilot", Role.MAINTENANCE_HEAD).expect(200);
+  assert.equal(
+    (await db.workOrder.findUniqueOrThrow({ where: { id: o.id } })).version,
+    1,
+  );
+  const uploaded = await http()
+    .post(`${orders}/${o.id}/attachments`)
+    .set(headers("operator"))
+    .field("version", "1")
+    .field("requestId", randomUUID())
+    .field("description", "TEST observation evidence")
+    .attach("file", Buffer.from("%PDF-1.4\nTEST fixture\n%%EOF"), {
+      filename: "TEST.pdf",
+      contentType: "application/pdf",
+    })
+    .expect(201);
+  o = { ...o, version: uploaded.body.attachment.orderVersion };
+  assert.equal((await itemFor(o, "head2")).id, n.id);
+  await failAudit("WORK_ORDER_ASSIGN", async () => {
+    await action(o, "assign", "head", { technicianId: ids.tech }).expect(503);
+    assert.equal((await itemFor(o, "head2")).id, n.id);
+  });
+  o = (
+    await action(o, "assign", "head", { technicianId: ids.tech }).expect(200)
+  ).body;
+  assert.equal(await itemFor(o, "head2"), undefined);
+  await read(n.id, "head2").expect(404);
+  assert.equal((await itemFor(o)).action, "ASSIGN");
+  assert.equal(
+    await db.workOrderEvent.count({
+      where: { orderId: o.id, action: "REPORT" },
+    }),
+    1,
+  );
+});
+
+test("a rolled-back operator report creates no head notification", async () => {
+  const before = (await list("head").expect(200)).body.unread;
+  await failAudit("WORK_ORDER_REPORT", async () => {
+    await http()
+      .post(orders)
+      .set(headers("operator"))
+      .send({
+        requestId: randomUUID(),
+        title: "TEST rolled-back report",
+        description: "TEST failure fixture only",
+        priority: "HIGH",
+        impact: "OBSERVATION",
+      })
+      .expect(503);
+  });
+  assert.equal((await list("head").expect(200)).body.unread, before);
+});
+
 test("notifications require trusted role/org/machine scope and reject forged receipts", async () => {
   const o = await assigned(),
     n = await itemFor(o);
@@ -534,10 +622,10 @@ test("planned release exact retries/concurrency create one assignment notificati
       .set(headers("head"))
       .send(body);
   const results = await Promise.all([release(), release()]);
-  for (const r of results) assert.equal(r.status, 201, JSON.stringify(r.body));
+  for (const r of results) assert.equal(r.status, 200, JSON.stringify(r.body));
   assert.equal(results[0].body.orderId, results[1].body.orderId);
   assert.equal(
-    (await release().expect(201)).body.orderId,
+    (await release().expect(200)).body.orderId,
     results[0].body.orderId,
   );
   const o = { id: results[0].body.orderId };
@@ -626,7 +714,7 @@ test("all kinds notify heads on submission/resubmission and technicians on retur
       .post(`${calendar}/occurrences/${occurrence.id}/release`)
       .set(headers("head"))
       .send({ version: 1, technicianId: ids.tech })
-      .expect(201)
+      .expect(200)
   ).body.orderId;
   const input = { ...(await flagFor()), technicianId: ids.tech };
   const i = (

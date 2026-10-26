@@ -284,6 +284,42 @@ test("compact inbox polling preserves the technician's open repair draft and doe
   expect(state.listCalls).toBe(expandedCalls);
 });
 
+test("maintenance head sees a new breakdown report with an assignment prompt and independent read controls", async ({
+  page,
+}) => {
+  const state = await fixture(page, "MAINTENANCE_HEAD");
+  state.items = [
+    item({
+      action: "REPORT",
+      title: "TEST high temperature report",
+      actorName: "TEST operator",
+      eventVersion: 1,
+      message:
+        "New breakdown reported. Review the reported symptoms and assign a technician.",
+    }),
+  ];
+  await page.goto("/machines/WH-C");
+  await expand(page);
+  await expect(
+    inbox(page).getByText("TEST high temperature report", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    inbox(page).getByText(/New breakdown reported.*assign a technician/),
+  ).toBeVisible();
+  expect(state.readBodies).toHaveLength(0);
+  await inbox(page)
+    .getByRole("button", { name: "Mark TEST high temperature report as read" })
+    .click();
+  await expect(
+    inbox(page).getByRole("button", {
+      name: "Work-order notifications (0 unread)",
+    }),
+  ).toBeVisible();
+  await expect(
+    inbox(page).getByRole("link", { name: "Open work order" }),
+  ).toHaveAttribute("href", `/machines/WH-C/work-orders/${orderId}`);
+});
+
 test("maintenance-head view displays submission message; read-only roles have no personal engineering inbox", async ({
   page,
 }) => {
