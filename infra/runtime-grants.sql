@@ -27,3 +27,10 @@ GRANT INSERT ON maintenance."WorkOrderAttachment" TO :"runtime_role";
 GRANT INSERT ON maintenance."WorkOrderNotificationReceipt" TO :"runtime_role";
 GRANT INSERT ON maintenance."MachineDocument", maintenance."MachineDocumentFile", maintenance."MachineDocumentEvent" TO :"runtime_role";
 GRANT UPDATE (version) ON maintenance."MachineDocument" TO :"runtime_role";
+
+GRANT USAGE ON SCHEMA extensions TO :"runtime_role";
+GRANT INSERT ON maintenance."DocumentRagIndex", maintenance."DocumentRagChunk" TO :"runtime_role";
+GRANT UPDATE (status, attempts, "leaseId", "leaseUntil", "nextAttemptAt", "pageCount", "chunkCount", "lastError", "readyAt", "updatedAt") ON maintenance."DocumentRagIndex" TO :"runtime_role";
+
+GRANT INSERT ON maintenance."DocumentChat",maintenance."DocumentChatTurn" TO :"runtime_role";
+GRANT UPDATE(version,"updatedAt") ON maintenance."DocumentChat" TO :"runtime_role";

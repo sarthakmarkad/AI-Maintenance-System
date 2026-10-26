@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16.15-alpine
+        image: pgvector/pgvector:0.8.7-pg16
         env:
           POSTGRES_USER: maintenance_owner
           POSTGRES_PASSWORD: ephemeral-ci-owner
@@ -26,6 +26,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install bounded PDF text extractor
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
       - run: npm ci
       - run: npm run typecheck
       - run: npm test

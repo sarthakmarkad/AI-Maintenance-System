@@ -68,3 +68,13 @@ All six roles can download work-order photos/PDFs within existing machine/organi
 ## Maintenance report permissions (M9)
 
 All six active roles can preview/export PDF/Excel reports within their existing organization/machine read scope; Operator/Technician still require explicit machine grants. Individual exports require the displayed order version. Source transactions and post-render delivery both recheck live trusted access; forged/revoked roles and foreign records cannot receive report bytes. Export audit uses existing protected append permissions and grants no operational/engineering authority. See REPORTS.md for role activity and acceptance boundaries.
+
+## Work-order notifications and approved references (M10–11)
+
+Active Technician receives current assignment/release/return handoffs only for its own assignments and explicit machine grants; active Maintenance head receives unassigned operator breakdown reports and pending-review submissions in organization scope. Other active views have no personal engineering handoffs. Read receipts are separate by actual identity/active role and never change work-order versions. Calendar reminders stay independent. See WORK-ORDER-NOTIFICATIONS.md.
+
+All six scoped roles browse/download current approved machine PDFs. Only Administrator and Maintenance head manage drafts and inspect obsolete file/history evidence; only the active Maintenance head approves or withdraws with a reason. Administrator has no approval authority. Draft uploads preserve the current approval, and withdrawal does not silently restore older files. Selected grants and scope are rechecked for metadata, mutations and private downloads; no new accounts or grants are provisioned. See DOCUMENT-LIBRARY.md.
+
+## Approved-document assistant — 24 October 2026
+
+All six active role views can use general chat and ask questions from current approved, indexed WH-C references within existing trusted scope. Head/Admin can retry failed indexing; Administrator still cannot approve documents or engineering work. No new Auth identities or grants are introduced. Draft/withdrawn/superseded files are excluded from retrieval. Details, provider disclosure, observed live-provider checks and remaining limits: [DOCUMENT-AI.md](DOCUMENT-AI.md).

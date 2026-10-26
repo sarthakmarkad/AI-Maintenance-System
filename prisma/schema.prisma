@@ -77,6 +77,7 @@ model Membership {
   closedOrders WorkOrder[] @relation("OrderCloser")
   orderEvents WorkOrderEvent[]
   documentEvents MachineDocumentEvent[]
+  documentChats DocumentChat[]
   orderAttachments WorkOrderAttachment[]
   createdPlans MaintenancePlan[] @relation("PlanCreator")
   technicianPlans MaintenancePlan[] @relation("PlanTechnician")
@@ -124,6 +125,7 @@ model Machine {
   readingImports ReadingImport[]
   processReadings ProcessReading[]
   documents MachineDocument[]
+  documentChats DocumentChat[]
   workOrders WorkOrder[]
   maintenancePlans MaintenancePlan[]
   maintenanceOccurrences MaintenanceOccurrence[]
@@ -616,6 +618,7 @@ model MachineDocumentFile {
   content Bytes
   document MachineDocument @relation(fields:[orgId,machineId,documentId], references:[orgId,machineId,id], onDelete:Restrict)
   events MachineDocumentEvent[]
+  ragIndexes DocumentRagIndex[]
   @@unique([orgId,machineId,documentId,id])
   @@unique([documentId,number])
   @@schema("maintenance")
@@ -641,4 +644,85 @@ model MachineDocumentEvent {
   @@unique([documentId,revision])
   @@unique([orgId,machineId,actorId,requestId])
   @@schema("maintenance")
+}
+
+model DocumentRagIndex {
+  id String @id @default(uuid()) @db.Uuid
+  orgId String @db.Uuid
+  machineId String @db.Uuid
+  documentId String @db.Uuid
+  fileId String @db.Uuid
+  profile String @db.VarChar(160)
+  sourceHash String @db.VarChar(64)
+  status String @default("QUEUED") @db.VarChar(20)
+  attempts Int @default(0)
+  leaseId String? @db.Uuid
+  leaseUntil DateTime? @db.Timestamptz(3)
+  nextAttemptAt DateTime @default(now()) @db.Timestamptz(3)
+  pageCount Int?
+  chunkCount Int?
+  lastError String? @db.VarChar(80)
+  readyAt DateTime? @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  file MachineDocumentFile @relation(fields:[orgId,machineId,documentId,fileId], references:[orgId,machineId,documentId,id],onDelete:Restrict)
+  chunks DocumentRagChunk[]
+  @@unique([fileId,profile])
+  @@unique([orgId,machineId,documentId,fileId,id])
+  @@index([status,nextAttemptAt])
+  @@schema("maintenance")
+}
+model DocumentRagChunk {
+  id String @id @default(uuid()) @db.Uuid
+  orgId String @db.Uuid
+  machineId String @db.Uuid
+  documentId String @db.Uuid
+  fileId String @db.Uuid
+  indexId String @db.Uuid
+  ordinal Int
+  page Int
+  text String
+  hash String @db.VarChar(64)
+  embedding Unsupported("vector(1536)")
+  search Unsupported("tsvector")? @default(dbgenerated())
+  index DocumentRagIndex @relation(fields:[orgId,machineId,documentId,fileId,indexId],references:[orgId,machineId,documentId,fileId,id],onDelete:Restrict)
+  @@unique([indexId,ordinal])
+  @@index([orgId,machineId,indexId],map:"DocumentRagChunk_scope_index_idx")
+  @@schema("maintenance")
+}
+
+model DocumentChat {
+ id String @id @default(uuid()) @db.Uuid
+ orgId String @db.Uuid
+ machineId String @db.Uuid
+ userId String @db.Uuid
+ actorRole Role
+ title String @db.VarChar(80)
+ version Int
+ createdAt DateTime @default(now()) @db.Timestamptz(3)
+ updatedAt DateTime @updatedAt @db.Timestamptz(3)
+ machine Machine @relation(fields:[orgId,machineId],references:[orgId,id],onDelete:Restrict)
+ owner Membership @relation(fields:[orgId,userId],references:[orgId,userId],onDelete:Restrict)
+ turns DocumentChatTurn[]
+ @@unique([orgId,machineId,userId,actorRole,id])
+ @@index([orgId,machineId,userId,actorRole,updatedAt,id],map:"DocumentChat_owner_updated_idx")
+ @@schema("maintenance")
+}
+model DocumentChatTurn {
+ id String @id @default(uuid()) @db.Uuid
+ orgId String @db.Uuid
+ machineId String @db.Uuid
+ userId String @db.Uuid
+ actorRole Role
+ chatId String @db.Uuid
+ ordinal Int
+ requestId String @db.Uuid
+ fingerprint String @db.VarChar(64)
+ question String @db.VarChar(1000)
+ answer Json
+ at DateTime @default(now()) @db.Timestamptz(3)
+ chat DocumentChat @relation(fields:[orgId,machineId,userId,actorRole,chatId],references:[orgId,machineId,userId,actorRole,id],onDelete:Restrict)
+ @@unique([chatId,ordinal])
+ @@unique([orgId,machineId,userId,actorRole,requestId])
+ @@schema("maintenance")
 }

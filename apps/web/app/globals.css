@@ -3626,3 +3626,48 @@ button {
     flex: 1;
   }
 }
+
+/* The conversational workspace keeps messages scrolling above its composer. */
+.chat-shell .workspace {
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+.chat-shell .topbar {
+  flex-shrink: 0;
+}
+.chat-shell .main-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding: 18px;
+  max-width: none;
+  width: 100%;
+}
+.chat-shell .workspace-footer {
+  display: none;
+}
+@media (max-width: 760px) {
+  .chat-shell .sidebar {
+    display: none;
+  }
+  .chat-shell .workspace {
+    margin-left: 0;
+    width: 100%;
+  }
+  .chat-shell .topbar {
+    height: 62px;
+    padding: 0 15px;
+  }
+  .chat-shell .main-content {
+    padding: 0;
+  }
+  .chat-shell .account {
+    gap: 7px;
+  }
+  .chat-shell .breadcrumb {
+    gap: 6px;
+    font-size: 10px;
+  }
+}

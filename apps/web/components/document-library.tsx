@@ -78,6 +78,18 @@ export function DocumentLibraryWorkspace({
       router.replace("/login?reason=expired");
       return;
     }
+    if (e instanceof ApiError && [403, 404].includes(e.status)) {
+      setLibrary(null);
+      setReview(null);
+      setOpened(null);
+      setTarget(null);
+      setFile(null);
+      setTitle("");
+      setDescription("");
+      setReason("");
+      request.current = null;
+      if (fileInput.current) fileInput.current.value = "";
+    }
     setError(
       e instanceof Error
         ? e.message
@@ -268,6 +280,11 @@ export function DocumentLibraryWorkspace({
           <div className="eyebrow">{machine.code} / PRIVATE REFERENCES</div>
           <h1>Machine manuals & SOPs</h1>
           <p>Download the current approved references for this machine.</p>
+          <p>
+            <Link href={`/machines/${machine.code}/assistant`}>
+              Chat with the maintenance assistant
+            </Link>
+          </p>
         </div>
       </div>
       <p className={styles.notice}>
@@ -587,7 +604,7 @@ export function DocumentLibraryWorkspace({
           </form>
         </section>
       )}
-      {manager && (
+      {manager && library?.canManage && (
         <section className={styles.card} aria-label="Upload reference draft">
           <h2 ref={uploadHeading} tabIndex={-1}>
             {target

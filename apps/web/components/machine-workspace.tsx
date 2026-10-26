@@ -24,6 +24,7 @@ import { ProductionWorkspace } from "./production-workspace";
 import { ReadingsWorkspace } from "./readings-workspace";
 import { WorkOrdersWorkspace } from "./work-orders-workspace";
 import { PerformanceWorkspace } from "./performance-workspace";
+import { DocumentAssistant } from "./document-assistant";
 import { DocumentLibraryWorkspace } from "./document-library";
 import { ReportsWorkspace } from "./reports-workspace";
 import { CalendarWorkspace } from "./calendar-workspace";
@@ -41,6 +42,7 @@ export function MachineWorkspace({
   performance = false,
   reports = false,
   documents = false,
+  assistant = false,
   orderId,
 }: {
   code?: string;
@@ -51,6 +53,7 @@ export function MachineWorkspace({
   performance?: boolean;
   reports?: boolean;
   documents?: boolean;
+  assistant?: boolean;
   orderId?: string;
 }) {
   const { session, loading, expired, expire } = useAuth();
@@ -136,7 +139,14 @@ export function MachineWorkspace({
           </Button>
         </section>
       ) : code && result.machines[0] ? (
-        documents ? (
+        assistant ? (
+          <DocumentAssistant
+            key={`${result.user.userId}:${result.user.role}:${result.machines[0].id}`}
+            machine={result.machines[0]}
+            user={result.user}
+            token={session.access_token}
+          />
+        ) : documents ? (
           <DocumentLibraryWorkspace
             machine={result.machines[0]}
             user={result.user}

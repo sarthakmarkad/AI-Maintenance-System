@@ -1,3 +1,10 @@
+import { DocumentChatService } from "./rag/chat";
+import { DocumentAiController } from "./rag/controller";
+import { DocumentAiService } from "./rag/service";
+import { DocumentIndexer } from "./rag/indexer";
+import { DocumentAiWorker } from "./rag/worker";
+import { RAG_AI, DocumentAiProvider } from "./rag/provider";
+import { PDF_EXTRACTOR, PopplerExtractor } from "./rag/extractor";
 import "reflect-metadata";
 import { Module, ConsoleLogger } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
@@ -55,6 +62,7 @@ export function appModule(config: Config) {
       ReportsController,
       NotificationsController,
       DocumentsController,
+      DocumentAiController,
     ],
     providers: [
       { provide: CONFIG, useValue: config },
@@ -76,6 +84,12 @@ export function appModule(config: Config) {
       ReportsService,
       NotificationsService,
       DocumentsService,
+      DocumentAiService,
+      DocumentChatService,
+      DocumentIndexer,
+      DocumentAiWorker,
+      { provide: RAG_AI, useClass: DocumentAiProvider },
+      { provide: PDF_EXTRACTOR, useClass: PopplerExtractor },
       ReportExportLimit,
     ],
   })
@@ -108,9 +122,9 @@ export function configure(
     new DocumentBuilder()
       .setTitle("Supreme Maintenance API")
       .setDescription(
-        "Milestones 1–9. Scoped registry, imports/trends, maintenance work orders with private attachments, planned maintenance, reviewed statistical patterns, maintenance performance and private PDF/Excel reports.",
+        "Milestones 1–12. Scoped registry, imports/trends, maintenance work orders and notifications, planned maintenance, reviewed statistical patterns, maintenance performance, private attachments/reports and approved machine references with cited document assistance.",
       )
-      .setVersion("0.9.0")
+      .setVersion("0.12.0")
       .addBearerAuth()
       .build(),
   );

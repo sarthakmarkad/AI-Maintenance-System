@@ -7,6 +7,7 @@ import { UnauthorizedException, type INestApplication } from "@nestjs/common";
 import request from "supertest";
 import { appModule, configure } from "../app";
 import { VERIFIER } from "../auth";
+import { WorkOrdersService } from "../work-orders/service";
 const owner = process.env.TEST_DATABASE_URL,
   runtimeUrl = process.env.TEST_RUNTIME_DATABASE_URL;
 if (
@@ -532,6 +533,38 @@ test("trusted active role grants and access revocations apply to metadata, actio
   } finally {
     await db.membership.update({
       where: { id: member.id },
+      data: { active: true },
+    });
+  }
+});
+
+test("downloads recheck trusted access after acquiring the approval lock", async () => {
+  let d = await create();
+  await act(d).expect(200);
+  d = await detail(d.id);
+  const orders = app.get(WorkOrdersService),
+    original = orders.context;
+  let checked = false;
+  orders.context = async (
+    ...args: Parameters<WorkOrdersService["context"]>
+  ) => {
+    const context = await original.call(orders, ...args);
+    if (context.user.userId === ids.tech2 && !checked) {
+      checked = true;
+      await db.membership.update({
+        where: { userId: ids.tech2 },
+        data: { active: false },
+      });
+    }
+    return context;
+  };
+  try {
+    await download(d, d.files[0], "tech2").expect(403);
+    assert.equal(checked, true);
+  } finally {
+    orders.context = original;
+    await db.membership.update({
+      where: { userId: ids.tech2 },
       data: { active: true },
     });
   }

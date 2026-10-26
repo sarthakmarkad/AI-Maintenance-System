@@ -20,6 +20,9 @@ import {
   MAX_DOCUMENTS,
   MAX_DOCUMENT_VERSIONS,
 } from "./policy";
+import { CONFIG, type Config } from "../config";
+import { settings } from "../rag/policy";
+import { currentApproved, enqueue } from "../rag/store";
 const text = z.string().trim().min(3).max(1000);
 export const draftSchema = z
   .object({
@@ -74,6 +77,7 @@ type Document = Prisma.MachineDocumentGetPayload<{ include: typeof include }>;
 export class DocumentsService {
   constructor(
     @Inject(Database) private readonly database: Database,
+    @Inject(CONFIG) private readonly config: Config,
     @Inject(WorkOrdersService) private readonly orders: WorkOrdersService,
   ) {}
   private get db() {
@@ -166,15 +170,18 @@ export class DocumentsService {
     );
   }
   async detail(user: Principal, code: string, id: string) {
-    return this.db.$transaction(async (tx) => {
-      const c = await this.orders.context(tx, user, code);
-      const d = await tx.machineDocument.findFirst({
-        where: { ...c.scope, id },
-        include,
-      });
-      if (!d) throw new NotFoundException("Reference not found.");
-      return this.view(d, c.user.role);
-    });
+    return this.db.$transaction(
+      async (tx) => {
+        const c = await this.orders.context(tx, user, code);
+        const d = await tx.machineDocument.findFirst({
+          where: { ...c.scope, id },
+          include,
+        });
+        if (!d) throw new NotFoundException("Reference not found.");
+        return this.view(d, c.user.role);
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
+    );
   }
   async upload(
     user: Principal,
@@ -392,6 +399,12 @@ export class DocumentsService {
             detail: { ...result, actorRole: c.user.role, file: evidence },
           },
         });
+        if (result.action === "APPROVE") {
+          const source = (await currentApproved(tx, c.scope)).find(
+            (s) => s.fileId === result.fileId,
+          );
+          if (source) await enqueue(tx, source, settings(this.config).profile);
+        }
         return {
           documentId,
           fileId: result.fileId,
@@ -410,6 +423,12 @@ export class DocumentsService {
     version: number,
   ) {
     return this.db.$transaction(async (tx) => {
+      const initial = await this.orders.context(tx, user, code);
+      // Serialize bytes/approval checks against lifecycle version changes. A
+      // queued download must recheck its grants after acquiring the row lock.
+      await tx.$queryRaw`SELECT id FROM maintenance."MachineDocument"
+        WHERE id=${id}::uuid AND "orgId"=${initial.scope.orgId}::uuid
+          AND "machineId"=${initial.scope.machineId}::uuid FOR SHARE`;
       const c = await this.orders.context(tx, user, code),
         d = await tx.machineDocument.findFirst({
           where: { ...c.scope, id },

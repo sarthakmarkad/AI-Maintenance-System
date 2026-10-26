@@ -564,6 +564,214 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/machines/{code}/work-order-notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["NotificationsController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/work-order-notifications/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["NotificationsController_read"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["DocumentsController_list"];
+        put?: never;
+        post: operations["DocumentsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/documents/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["DocumentsController_detail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/documents/{id}/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["DocumentsController_revision"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/documents/{id}/actions/{action}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["DocumentsController_action"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/documents/{id}/versions/{fileId}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["DocumentsController_download"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/assistant/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["DocumentAiController_status"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/assistant/chats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["DocumentAiController_chats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/assistant/chats/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["DocumentAiController_transcript"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/assistant/chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["DocumentAiController_message"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/assistant/ask": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["DocumentAiController_ask"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/assistant/indexes/{id}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["DocumentAiController_retry"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1522,6 +1730,191 @@ export interface components {
             rows: components["schemas"]["ReportRowDto"][];
             fingerprint: string;
             previewLimit: number;
+        };
+        WorkOrderNotificationDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            orderId: string;
+            title: string;
+            /** @enum {string} */
+            kind: "BREAKDOWN" | "PLANNED" | "INVESTIGATION";
+            /** @enum {string} */
+            action: "REPORT" | "ASSIGN" | "SCHEDULE" | "INVESTIGATE" | "SUBMIT" | "RETURN";
+            eventVersion: number;
+            actorName: string;
+            message: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            readAt: string | null;
+        };
+        WorkOrderNotificationsDto: {
+            unread: number;
+            items: components["schemas"]["WorkOrderNotificationDto"][];
+            nextCursor: string | null;
+        };
+        WorkOrderNotificationReadDto: {
+            read: boolean;
+            /** Format: date-time */
+            readAt: string;
+        };
+        DocumentFileDto: {
+            /** Format: uuid */
+            id: string;
+            number: number;
+            filename: string;
+            description: string;
+            byteSize: number;
+            sha256: string;
+            /** @enum {string} */
+            status: "CURRENT" | "DRAFT" | "SUPERSEDED" | "WITHDRAWN";
+        };
+        DocumentEventDto: {
+            id: string;
+            fileId: string;
+            revision: number;
+            /** @enum {string} */
+            action: "UPLOAD" | "APPROVE" | "WITHDRAW";
+            reason: string;
+            actorId: string;
+            actorName: string;
+            /** @enum {string} */
+            actorRole: "OPERATOR" | "TECHNICIAN" | "MAINTENANCE_HEAD" | "SUPERVISOR" | "MANAGEMENT" | "ADMINISTRATOR";
+            /** Format: date-time */
+            at: string;
+        };
+        MachineDocumentDto: {
+            id: string;
+            title: string;
+            /** @enum {string} */
+            kind: "MANUAL" | "SOP";
+            version: number;
+            /** Format: date-time */
+            createdAt: string;
+            currentFileId: string | null;
+            files: components["schemas"]["DocumentFileDto"][];
+            events: components["schemas"]["DocumentEventDto"][];
+        };
+        DocumentLibraryDto: {
+            total: number;
+            page: number;
+            pageSize: number;
+            items: components["schemas"]["MachineDocumentDto"][];
+            canManage: boolean;
+            canApprove: boolean;
+            maxBytes: number;
+            maxDocuments: number;
+            maxVersions: number;
+        };
+        DocumentReceiptDto: {
+            documentId: string;
+            fileId: string;
+            revision: number;
+            alreadyApplied: boolean;
+        };
+        DocumentAiIndexDto: {
+            documentId: string;
+            fileId: string;
+            title: string;
+            fileNumber: number;
+            indexId: string | null;
+            /** @enum {string} */
+            status: "QUEUED" | "PROCESSING" | "READY" | "FAILED" | "INACTIVE";
+            pages: number | null;
+            chunks: number | null;
+            error: string | null;
+        };
+        DocumentAiStatusDto: {
+            /** @enum {string} */
+            provider: "commandcode" | "openai";
+            embeddingModel: string;
+            configured: boolean;
+            canManage: boolean;
+            approved: number;
+            ready: number;
+            items: components["schemas"]["DocumentAiIndexDto"][];
+        };
+        DocumentChatSummaryDto: {
+            id: string;
+            title: string;
+            turns: number;
+            updatedAt: string;
+        };
+        DocumentChatListDto: {
+            items: components["schemas"]["DocumentChatSummaryDto"][];
+            nextCursor: string | null;
+        };
+        DocumentAiReferenceDto: {
+            kind?: string;
+            documentId: string;
+            fileId: string;
+            approvalId: string;
+            title: string;
+            fileNumber: number;
+        };
+        DocumentAiCitationDto: {
+            sourceId: string;
+            quote: string;
+        };
+        DocumentAiStatementDto: {
+            text: string;
+            citations: components["schemas"]["DocumentAiCitationDto"][];
+        };
+        DocumentAiSourceDto: {
+            id: string;
+            documentId: string;
+            fileId: string;
+            title: string;
+            filename: string;
+            fileNumber: number;
+            documentVersion: number;
+            approvalId: string;
+            page: number;
+            text: string;
+        };
+        DocumentAiCoverageDto: {
+            omittedStatements?: number;
+            approved: number;
+            ready: number;
+            /** @enum {string} */
+            scope?: "FULL_INDEXED_REFERENCE" | "EXCERPTS";
+            referenceTitle?: string;
+            pages?: number[];
+            totalPages?: number;
+        };
+        DocumentAiAnswerDto: {
+            /** @enum {string} */
+            status: "ANSWERED" | "GENERAL_ANSWER" | "REFERENCE_LIST" | "REFERENCE_EXCERPTS" | "CLARIFICATION" | "GUIDANCE" | "SOURCE_CHANGED" | "INSUFFICIENT_EVIDENCE" | "CONFLICTING_SOURCES" | "NO_APPROVED_DOCUMENTS" | "INDEXING_REQUIRED";
+            reason?: string;
+            references?: components["schemas"]["DocumentAiReferenceDto"][];
+            message: string;
+            policy: string;
+            statements: components["schemas"]["DocumentAiStatementDto"][];
+            sources: components["schemas"]["DocumentAiSourceDto"][];
+            coverage: components["schemas"]["DocumentAiCoverageDto"];
+        };
+        DocumentChatTurnDto: {
+            id: string;
+            ordinal: number;
+            question: string;
+            at: string;
+            answer: components["schemas"]["DocumentAiAnswerDto"];
+        };
+        DocumentChatDetailDto: {
+            id: string;
+            title: string;
+            total: number;
+            turns: components["schemas"]["DocumentChatTurnDto"][];
+            before: number | null;
+        };
+        DocumentChatReceiptDto: {
+            chatId: string;
+            turn: components["schemas"]["DocumentChatTurnDto"];
+            alreadyApplied: boolean;
+        };
+        DocumentAiRetryDto: {
+            queued: boolean;
         };
     };
     responses: never;
@@ -4200,6 +4593,777 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    NotificationsController_list: {
+        parameters: {
+            query?: {
+                after?: unknown;
+            };
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkOrderNotificationsDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    NotificationsController_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkOrderNotificationReadDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    DocumentsController_list: {
+        parameters: {
+            query?: {
+                status?: "ALL" | "CURRENT" | "DRAFT" | "WITHDRAWN";
+                kind?: "ALL" | "MANUAL" | "SOP";
+                q?: unknown;
+                page?: number;
+            };
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentLibraryDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    DocumentsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                    /** Format: uuid */
+                    requestId: string;
+                    version: number;
+                    title: string;
+                    /** @enum {string} */
+                    kind: "MANUAL" | "SOP";
+                    description: string;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentReceiptDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    DocumentsController_detail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MachineDocumentDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    DocumentsController_revision: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                    /** Format: uuid */
+                    requestId: string;
+                    version: number;
+                    title: string;
+                    /** @enum {string} */
+                    kind: "MANUAL" | "SOP";
+                    description: string;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentReceiptDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    DocumentsController_action: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+                action: "approve" | "withdraw";
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    requestId: string;
+                    version: number;
+                    /** Format: uuid */
+                    fileId: string;
+                    reason: string;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentReceiptDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    DocumentsController_download: {
+        parameters: {
+            query: {
+                version: number;
+            };
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+                fileId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/octet-stream": string;
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    DocumentAiController_status: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentAiStatusDto"];
+                };
+            };
+        };
+    };
+    DocumentAiController_chats: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentChatListDto"];
+                };
+            };
+        };
+    };
+    DocumentAiController_transcript: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentChatDetailDto"];
+                };
+            };
+        };
+    };
+    DocumentAiController_message: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    question: string;
+                    /** Format: uuid */
+                    requestId: string;
+                    /** Format: uuid */
+                    chatId?: string;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentChatReceiptDto"];
+                };
+            };
+        };
+    };
+    DocumentAiController_ask: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    question: string;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentAiAnswerDto"];
+                };
+            };
+        };
+    };
+    DocumentAiController_retry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentAiRetryDto"];
                 };
             };
         };

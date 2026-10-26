@@ -44,6 +44,7 @@ export function Shell({
   const inReadings = pathname.includes("/readings");
   const inOrders = pathname.includes("/work-orders");
   const inPerformance = pathname.includes("/performance");
+  const inAssistant = pathname.includes("/assistant");
   const inDocuments = pathname.includes("/documents");
   const inReports = pathname.includes("/reports");
   const inCalendar = pathname.includes("/calendar");
@@ -85,7 +86,7 @@ export function Shell({
     }
   }
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${inAssistant ? "chat-shell" : ""}`}>
       <aside className="sidebar">
         <Link href="/machines" className="brand">
           <span className="brand-mark">
@@ -98,7 +99,7 @@ export function Shell({
         <div className="workspace-label">PILOT WORKSPACE</div>
         <nav aria-label="Main navigation">
           <Link
-            className={`nav-item ${inProduction || inReadings || inOrders || inCalendar || inPerformance || inReports || inDocuments ? "" : "active"}`}
+            className={`nav-item ${inProduction || inReadings || inOrders || inCalendar || inPerformance || inReports || inDocuments || inAssistant ? "" : "active"}`}
             href="/machines"
           >
             <Boxes size={18} />
@@ -166,6 +167,15 @@ export function Shell({
             >
               <FileText size={18} />
               Manuals & SOPs
+            </Link>
+          )}
+          {code && (
+            <Link
+              className={`nav-item ${inAssistant ? "active" : ""}`}
+              href={`/machines/${code}/assistant`}
+            >
+              <FileText size={18} />
+              AI assistant
             </Link>
           )}
         </nav>
@@ -238,6 +248,7 @@ export function Shell({
         <main className="main-content">
           {code === "WH-C" &&
             user &&
+            !inAssistant &&
             session &&
             ["TECHNICIAN", "MAINTENANCE_HEAD"].includes(user.role) && (
               <WorkOrderNotifications

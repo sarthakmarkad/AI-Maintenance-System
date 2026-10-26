@@ -32,6 +32,19 @@ const schema = z
     ),
     SUPABASE_URL: optional(z.string().url()),
     SUPABASE_PUBLISHABLE_KEY: optional(z.string().min(10)),
+    DOCUMENT_AI_PROVIDER: z.enum(["commandcode", "openai"]).optional(),
+    COMMANDCODE_API_KEY: optional(z.string().trim().min(20)),
+    COMMANDCODE_MODEL: z.literal("z-ai/glm-5.3-flash").optional(),
+    COMMANDCODE_BASE_URL: z
+      .literal("https://api.commandcode.ai/provider/v1")
+      .optional(),
+    LOCAL_EMBEDDING_DIGEST: optional(z.string().regex(/^[a-f0-9]{64}$/)),
+    OPENAI_API_KEY: optional(z.string().trim().min(20)),
+    OPENAI_EMBEDDING_MODEL: z
+      .enum(["text-embedding-3-small", "text-embedding-3-large"])
+      .optional(),
+    OPENAI_ANSWER_MODEL: optional(z.string().regex(/^[a-zA-Z0-9._-]{1,100}$/)),
+    DOCUMENT_AI_ENABLED: z.enum(["true", "false"]).optional(),
     ENABLE_DEMO_AUTH: z.enum(["false"]).optional(),
   })
   .superRefine((v, ctx) => {

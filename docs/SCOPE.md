@@ -1,6 +1,6 @@
 # Scope retained from the handoff
 
-SRS v1.0 is the official baseline; its full text is unavailable here. This list is the handoff's intended overall functional scope, not a reconstruction of original authoritative requirements. Milestones 1–9 are intermediate deliveries.
+SRS v1.0 is the official baseline; its full text is unavailable here. This list is the handoff's intended overall functional scope, not a reconstruction of original authoritative requirements. Milestones 1–11 are intermediate deliveries.
 
 | Functional area | Current status / intended delivery |
 |---|---|
@@ -15,14 +15,18 @@ SRS v1.0 is the official baseline; its full text is unavailable here. This list 
 | 9 Complete maintenance history | M4: immutable, fully paged report/assignment/submission/review history; M5 planned occurrences/completion linked; M8 immutable private photos/PDFs with upload history |
 | 10 Human root-cause analysis | M4: required human findings/RCA/actions, head approval or reasoned return |
 | 11 Advisory AI fault diagnosis | Later: backend provider abstraction |
-| 12 Approved manual/SOP RAG | Later: private approved documents and grounded retrieval |
+| 12 Approved manual/SOP RAG | M11 library + M12: current-approved PDF RAG, pgvector indexing and cited OpenAI answers; live CommandCode GLM + local embedding acceptance passed in `_test` |
 | 13 AI-assisted RCA drafting | Later: mandatory human approval |
 | 14 Maintenance KPIs | Later: agreed definitions and verified units/runtime |
 | 15 Management analytics | Later |
 | 16 Reports/exports | M9: scoped PDF/Excel work-order, planned-task and investigation registers; individual full-history/attachment-manifest reports |
 | 17 Backend role-based access | M1: verified identity, trusted roles, org/record scope |
-| 18 Notifications | M5: scoped due-stage in-app reminders/read receipts; external/other event delivery later |
-| 19 Protected audit trail | M1–9: immutable seed/provisioning/import and work-order/calendar action/job and statistical review and attachment/export events |
-| 20 REST API/OpenAPI | M1–9: authenticated registry/import/trend/work-order/calendar/reminder/statistical-review/performance/private-attachment/report endpoints, Swagger and generated frontend types |
+| 18 Notifications | M5: calendar due-stage reminders; M10: role-scoped actionable report/assignment/submission/return notifications and read receipts; external delivery later |
+| 19 Protected audit trail | M1–11: immutable seed/provisioning/import and work-order/calendar action/job and statistical review and attachment/export/document lifecycle and notification-read events |
+| 20 REST API/OpenAPI | M1–11: authenticated registry/import/trend/work-order/calendar/reminder/statistical-review/performance/private-attachment/report/notification/document-library endpoints, Swagger and generated frontend types |
 
 Equipment-reliability placeholders are omitted from the current delivery at the owner’s request. Industrial validation/AI diagnosis remain later work. Calendar/role/work-order acceptance across independent staff identities remains distinct from the single-identity pilot. Supabase-hosted operational persistence is still pending. See STATISTICAL-PATTERNS.md, CALENDAR.md and WORK-ORDERS.md for implemented pilot choices and verification boundaries.
+
+## Approved-document assistant — 24 October 2026
+
+All six active role views can ask questions from current approved, indexed WH-C references within existing trusted scope. Head/Admin can retry failed indexing; Administrator still cannot approve documents or engineering work. No new Auth identities or grants are introduced. Draft/withdrawn/superseded files are excluded from retrieval. Details, provider disclosure and unverified live-provider acceptance: [DOCUMENT-AI.md](DOCUMENT-AI.md).

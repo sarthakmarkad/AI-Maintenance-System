@@ -1,6 +1,7 @@
 // Browser Auth/API fixtures only. Real scope/atomicity/bytes belong to documents.integration.ts.
 import { test, expect, type Page } from "@playwright/test";
 import { setup, signIn, userId } from "./helpers";
+import type { Me } from "../../apps/web/lib/api";
 import type {
   MachineDocument,
   DocumentLibrary,
@@ -56,7 +57,7 @@ function model(): MachineDocument {
 }
 async function fixture(
   page: Page,
-  role = "MAINTENANCE_HEAD",
+  role: Me["role"] = "MAINTENANCE_HEAD",
   failure = 0,
   empty = false,
 ) {
@@ -270,7 +271,7 @@ for (const role of [
   "SUPERVISOR",
   "MANAGEMENT",
   "ADMINISTRATOR",
-]) {
+] as const) {
   test(`${role} has approved browse/download with isolated engineering controls`, async ({
     page,
   }) => {
@@ -393,4 +394,33 @@ test("expired private download follows existing sign-in flow", async ({
   await fixture(page, "OPERATOR", 401);
   await page.getByRole("button", { name: "Download approved PDF" }).click();
   await expect(page).toHaveURL(/\/login\?reason=expired/);
+});
+
+test("revoked document access clears cached references and management drafts until a successful reload", async ({
+  page,
+}) => {
+  await fixture(page, "ADMINISTRATOR");
+  await revision(page);
+  await page.route("**/documents/**/download?*", (route) =>
+    route.fulfill({
+      status: 403,
+      json: { message: "TEST document access revoked" },
+    }),
+  );
+  await page.getByRole("button", { name: "Download approved PDF" }).click();
+  await expect(
+    page.getByRole("alert", { name: "Document request error" }),
+  ).toContainText("access revoked");
+  await expect(
+    page.getByRole("region", { name: "Document library", exact: true }),
+  ).toHaveCount(0);
+  await expect(page.getByLabel("Revision description")).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Save unapproved draft" }),
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: "Reload library" }).click();
+  await expect(
+    page.getByRole("heading", { name: "TEST machine manual", exact: true }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Revision description")).toHaveValue("");
 });

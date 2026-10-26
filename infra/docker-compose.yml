@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:16.15-alpine
+    image: pgvector/pgvector:0.8.7-pg16
     environment:
       POSTGRES_USER: maintenance_owner
       POSTGRES_PASSWORD: ${LOCAL_DB_PASSWORD:?Set LOCAL_DB_PASSWORD}

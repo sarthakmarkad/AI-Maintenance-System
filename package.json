@@ -10,7 +10,7 @@
     "node": ">=22.12 <25"
   },
   "scripts": {
-    "dev": "concurrently -k -n api,web \"npm:dev:api\" \"npm:dev:web\"",
+    "dev": "concurrently -k -n api,web,embeddings \"npm:dev:api\" \"npm:dev:web\" \"npm:dev:embeddings\"",
     "dev:api": "npm run build:api && concurrently -k \"tsc -p apps/api/tsconfig.json --watch --preserveWatchOutput\" \"node --watch --env-file-if-exists=.env apps/api/dist/main.js\"",
     "dev:web": "npm run dev --workspace @maintenance/web",
     "build:api": "tsc -p apps/api/tsconfig.json",
@@ -33,7 +33,11 @@
     "db:grants": "node scripts/runtime-grants.mjs",
     "db:test:prepare": "node scripts/test-db.mjs",
     "format": "prettier --write \"apps/**/src/**/*.ts\" \"apps/web/{app,components,lib}/**/*.{ts,tsx,css}\" \"scripts/*.{ts,mjs}\" \"tests/**/*.ts\" playwright.config.ts",
-    "demo:readings": "npm run build:api && node scripts/import-synthetic-readings.mjs"
+    "demo:readings": "npm run build:api && node scripts/import-synthetic-readings.mjs",
+    "dev:embeddings": "node scripts/local-embeddings.mjs",
+    "test:ai:live": "npm run build:api && node --env-file-if-exists=.env tests/live/document-ai.mjs",
+    "ai:setup": "node scripts/local-embeddings.mjs --setup",
+    "test:ai:evaluate": "npm run build:api && node --env-file-if-exists=.env tests/live/chatbot-evaluation.mjs"
   },
   "dependencies": {
     "@nestjs/common": "11.2.7",
@@ -55,8 +59,10 @@
     "pdfkit": "0.20.2",
     "react": "19.3.1",
     "react-dom": "19.3.1",
+    "react-markdown": "10.1.0",
     "recharts": "3.10.1",
     "reflect-metadata": "0.2.2",
+    "remark-gfm": "4.0.1",
     "rxjs": "7.8.2",
     "saxes": "6.0.0",
     "tailwind-merge": "3.3.1",

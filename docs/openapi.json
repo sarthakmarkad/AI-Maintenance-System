@@ -4265,12 +4265,1348 @@
           "Maintenance reports"
         ]
       }
+    },
+    "/api/machines/{code}/work-order-notifications": {
+      "get": {
+        "operationId": "NotificationsController_list",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "after",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrderNotificationsDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Work-order notifications"
+        ]
+      }
+    },
+    "/api/machines/{code}/work-order-notifications/{id}/read": {
+      "post": {
+        "operationId": "NotificationsController_read",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrderNotificationReadDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Work-order notifications"
+        ]
+      }
+    },
+    "/api/machines/{code}/documents": {
+      "get": {
+        "operationId": "DocumentsController_list",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "ALL",
+                "CURRENT",
+                "DRAFT",
+                "WITHDRAWN"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "kind",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "ALL",
+                "MANUAL",
+                "SOP"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 160
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 10,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentLibraryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Machine document library"
+        ]
+      },
+      "post": {
+        "operationId": "DocumentsController_create",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file",
+                  "requestId",
+                  "version",
+                  "title",
+                  "kind",
+                  "description"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "requestId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 160
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "MANUAL",
+                      "SOP"
+                    ]
+                  },
+                  "description": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 1000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentReceiptDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Machine document library"
+        ]
+      }
+    },
+    "/api/machines/{code}/documents/{id}": {
+      "get": {
+        "operationId": "DocumentsController_detail",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MachineDocumentDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Machine document library"
+        ]
+      }
+    },
+    "/api/machines/{code}/documents/{id}/versions": {
+      "post": {
+        "operationId": "DocumentsController_revision",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file",
+                  "requestId",
+                  "version",
+                  "title",
+                  "kind",
+                  "description"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "requestId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 160
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "MANUAL",
+                      "SOP"
+                    ]
+                  },
+                  "description": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 1000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentReceiptDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Machine document library"
+        ]
+      }
+    },
+    "/api/machines/{code}/documents/{id}/actions/{action}": {
+      "post": {
+        "operationId": "DocumentsController_action",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "action",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "enum": [
+                "approve",
+                "withdraw"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "requestId",
+                  "version",
+                  "fileId",
+                  "reason"
+                ],
+                "properties": {
+                  "requestId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "fileId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 1000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentReceiptDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Machine document library"
+        ]
+      }
+    },
+    "/api/machines/{code}/documents/{id}/versions/{fileId}/download": {
+      "get": {
+        "operationId": "DocumentsController_download",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "fileId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Machine document library"
+        ]
+      }
+    },
+    "/api/machines/{code}/assistant/status": {
+      "get": {
+        "operationId": "DocumentAiController_status",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentAiStatusDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Document assistant"
+        ]
+      }
+    },
+    "/api/machines/{code}/assistant/chats": {
+      "get": {
+        "operationId": "DocumentAiController_chats",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentChatListDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Document assistant"
+        ]
+      }
+    },
+    "/api/machines/{code}/assistant/chats/{id}": {
+      "get": {
+        "operationId": "DocumentAiController_transcript",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentChatDetailDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Document assistant"
+        ]
+      }
+    },
+    "/api/machines/{code}/assistant/chat": {
+      "post": {
+        "operationId": "DocumentAiController_message",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "question",
+                  "requestId"
+                ],
+                "properties": {
+                  "question": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  },
+                  "requestId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "chatId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentChatReceiptDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Document assistant"
+        ]
+      }
+    },
+    "/api/machines/{code}/assistant/ask": {
+      "post": {
+        "operationId": "DocumentAiController_ask",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "question"
+                ],
+                "properties": {
+                  "question": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 1000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentAiAnswerDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Document assistant"
+        ]
+      }
+    },
+    "/api/machines/{code}/assistant/indexes/{id}/retry": {
+      "post": {
+        "operationId": "DocumentAiController_retry",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentAiRetryDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Document assistant"
+        ]
+      }
     }
   },
   "info": {
     "title": "Supreme Maintenance API",
     "description": "",
-    "version": "0.9.0",
+    "version": "0.12.0",
     "contact": {}
   },
   "tags": [],
@@ -8077,6 +9413,761 @@
           "rows",
           "fingerprint",
           "previewLimit"
+        ]
+      },
+      "WorkOrderNotificationDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "BREAKDOWN",
+              "PLANNED",
+              "INVESTIGATION"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "REPORT",
+              "ASSIGN",
+              "SCHEDULE",
+              "INVESTIGATE",
+              "SUBMIT",
+              "RETURN"
+            ]
+          },
+          "eventVersion": {
+            "type": "number"
+          },
+          "actorName": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "readAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "orderId",
+          "title",
+          "kind",
+          "action",
+          "eventVersion",
+          "actorName",
+          "message",
+          "createdAt",
+          "readAt"
+        ]
+      },
+      "WorkOrderNotificationsDto": {
+        "type": "object",
+        "properties": {
+          "unread": {
+            "type": "number"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkOrderNotificationDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "unread",
+          "items",
+          "nextCursor"
+        ]
+      },
+      "WorkOrderNotificationReadDto": {
+        "type": "object",
+        "properties": {
+          "read": {
+            "type": "boolean"
+          },
+          "readAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "read",
+          "readAt"
+        ]
+      },
+      "DocumentFileDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "number": {
+            "type": "number"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "byteSize": {
+            "type": "number"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CURRENT",
+              "DRAFT",
+              "SUPERSEDED",
+              "WITHDRAWN"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "number",
+          "filename",
+          "description",
+          "byteSize",
+          "sha256",
+          "status"
+        ]
+      },
+      "DocumentEventDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "fileId": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "number"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "UPLOAD",
+              "APPROVE",
+              "WITHDRAW"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "actorId": {
+            "type": "string"
+          },
+          "actorName": {
+            "type": "string"
+          },
+          "actorRole": {
+            "type": "string",
+            "enum": [
+              "OPERATOR",
+              "TECHNICIAN",
+              "MAINTENANCE_HEAD",
+              "SUPERVISOR",
+              "MANAGEMENT",
+              "ADMINISTRATOR"
+            ]
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "fileId",
+          "revision",
+          "action",
+          "reason",
+          "actorId",
+          "actorName",
+          "actorRole",
+          "at"
+        ]
+      },
+      "MachineDocumentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "MANUAL",
+              "SOP"
+            ]
+          },
+          "version": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "currentFileId": {
+            "type": "string",
+            "nullable": true
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentFileDto"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentEventDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "kind",
+          "version",
+          "createdAt",
+          "currentFileId",
+          "files",
+          "events"
+        ]
+      },
+      "DocumentLibraryDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "pageSize": {
+            "type": "number"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MachineDocumentDto"
+            }
+          },
+          "canManage": {
+            "type": "boolean"
+          },
+          "canApprove": {
+            "type": "boolean"
+          },
+          "maxBytes": {
+            "type": "number"
+          },
+          "maxDocuments": {
+            "type": "number"
+          },
+          "maxVersions": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "total",
+          "page",
+          "pageSize",
+          "items",
+          "canManage",
+          "canApprove",
+          "maxBytes",
+          "maxDocuments",
+          "maxVersions"
+        ]
+      },
+      "DocumentReceiptDto": {
+        "type": "object",
+        "properties": {
+          "documentId": {
+            "type": "string"
+          },
+          "fileId": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "number"
+          },
+          "alreadyApplied": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "documentId",
+          "fileId",
+          "revision",
+          "alreadyApplied"
+        ]
+      },
+      "DocumentAiIndexDto": {
+        "type": "object",
+        "properties": {
+          "documentId": {
+            "type": "string"
+          },
+          "fileId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "fileNumber": {
+            "type": "number"
+          },
+          "indexId": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "QUEUED",
+              "PROCESSING",
+              "READY",
+              "FAILED",
+              "INACTIVE"
+            ]
+          },
+          "pages": {
+            "type": "number",
+            "nullable": true
+          },
+          "chunks": {
+            "type": "number",
+            "nullable": true
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "documentId",
+          "fileId",
+          "title",
+          "fileNumber",
+          "indexId",
+          "status",
+          "pages",
+          "chunks",
+          "error"
+        ]
+      },
+      "DocumentAiStatusDto": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "enum": [
+              "commandcode",
+              "openai"
+            ]
+          },
+          "embeddingModel": {
+            "type": "string"
+          },
+          "configured": {
+            "type": "boolean"
+          },
+          "canManage": {
+            "type": "boolean"
+          },
+          "approved": {
+            "type": "number"
+          },
+          "ready": {
+            "type": "number"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentAiIndexDto"
+            }
+          }
+        },
+        "required": [
+          "provider",
+          "embeddingModel",
+          "configured",
+          "canManage",
+          "approved",
+          "ready",
+          "items"
+        ]
+      },
+      "DocumentChatSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "turns": {
+            "type": "number"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "turns",
+          "updatedAt"
+        ]
+      },
+      "DocumentChatListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentChatSummaryDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ]
+      },
+      "DocumentAiReferenceDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "documentId": {
+            "type": "string"
+          },
+          "fileId": {
+            "type": "string"
+          },
+          "approvalId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "fileNumber": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "documentId",
+          "fileId",
+          "approvalId",
+          "title",
+          "fileNumber"
+        ]
+      },
+      "DocumentAiCitationDto": {
+        "type": "object",
+        "properties": {
+          "sourceId": {
+            "type": "string"
+          },
+          "quote": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sourceId",
+          "quote"
+        ]
+      },
+      "DocumentAiStatementDto": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "citations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentAiCitationDto"
+            }
+          }
+        },
+        "required": [
+          "text",
+          "citations"
+        ]
+      },
+      "DocumentAiSourceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "documentId": {
+            "type": "string"
+          },
+          "fileId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "fileNumber": {
+            "type": "number"
+          },
+          "documentVersion": {
+            "type": "number"
+          },
+          "approvalId": {
+            "type": "string"
+          },
+          "page": {
+            "type": "number"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "documentId",
+          "fileId",
+          "title",
+          "filename",
+          "fileNumber",
+          "documentVersion",
+          "approvalId",
+          "page",
+          "text"
+        ]
+      },
+      "DocumentAiCoverageDto": {
+        "type": "object",
+        "properties": {
+          "omittedStatements": {
+            "type": "number"
+          },
+          "approved": {
+            "type": "number"
+          },
+          "ready": {
+            "type": "number"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "FULL_INDEXED_REFERENCE",
+              "EXCERPTS"
+            ]
+          },
+          "referenceTitle": {
+            "type": "string"
+          },
+          "pages": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "totalPages": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "approved",
+          "ready"
+        ]
+      },
+      "DocumentAiAnswerDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ANSWERED",
+              "GENERAL_ANSWER",
+              "REFERENCE_LIST",
+              "REFERENCE_EXCERPTS",
+              "CLARIFICATION",
+              "GUIDANCE",
+              "SOURCE_CHANGED",
+              "INSUFFICIENT_EVIDENCE",
+              "CONFLICTING_SOURCES",
+              "NO_APPROVED_DOCUMENTS",
+              "INDEXING_REQUIRED"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "references": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentAiReferenceDto"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "policy": {
+            "type": "string"
+          },
+          "statements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentAiStatementDto"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentAiSourceDto"
+            }
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/DocumentAiCoverageDto"
+          }
+        },
+        "required": [
+          "status",
+          "message",
+          "policy",
+          "statements",
+          "sources",
+          "coverage"
+        ]
+      },
+      "DocumentChatTurnDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "ordinal": {
+            "type": "number"
+          },
+          "question": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string"
+          },
+          "answer": {
+            "$ref": "#/components/schemas/DocumentAiAnswerDto"
+          }
+        },
+        "required": [
+          "id",
+          "ordinal",
+          "question",
+          "at",
+          "answer"
+        ]
+      },
+      "DocumentChatDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "total": {
+            "type": "number"
+          },
+          "turns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentChatTurnDto"
+            }
+          },
+          "before": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "total",
+          "turns",
+          "before"
+        ]
+      },
+      "DocumentChatReceiptDto": {
+        "type": "object",
+        "properties": {
+          "chatId": {
+            "type": "string"
+          },
+          "turn": {
+            "$ref": "#/components/schemas/DocumentChatTurnDto"
+          },
+          "alreadyApplied": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "chatId",
+          "turn",
+          "alreadyApplied"
+        ]
+      },
+      "DocumentAiRetryDto": {
+        "type": "object",
+        "properties": {
+          "queued": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "queued"
         ]
       }
     }

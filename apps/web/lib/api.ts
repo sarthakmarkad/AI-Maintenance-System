@@ -17,6 +17,7 @@ async function apiResponse(
   token: string,
   signal?: AbortSignal,
   init?: RequestInit,
+  timeoutMs = 15000,
 ): Promise<Response> {
   const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
   let response: Response;
@@ -30,8 +31,8 @@ async function apiResponse(
       },
       cache: "no-store",
       signal: signal
-        ? AbortSignal.any([signal, AbortSignal.timeout(15000)])
-        : AbortSignal.timeout(15000),
+        ? AbortSignal.any([signal, AbortSignal.timeout(timeoutMs)])
+        : AbortSignal.timeout(timeoutMs),
     });
   } catch (error) {
     if (signal?.aborted) throw error;
@@ -56,8 +57,9 @@ export async function api<T>(
   token: string,
   signal?: AbortSignal,
   init?: RequestInit,
+  timeoutMs = 15000,
 ): Promise<T> {
-  return (await apiResponse(path, token, signal, init))
+  return (await apiResponse(path, token, signal, init, timeoutMs))
     .json()
     .catch(() => null) as Promise<T>;
 }
