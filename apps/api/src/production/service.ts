@@ -59,10 +59,7 @@ export const commitSchema = z
         "Select each day only once.",
       ),
     acknowledgeWarnings: z.literal(true, {
-      errorMap: () => ({
-        message:
-          "Acknowledge the source and validation notes before importing.",
-      }),
+      error: "Acknowledge the source and validation notes before importing.",
     }),
   })
   .strict();

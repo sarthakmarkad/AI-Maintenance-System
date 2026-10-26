@@ -19,8 +19,8 @@ import {
 import { trendQuery } from "../readings/service";
 import { localDayStart, localTime } from "../readings/parser";
 import { StatisticalEngine, POLICY, parameter, kind } from "./engine";
-export const anomalyQuery = trendQuery
-  .innerType()
+export const anomalyQuery = z
+  .object(trendQuery.shape)
   .extend({
     parameter: parameter.optional(),
     kind: kind.optional(),
