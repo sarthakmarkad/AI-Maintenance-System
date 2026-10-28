@@ -1,3 +1,4 @@
+import { productionTemplate, templateMonth } from "../imports/templates";
 import {
   BadRequestException,
   ConflictException,
@@ -14,7 +15,7 @@ import { REPOSITORY, type Principal, type Repository } from "../repository";
 import {
   loadWorkbook,
   parseSheet,
-  PARSER_VERSION,
+  SUPPORTED_PRODUCTION_PARSERS,
   strictDate,
   sumKg,
   type ParsedSheet,
@@ -91,16 +92,18 @@ export class ProductionService {
     return this.database.client;
   }
   private async machine(user: Principal, code: string) {
-    if (code !== "WH-C")
-      throw new NotFoundException(
-        "Production imports are currently available only for the WH-C pilot.",
-      );
+    if (code === "WH-B")
+      throw new NotFoundException("WH-B remains reference-only.");
     const record = await this.repo.machine(user, code);
     if (!record)
       throw new NotFoundException(
         "Machine not found or unavailable to your account.",
       );
     return record;
+  }
+  async template(user: Principal, code: string, month = templateMonth()) {
+    await this.machine(user, code);
+    return this.process(user, () => productionTemplate(code, month));
   }
   private async process<T>(
     user: Principal,
@@ -125,7 +128,7 @@ export class ProductionService {
   ) {
     await this.machine(user, code);
     return this.process(user, async () => {
-      const loaded = await loadWorkbook(buffer, filename);
+      const loaded = await loadWorkbook(buffer, filename, code);
       return {
         filename: loaded.filename,
         workbookHash: loaded.workbookHash,
@@ -143,7 +146,7 @@ export class ProductionService {
   ) {
     const machine = await this.machine(user, code);
     return this.process(user, async () => {
-      const loaded = await loadWorkbook(buffer, filename);
+      const loaded = await loadWorkbook(buffer, filename, code);
       const staged = parseSheet(loaded, sheet, source);
       await this.markExisting(staged, user.orgId, machine.id);
       const record = await this.db.$transaction(async (tx) => {
@@ -155,7 +158,7 @@ export class ProductionService {
             filename: loaded.filename,
             workbookHash: loaded.workbookHash,
             sheet,
-            parserVersion: PARSER_VERSION,
+            parserVersion: staged.parserVersion,
             staged: staged as unknown as Prisma.InputJsonValue,
             createdBy: user.userId,
             expiresAt: new Date(Date.now() + 86400000),
@@ -280,7 +283,10 @@ export class ProductionService {
             );
           const staged = row.staged as unknown as ParsedSheet;
           if (
-            staged.parserVersion !== PARSER_VERSION ||
+            !SUPPORTED_PRODUCTION_PARSERS.includes(
+              staged.parserVersion as (typeof SUPPORTED_PRODUCTION_PARSERS)[number],
+            ) ||
+            staged.parserVersion !== row.parserVersion ||
             staged.source !== row.source ||
             staged.sheet !== row.sheet
           )

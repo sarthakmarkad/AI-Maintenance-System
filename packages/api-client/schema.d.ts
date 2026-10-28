@@ -4,6 +4,166 @@
  */
 
 export interface paths {
+    "/api/team/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["TeamController_members"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/team/invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["TeamController_invitations"];
+        put?: never;
+        post: operations["TeamController_invite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/team/members/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["TeamController_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/team/invitations/{id}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["TeamController_revoke"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/team/invitations/{id}/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["TeamController_link"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/team/invitations/{id}/email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["TeamController_send"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/team/onboarding/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["TeamOnboardingController_options"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/team/onboarding/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["TeamOnboardingController_preview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/team/onboarding/available": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["TeamOnboardingController_available"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/team/onboarding/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["TeamOnboardingController_accept"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/health/live": {
         parameters: {
             query?: never;
@@ -61,7 +221,7 @@ export interface paths {
         };
         get: operations["MachinesController_list"];
         put?: never;
-        post?: never;
+        post: operations["MachineRegistrationController_register"];
         delete?: never;
         options?: never;
         head?: never;
@@ -76,6 +236,118 @@ export interface paths {
             cookie?: never;
         };
         get: operations["MachinesController_detail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/access": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["MachineRegistrationController_roster"];
+        put: operations["MachineRegistrationController_access"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/details": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["MachineRegistrationController_details"];
+        put: operations["MachineRegistrationController_updateDetails"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/lifecycle": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["MachineRegistrationController_lifecycle"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/photo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["MachineRegistrationController_uploadPhoto"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/photo/remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["MachineRegistrationController_removePhoto"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/photo/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["MachineRegistrationController_photo"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/production/template": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ProductionController_template"];
         put?: never;
         post?: never;
         delete?: never;
@@ -156,6 +428,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["ProductionController_dashboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/readings/template": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ReadingsController_template"];
         put?: never;
         post?: never;
         delete?: never;
@@ -724,6 +1012,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/machines/{code}/assistant/chats/{id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["DocumentAiController_archive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/machines/{code}/assistant/chat": {
         parameters: {
             query?: never;
@@ -772,10 +1076,152 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/machines/{code}/work-orders/{id}/rca-drafts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["RcaController_list"];
+        put?: never;
+        post: operations["RcaController_generate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/external-notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ExternalNotificationsController_settings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/machines/{code}/external-notifications/preference": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["ExternalNotificationsController_save"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        StaffMachineDto: {
+            id: string;
+            code: string;
+            name: string;
+            archivedAt: string | null;
+        };
+        StaffMemberDto: {
+            id: string;
+            userId: string;
+            displayName: string;
+            email: string | null;
+            /** @enum {string} */
+            role: "OPERATOR" | "TECHNICIAN" | "MAINTENANCE_HEAD" | "SUPERVISOR" | "MANAGEMENT" | "ADMINISTRATOR";
+            additionalRoles: ("OPERATOR" | "TECHNICIAN" | "MAINTENANCE_HEAD" | "SUPERVISOR" | "MANAGEMENT" | "ADMINISTRATOR")[];
+            active: boolean;
+            version: number;
+            machines: components["schemas"]["StaffMachineDto"][];
+            openWorkOrders: number;
+            activePlans: number;
+        };
+        StaffListDto: {
+            items: components["schemas"]["StaffMemberDto"][];
+            page: number;
+            total: number;
+        };
+        TeamInvitationDto: {
+            id: string;
+            email: string;
+            displayName: string;
+            /** @enum {string} */
+            role: "OPERATOR" | "TECHNICIAN" | "MAINTENANCE_HEAD" | "SUPERVISOR" | "MANAGEMENT" | "ADMINISTRATOR";
+            organization: string;
+            machines: components["schemas"]["StaffMachineDto"][];
+            status: string;
+            version: number;
+            expiresAt: string;
+            deliveryStatus: string | null;
+            deliveryCode: string | null;
+        };
+        TeamInvitationsDto: {
+            items: components["schemas"]["TeamInvitationDto"][];
+            total: number;
+            page: number;
+            invitationsConfigured: boolean;
+            emailConfigured: boolean;
+            passwordEmailConfigured: boolean;
+        };
+        InviteStaffDto: {
+            /** Format: uuid */
+            requestId: string;
+            email: string;
+            displayName: string;
+            /** @enum {string} */
+            role: "OPERATOR" | "TECHNICIAN" | "MAINTENANCE_HEAD" | "SUPERVISOR" | "MANAGEMENT" | "ADMINISTRATOR";
+            machineIds: string[];
+        };
+        TeamReceiptDto: {
+            id: string;
+            version?: number;
+            alreadyApplied: boolean;
+            invitationUrl?: string | null;
+            deliveryStatus?: string;
+        };
+        UpdateStaffDto: {
+            /** Format: uuid */
+            requestId: string;
+            version: number;
+            displayName: string;
+            /** @enum {string} */
+            role: "OPERATOR" | "TECHNICIAN" | "MAINTENANCE_HEAD" | "SUPERVISOR" | "MANAGEMENT" | "ADMINISTRATOR";
+            active: boolean;
+            machineIds: string[];
+            expectedMachineIds: string[];
+            reason: string;
+            replaceAdditionalRoles: boolean;
+        };
+        TeamActionDto: {
+            /** Format: uuid */
+            requestId: string;
+            version: number;
+        };
+        TeamInvitationTokenDto: {
+            token: string;
+        };
+        AcceptTeamInvitationDto: {
+            /** Format: uuid */
+            invitationId: string;
+        };
+        TeamAcceptanceDto: {
+            membershipId: string;
+            /** @enum {string} */
+            role: "OPERATOR" | "TECHNICIAN" | "MAINTENANCE_HEAD" | "SUPERVISOR" | "MANAGEMENT" | "ADMINISTRATOR";
+            alreadyApplied: boolean;
+        };
         HealthDto: {
             /** @enum {string} */
             status: "ok" | "ready" | "not_ready";
@@ -810,13 +1256,23 @@ export interface components {
         NamedDto: {
             name: string;
         };
+        MachinePhotoSummaryDto: {
+            /** Format: uuid */
+            id: string;
+            width: number;
+            height: number;
+        };
         MachineDto: {
+            /** Format: date-time */
+            archivedAt?: string | null;
+            archiveReason?: string | null;
             /** Format: uuid */
             id: string;
             /** @example WH-C */
             code: string;
             name: string;
-            manufacturer: string;
+            manufacturer: string | null;
+            version: number;
             model: string | null;
             /**
              * @description Registry status, not live telemetry.
@@ -825,6 +1281,7 @@ export interface components {
             operationalStatus: string;
             department: components["schemas"]["NamedDto"] | null;
             location: components["schemas"]["NamedDto"] | null;
+            photo?: components["schemas"]["MachinePhotoSummaryDto"] | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -833,6 +1290,92 @@ export interface components {
         MachinesDto: {
             items: components["schemas"]["MachineDto"][];
             nextCursor: string | null;
+        };
+        RegisterMachineDto: {
+            /** Format: uuid */
+            requestId: string;
+            /** @example COMP-01 */
+            code: string;
+            name: string;
+            manufacturer?: string | null;
+            model?: string | null;
+            department?: string | null;
+            location?: string | null;
+        };
+        MachineAccessPersonDto: {
+            /** Format: uuid */
+            membershipId: string;
+            displayName: string;
+            active: boolean;
+            roles: ("OPERATOR" | "TECHNICIAN" | "MAINTENANCE_HEAD" | "SUPERVISOR" | "MANAGEMENT" | "ADMINISTRATOR")[];
+            granted: boolean;
+        };
+        MachineAccessRosterDto: {
+            version: number;
+            items: components["schemas"]["MachineAccessPersonDto"][];
+            nextCursor: string | null;
+        };
+        MachineAccessChangeDto: {
+            /** Format: uuid */
+            membershipId: string;
+            granted: boolean;
+        };
+        UpdateMachineAccessDto: {
+            /** Format: uuid */
+            requestId: string;
+            version: number;
+            changes: components["schemas"]["MachineAccessChangeDto"][];
+        };
+        MachineAccessReceiptDto: {
+            version: number;
+            alreadySaved: boolean;
+        };
+        MachinePhotoSourceDto: {
+            filename: string;
+            mediaType: string;
+            byteSize: number;
+            sha256: string;
+            width: number;
+            height: number;
+        };
+        MachinePhotoDto: {
+            /** Format: uuid */
+            id: string;
+            sha256: string;
+            byteSize: number;
+            width: number;
+            height: number;
+            uploadedBy: string;
+            uploaderName: string;
+            createdAt: string;
+            source: components["schemas"]["MachinePhotoSourceDto"];
+        };
+        MachineDetailsDto: {
+            machine: components["schemas"]["MachineDto"];
+            photo: components["schemas"]["MachinePhotoDto"] | null;
+            canManage: boolean;
+        };
+        UpdateMachineDetailsDto: {
+            /** Format: uuid */
+            requestId: string;
+            version: number;
+            name: string;
+            manufacturer: string | null;
+            model: string | null;
+            department: string | null;
+            location: string | null;
+        };
+        MachineLifecycleDto: {
+            /** Format: uuid */
+            requestId: string;
+            version: number;
+            archived: boolean;
+            reason: string;
+        };
+        ChangeMachinePhotoDto: {
+            /** Format: uuid */
+            requestId: string;
+            version: number;
         };
         SheetInfoDto: {
             name: string;
@@ -1130,7 +1673,7 @@ export interface components {
             /** @enum {string} */
             actorRole: "OPERATOR" | "TECHNICIAN" | "MAINTENANCE_HEAD" | "SUPERVISOR" | "MANAGEMENT" | "ADMINISTRATOR";
             /** @enum {string} */
-            status: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED";
+            status: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED" | "CANCELLED";
             /** Format: date-time */
             createdAt: string;
         };
@@ -1177,11 +1720,11 @@ export interface components {
             id: string;
             version: number;
             /** @enum {string} */
-            action: "REPORT" | "SCHEDULE" | "INVESTIGATE" | "ASSIGN" | "START" | "SUBMIT" | "APPROVE" | "RETURN" | "CLOSE" | "ATTACH";
+            action: "REPORT" | "SCHEDULE" | "INVESTIGATE" | "ASSIGN" | "START" | "SUBMIT" | "APPROVE" | "RETURN" | "CLOSE" | "CANCEL" | "ATTACH";
             /** @enum {string|null} */
-            fromStatus: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED" | null;
+            fromStatus: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED" | "CANCELLED" | null;
             /** @enum {string} */
-            toStatus: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED";
+            toStatus: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED" | "CANCELLED";
             actor: components["schemas"]["WorkOrderPersonDto"];
             /** @enum {string} */
             actorRole: "OPERATOR" | "TECHNICIAN" | "MAINTENANCE_HEAD" | "SUPERVISOR" | "MANAGEMENT" | "ADMINISTRATOR";
@@ -1201,7 +1744,7 @@ export interface components {
             id: string;
             title: string;
             /** @enum {string} */
-            status: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED";
+            status: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED" | "CANCELLED";
             version: number;
             /** @enum {string} */
             priority: "LOW" | "NORMAL" | "HIGH";
@@ -1217,7 +1760,7 @@ export interface components {
             restoredAt: string | null;
             /** Format: date-time */
             closedAt: string | null;
-            allowedActions: ("assign" | "start" | "submit" | "approve" | "return" | "close")[];
+            allowedActions: ("assign" | "start" | "submit" | "approve" | "return" | "close" | "cancel")[];
             attachments: components["schemas"]["AttachmentDto"][];
             canUploadAttachment: boolean;
             attachmentLimit: number;
@@ -1252,7 +1795,7 @@ export interface components {
             id: string;
             title: string;
             /** @enum {string} */
-            status: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED";
+            status: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED" | "CANCELLED";
             version: number;
             /** @enum {string} */
             priority: "LOW" | "NORMAL" | "HIGH";
@@ -1268,7 +1811,7 @@ export interface components {
             restoredAt: string | null;
             /** Format: date-time */
             closedAt: string | null;
-            allowedActions: ("assign" | "start" | "submit" | "approve" | "return" | "close")[];
+            allowedActions: ("assign" | "start" | "submit" | "approve" | "return" | "close" | "cancel")[];
         };
         WorkOrderListDto: {
             items: components["schemas"]["WorkOrderSummaryDto"][];
@@ -1291,7 +1834,7 @@ export interface components {
             id: string;
             title: string;
             /** @enum {string} */
-            status: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED";
+            status: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED" | "CANCELLED";
             version: number;
             /** @enum {string} */
             priority: "LOW" | "NORMAL" | "HIGH";
@@ -1307,7 +1850,7 @@ export interface components {
             restoredAt: string | null;
             /** Format: date-time */
             closedAt: string | null;
-            allowedActions: ("assign" | "start" | "submit" | "approve" | "return" | "close")[];
+            allowedActions: ("assign" | "start" | "submit" | "approve" | "return" | "close" | "cancel")[];
             attachments: components["schemas"]["AttachmentDto"][];
             canUploadAttachment: boolean;
             attachmentLimit: number;
@@ -1387,7 +1930,7 @@ export interface components {
             workOrderId: string | null;
             workOrderStatus: string | null;
             /** @enum {string} */
-            status: "UPCOMING" | "DUE" | "OVERDUE" | "COMPLETED" | "SKIPPED";
+            status: "UPCOMING" | "DUE" | "OVERDUE" | "COMPLETED" | "SKIPPED" | "CANCELLED";
             skippedAt: string | null;
             skipReason: string | null;
             planActive: boolean;
@@ -1533,7 +2076,7 @@ export interface components {
             createdAt: string;
             workOrderId: string | null;
             /** @enum {string|null} */
-            workOrderStatus: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED" | null;
+            workOrderStatus: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED" | "CANCELLED" | null;
             technicianId: string | null;
         };
         AnomalyFlagDto: {
@@ -1613,7 +2156,7 @@ export interface components {
             createdAt: string;
             workOrderId: string | null;
             /** @enum {string|null} */
-            workOrderStatus: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED" | null;
+            workOrderStatus: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED" | "CANCELLED" | null;
             technicianId: string | null;
             evidence: components["schemas"]["AnomalyEvidenceDto"];
         };
@@ -1637,7 +2180,7 @@ export interface components {
             /** @enum {string} */
             kind: "BREAKDOWN" | "PLANNED" | "INVESTIGATION";
             /** @enum {string} */
-            status: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED";
+            status: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED" | "CANCELLED";
             reportedAt: string;
             ageHours: number;
             technicianName: string | null;
@@ -1656,6 +2199,7 @@ export interface components {
             closed: number;
         };
         PerformancePlannedDto: {
+            cancelled?: number;
             applicable: boolean;
             due: number;
             skipped: number;
@@ -1699,6 +2243,7 @@ export interface components {
             alreadyUploaded: boolean;
         };
         ReportCountsDto: {
+            cancelled?: number;
             open: number;
             closed: number;
             skipped: number;
@@ -1916,6 +2461,150 @@ export interface components {
         DocumentAiRetryDto: {
             queued: boolean;
         };
+        RcaHumanFieldsDto: {
+            /** @description Current unsubmitted human inspection text, or empty. Not independent verification. */
+            findings: string;
+            rootCause: string;
+            correctiveAction: string;
+            preventiveAction: string;
+        };
+        GenerateRcaDto: {
+            /**
+             * Format: uuid
+             * @description Stable key for exact retries of this payload; never automatically repeats a provider call.
+             */
+            requestId: string;
+            version: number;
+            human: components["schemas"]["RcaHumanFieldsDto"];
+        };
+        RcaSourceDto: {
+            id: string;
+            attribution: string;
+            text: string;
+            /** @enum {string} */
+            origin: "ORIGINAL_REPORT" | "RETAINED_HISTORY" | "CURRENT_HUMAN_INPUT";
+            eventId: string | null;
+            eventVersion: number | null;
+            recordedAt: string | null;
+        };
+        RcaAdvisoryDto: {
+            text: string;
+            sourceIds: string[];
+        };
+        RcaDraftDto: {
+            /** @enum {string} */
+            status: "LIMITED_EVIDENCE" | "INSUFFICIENT_EVIDENCE";
+            factSourceIds: string[];
+            facts: components["schemas"]["RcaSourceDto"][];
+            hypotheses: components["schemas"]["RcaAdvisoryDto"][];
+            missingChecks: components["schemas"]["RcaAdvisoryDto"][];
+            correctiveProposals: components["schemas"]["RcaAdvisoryDto"][];
+            preventiveProposals: components["schemas"]["RcaAdvisoryDto"][];
+            proposed: components["schemas"]["RcaHumanFieldsDto"];
+            limitations: string;
+        };
+        RcaReportEvidenceDto: {
+            priority: string;
+            impact: string;
+            reportedBy: string;
+            reportedAt: string;
+            observedAt: string | null;
+        };
+        RcaHistoryEvidenceDto: {
+            id: string;
+            version: number;
+            action: string;
+            actorId: string;
+            actorRole: string;
+            at: string;
+        };
+        RcaSnapshotDto: {
+            policy: string;
+            orderId: string;
+            version: number;
+            kind: string;
+            machineCode: string;
+            capturedAt: string;
+            report: components["schemas"]["RcaReportEvidenceDto"];
+            history: components["schemas"]["RcaHistoryEvidenceDto"][];
+            sources: components["schemas"]["RcaSourceDto"][];
+            coverage: string;
+        };
+        RcaReceiptDto: {
+            id: string;
+            requestId: string;
+            orderId: string;
+            version: number;
+            sourceHash: string;
+            model: string;
+            policy: string;
+            requestedBy: string;
+            createdAt: string;
+            completedAt: string | null;
+            /** @enum {string} */
+            status: "GENERATED" | "FAILED" | "STALE" | "PENDING";
+            reason: string | null;
+            draft: components["schemas"]["RcaDraftDto"] | null;
+            snapshot: components["schemas"]["RcaSnapshotDto"];
+            stale: boolean;
+        };
+        RcaHistoryDto: {
+            items: components["schemas"]["RcaReceiptDto"][];
+            nextCursor: string | null;
+        };
+        ExternalNotificationPreferenceDto: {
+            enabled: boolean;
+            version: number;
+            /** @description Only the signed-in recipient's verified destination. */
+            destination: string | null;
+            enabledAt: string | null;
+            verifiedAt: string | null;
+        };
+        ExternalNotificationAttemptDto: {
+            /** Format: uuid */
+            id: string;
+            attempt: number;
+            status: string;
+            code: string | null;
+            at: string;
+            late: boolean;
+        };
+        ExternalNotificationDeliveryDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            eventId: string;
+            /** Format: uuid */
+            orderId: string;
+            action: string;
+            eventAt: string;
+            /** @enum {string} */
+            status: "PENDING" | "SENDING" | "SENT" | "FAILED" | "SUPPRESSED";
+            attemptCount: number;
+            code: string | null;
+            createdAt: string;
+            updatedAt: string;
+            nextAttemptAt: string | null;
+            attempts: components["schemas"]["ExternalNotificationAttemptDto"][];
+        };
+        ExternalNotificationSettingsDto: {
+            supported: boolean;
+            configured: boolean;
+            /** @enum {string} */
+            role: "OPERATOR" | "TECHNICIAN" | "MAINTENANCE_HEAD" | "SUPERVISOR" | "MANAGEMENT" | "ADMINISTRATOR";
+            preference: components["schemas"]["ExternalNotificationPreferenceDto"];
+            deliveries: components["schemas"]["ExternalNotificationDeliveryDto"][];
+        };
+        ExternalNotificationPreferenceInputDto: {
+            enabled: boolean;
+            /** @description Last loaded preference version; zero before enrollment. */
+            version: number;
+            /**
+             * Format: uuid
+             * @description Retain on an identical retry.
+             */
+            requestId: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -1925,6 +2614,251 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    TeamController_members: {
+        parameters: {
+            query?: {
+                q?: string;
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffListDto"];
+                };
+            };
+        };
+    };
+    TeamController_invitations: {
+        parameters: {
+            query?: {
+                q?: string;
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamInvitationsDto"];
+                };
+            };
+        };
+    };
+    TeamController_invite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InviteStaffDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamReceiptDto"];
+                };
+            };
+        };
+    };
+    TeamController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateStaffDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamReceiptDto"];
+                };
+            };
+        };
+    };
+    TeamController_revoke: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TeamActionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamReceiptDto"];
+                };
+            };
+        };
+    };
+    TeamController_link: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamReceiptDto"];
+                };
+            };
+        };
+    };
+    TeamController_send: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TeamActionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamReceiptDto"];
+                };
+            };
+        };
+    };
+    TeamOnboardingController_options: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TeamOnboardingController_preview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TeamInvitationTokenDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamInvitationDto"];
+                };
+            };
+        };
+    };
+    TeamOnboardingController_available: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamInvitationsDto"];
+                };
+            };
+        };
+    };
+    TeamOnboardingController_accept: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcceptTeamInvitationDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamAcceptanceDto"];
+                };
+            };
+        };
+    };
     HealthController_live: {
         parameters: {
             query?: never;
@@ -2017,6 +2951,10 @@ export interface operations {
     MachinesController_list: {
         parameters: {
             query?: {
+                /** @description Select active (default) or archived machines. */
+                archived?: "true" | "false";
+                /** @description Search machine code or name within current access. */
+                q?: string;
                 /** @description Last machine code returned; scoped keyset pagination. */
                 after?: string;
                 limit?: number;
@@ -2069,6 +3007,69 @@ export interface operations {
             };
         };
     };
+    MachineRegistrationController_register: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterMachineDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MachineDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
     MachinesController_detail: {
         parameters: {
             query?: never;
@@ -2086,6 +3087,589 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MachineDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    MachineRegistrationController_roster: {
+        parameters: {
+            query?: {
+                q?: string;
+                after?: string;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MachineAccessRosterDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    MachineRegistrationController_access: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateMachineAccessDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MachineAccessReceiptDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    MachineRegistrationController_details: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MachineDetailsDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    MachineRegistrationController_updateDetails: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateMachineDetailsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MachineAccessReceiptDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    MachineRegistrationController_lifecycle: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MachineLifecycleDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MachineAccessReceiptDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    MachineRegistrationController_uploadPhoto: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                    /** Format: uuid */
+                    requestId: string;
+                    version: number;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MachineAccessReceiptDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    MachineRegistrationController_removePhoto: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeMachinePhotoDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MachineAccessReceiptDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    MachineRegistrationController_photo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/webp": string;
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    ProductionController_template: {
+        parameters: {
+            query?: {
+                /** @description YYYY-MM; defaults to the current IST month. */
+                month?: string;
+            };
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": string;
                 };
             };
             400: {
@@ -2494,6 +4078,67 @@ export interface operations {
             };
         };
     };
+    ReadingsController_template: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": string;
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
     ReadingsController_preview: {
         parameters: {
             query?: never;
@@ -2783,7 +4428,7 @@ export interface operations {
             query?: {
                 after?: string;
                 limit?: number;
-                status?: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED";
+                status?: "REPORTED" | "ASSIGNED" | "IN_PROGRESS" | "AWAITING_REVIEW" | "APPROVED" | "CLOSED" | "CANCELLED";
             };
             header?: never;
             path: {
@@ -3142,7 +4787,7 @@ export interface operations {
             path: {
                 code: string;
                 id: string;
-                action: "assign" | "start" | "submit" | "approve" | "return" | "close";
+                action: "assign" | "start" | "submit" | "approve" | "return" | "close" | "cancel";
             };
             cookie?: never;
         };
@@ -3214,7 +4859,7 @@ export interface operations {
         parameters: {
             query: {
                 after?: unknown;
-                status?: "UPCOMING" | "DUE" | "OVERDUE" | "COMPLETED" | "SKIPPED";
+                status?: "UPCOMING" | "DUE" | "OVERDUE" | "COMPLETED" | "SKIPPED" | "CANCELLED";
                 to: unknown;
                 from: unknown;
             };
@@ -5288,6 +6933,34 @@ export interface operations {
             };
         };
     };
+    DocumentAiController_archive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        removed?: boolean;
+                    };
+                };
+            };
+        };
+    };
     DocumentAiController_message: {
         parameters: {
             query?: never;
@@ -5364,6 +7037,198 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DocumentAiRetryDto"];
+                };
+            };
+        };
+    };
+    RcaController_list: {
+        parameters: {
+            query?: {
+                before?: string;
+            };
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RcaHistoryDto"];
+                };
+            };
+        };
+    };
+    RcaController_generate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GenerateRcaDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RcaReceiptDto"];
+                };
+            };
+        };
+    };
+    ExternalNotificationsController_settings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExternalNotificationSettingsDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    ExternalNotificationsController_save: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExternalNotificationPreferenceInputDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExternalNotificationSettingsDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
                 };
             };
         };

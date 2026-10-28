@@ -278,7 +278,14 @@ test("compact inbox polling preserves the technician's open repair draft and doe
     page.getByRole("textbox", { name: "Inspection findings", exact: true }),
   ).toHaveValue("TEST retain this unsaved technician draft");
   expect(state.orderCalls).toBe(orderCalls);
+  await page.getByRole("button", { name: "Close form", exact: true }).click();
   await expand(page);
+  await page
+    .getByRole("button", { name: "Submit repair", exact: true })
+    .click();
+  await expect(
+    page.getByRole("textbox", { name: "Inspection findings", exact: true }),
+  ).toHaveValue("TEST retain this unsaved technician draft");
   const expandedCalls = state.listCalls;
   await page.clock.runFor(31000);
   expect(state.listCalls).toBe(expandedCalls);

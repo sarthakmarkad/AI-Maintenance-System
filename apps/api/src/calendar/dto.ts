@@ -74,7 +74,9 @@ export class CalendarOccurrenceDto {
   @ApiProperty({ type: String, nullable: true }) workOrderStatus!:
     | string
     | null;
-  @ApiProperty({ enum: ["UPCOMING", "DUE", "OVERDUE", "COMPLETED", "SKIPPED"] })
+  @ApiProperty({
+    enum: ["UPCOMING", "DUE", "OVERDUE", "COMPLETED", "SKIPPED", "CANCELLED"],
+  })
   status!: string;
   @ApiProperty({ type: String, nullable: true }) skippedAt!: string | null;
   @ApiProperty({ type: String, nullable: true }) skipReason!: string | null;

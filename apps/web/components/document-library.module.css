@@ -14,15 +14,15 @@
   line-height: 1.6;
 }
 .notice {
-  background: #eef5fb;
-  border: 1px solid #d3e2f1;
+  background: #f0efe9;
+  border: 1px solid #deddd5;
   border-radius: 12px;
   padding: 16px;
-  color: #304d65;
+  color: #343430;
 }
 .card {
   background: white;
-  border: 1px solid #dce3ea;
+  border: 1px solid #deddd5;
   border-radius: 14px;
   padding: 22px;
   min-width: 0;
@@ -48,11 +48,11 @@
 .library textarea {
   width: 100%;
   min-width: 0;
-  border: 1px solid #bccbd8;
+  border: 1px solid #b6b6ac;
   border-radius: 8px;
   padding: 11px;
   background: white;
-  color: #203548;
+  color: #343430;
   font: inherit;
 }
 .library textarea {
@@ -79,8 +79,8 @@
 .file {
   display: grid;
   gap: 10px;
-  border: 1px solid #e0e6ed;
-  background: #f8fafc;
+  border: 1px solid #f0efe9;
+  background: #fafaf7;
   padding: 18px;
   border-radius: 10px;
   margin-top: 16px;
@@ -108,8 +108,8 @@
   font-weight: 700;
 }
 .current {
-  background: #dcefe5;
-  color: #175b3b;
+  background: #f5ff80;
+  color: #191917;
 }
 .badge {
   background: #f7e8cf;
@@ -117,14 +117,14 @@
 }
 .history {
   margin-top: 18px;
-  border-top: 1px solid #dce3ea;
+  border-top: 1px solid #deddd5;
 }
 .events {
   padding-left: 20px;
   display: grid;
   gap: 14px;
   font-size: 13px;
-  color: #46596c;
+  color: #343430;
 }
 .events p {
   margin-top: 4px;
@@ -136,7 +136,7 @@
 .library input:focus-visible,
 .library select:focus-visible,
 .library textarea:focus-visible {
-  outline: 3px solid #89b8e5;
+  outline: 3px solid #b6b6ac;
   outline-offset: 2px;
 }
 @media (max-width: 600px) {

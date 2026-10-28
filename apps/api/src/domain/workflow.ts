@@ -14,7 +14,8 @@ export type IssueStatus =
   | "IN_PROGRESS"
   | "AWAITING_REVIEW"
   | "APPROVED"
-  | "CLOSED";
+  | "CLOSED"
+  | "CANCELLED";
 export type Issue = {
   id: string;
   orgId: string;
@@ -41,7 +42,8 @@ export type Action =
   | "submit"
   | "approve"
   | "return"
-  | "close";
+  | "close"
+  | "cancel";
 export function transition(
   issue: Issue,
   user: Principal,
@@ -78,6 +80,12 @@ export function transition(
     return value.trim();
   };
   switch (action) {
+    case "cancel":
+      role(Role.MAINTENANCE_HEAD);
+      state("REPORTED", "ASSIGNED", "IN_PROGRESS", "AWAITING_REVIEW");
+      text("reason");
+      next.status = "CANCELLED";
+      break;
     case "assign":
       role(Role.MAINTENANCE_HEAD);
       state("REPORTED", "ASSIGNED", "IN_PROGRESS");

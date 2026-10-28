@@ -352,6 +352,8 @@ test("review conflicts block actions until explicit reload", async ({
     page.getByRole("button", { name: "Save review", exact: true }),
   ).toBeDisabled();
   await expect(page.getByLabel("Pattern type", { exact: true })).toBeDisabled();
+  if (await page.getByRole("dialog").isVisible())
+    await page.getByRole("button", { name: "Close form", exact: true }).click();
   await page
     .getByRole("button", { name: "Reload analysis", exact: true })
     .click();
@@ -368,6 +370,7 @@ test("server filters and next-page controls clear pending forms", async ({
   await mocks(page, { paging: true });
   await open(page);
   await reviewForm(page);
+  await page.getByRole("button", { name: "Close form", exact: true }).click();
   await page.getByRole("button", { name: "Next flags", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Review gradual drift", exact: true }),
@@ -479,6 +482,8 @@ test("saved investigation review opens explicitly, retries safely and keeps a pr
       exact: true,
     }),
   ).toHaveAttribute("href", /work-orders\/c25dfdba/);
+  if (await page.getByRole("dialog").isVisible())
+    await page.getByRole("button", { name: "Close form", exact: true }).click();
   await page
     .getByRole("button", { name: "Reload analysis", exact: true })
     .click();

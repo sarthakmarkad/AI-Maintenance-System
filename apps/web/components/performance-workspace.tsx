@@ -159,7 +159,7 @@ export function PerformanceWorkspace({
           </div>
           <h1>Maintenance performance</h1>
           <p>
-            Workload, workflow delays and planned-task completion from saved
+            Workload, planned-task closure and investigation outcomes from saved
             maintenance records.
           </p>
         </div>
@@ -428,7 +428,7 @@ export function PerformanceWorkspace({
                       data={data.activity}
                       margin={{ top: 12, right: 15, left: -15, bottom: 8 }}
                     >
-                      <CartesianGrid stroke="#e3e9e2" vertical={false} />
+                      <CartesianGrid stroke="#deddd5" vertical={false} />
                       <XAxis
                         dataKey="date"
                         tickFormatter={(v) => String(v).slice(5)}
@@ -443,7 +443,7 @@ export function PerformanceWorkspace({
                         type="linear"
                         dataKey="created"
                         name="Created"
-                        stroke="#176b52"
+                        stroke="#242424"
                         strokeWidth={2}
                         dot={data.activity.length < 40}
                       />
@@ -452,7 +452,7 @@ export function PerformanceWorkspace({
                         type="linear"
                         dataKey="closed"
                         name="Closed"
-                        stroke="#487ba1"
+                        stroke="#ff5b29"
                         strokeWidth={2}
                         dot={data.activity.length < 40}
                       />
@@ -514,7 +514,11 @@ export function PerformanceWorkspace({
                       {[
                         ["Due", data.planned.due],
                         ["Skipped", data.planned.skipped],
-                        ["Eligible (excluding skipped)", data.planned.eligible],
+                        ["Cancelled", data.planned.cancelled ?? 0],
+                        [
+                          "Eligible (excluding skipped/cancelled)",
+                          data.planned.eligible,
+                        ],
                         ["Closed on time", data.planned.onTime],
                         ["Closed late", data.planned.late],
                         ["Still open", data.planned.open],
@@ -542,7 +546,7 @@ export function PerformanceWorkspace({
                       Last scheduler run:{" "}
                       {data.planned.scheduling.lastJobAt
                         ? time(data.planned.scheduling.lastJobAt)
-                        : "Not observed in this API process"}
+                        : "No run observed since service restart"}
                       . Future due instants today are excluded.
                     </p>
                     <Link href={base + "/calendar"}>

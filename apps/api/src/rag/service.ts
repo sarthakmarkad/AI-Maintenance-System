@@ -72,8 +72,9 @@ export class DocumentAiService {
           provider: settings(this.config).provider,
           embeddingModel: settings(this.config).embeddingModel,
           canManage:
-            c.user.role === Role.ADMINISTRATOR ||
-            c.user.role === Role.MAINTENANCE_HEAD,
+            !c.machine.archivedAt &&
+            (c.user.role === Role.ADMINISTRATOR ||
+              c.user.role === Role.MAINTENANCE_HEAD),
           approved: sources.length,
           ready: indexes.filter((i) => i.status === "READY").length,
           items: sources.map((s) => {

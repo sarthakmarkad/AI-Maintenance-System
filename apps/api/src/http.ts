@@ -40,22 +40,31 @@ export class Errors implements ExceptionFilter {
       .getRequest<Request & { requestId: string }>();
     const bodyError =
       error instanceof Error && "type" in error ? String(error.type) : "";
+    const archivedWrite =
+      !(error instanceof HttpException) &&
+      error instanceof Error &&
+      /Archived machines are read only|Restore the machine before changing/.test(
+        error.message,
+      );
     const status =
       error instanceof HttpException
         ? error.getStatus()
-        : bodyError === "entity.parse.failed"
-          ? 400
-          : bodyError === "entity.too.large"
-            ? 413
-            : 503;
+        : archivedWrite
+          ? 409
+          : bodyError === "entity.parse.failed"
+            ? 400
+            : bodyError === "entity.too.large"
+              ? 413
+              : 503;
     const details =
       error instanceof HttpException ? error.getResponse() : undefined;
     if (typeof details === "object" && details && "status" in details) {
       response.status(status).json({ ...details, requestId: req.requestId });
       return;
     }
-    const message =
-      bodyError === "entity.parse.failed"
+    const message = archivedWrite
+      ? "This machine was archived before your change could be saved. Refresh the workspace."
+      : bodyError === "entity.parse.failed"
         ? "Request body must contain valid JSON."
         : bodyError === "entity.too.large"
           ? "Request body exceeds the 64 KB limit."

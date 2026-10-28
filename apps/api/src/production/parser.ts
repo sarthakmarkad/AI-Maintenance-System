@@ -4,7 +4,24 @@ import { createHash } from "node:crypto";
 import path from "node:path";
 import * as yauzl from "yauzl";
 
+export const PRODUCTION_TEMPLATE_HEADERS: Record<string, string> = {
+  A4: "DATE",
+  B4: "SHIFT",
+  C4: "JOB / REFERENCE",
+  D4: "PRODUCTION KG",
+  E4: "JOB CHANGES",
+  F4: "SCRAP KG",
+  G4: "DAILY PRODUCTION CONTROL KG",
+  H4: "DAILY SCRAP CONTROL KG",
+  I4: "REMARKS",
+};
 export const PARSER_VERSION = "whc-production-v1";
+export const SUPPORTED_PRODUCTION_PARSERS = [
+  PARSER_VERSION,
+  "machine-production-template-v1",
+  "monthly-production-layout-v1",
+  "whb-monthly-production-v1",
+] as const;
 export const MAX_FILE_BYTES = 8 * 1024 * 1024;
 export type Source = "AUTHENTIC" | "SYNTHETIC";
 export type Problem = {
@@ -75,6 +92,54 @@ const months: Record<string, number> = {
   DEC: 12,
 };
 const norm = (value: string) => value.trim().replace(/\s+/g, " ").toUpperCase();
+// Owner-confirmed source identity, 28 October 2026. This is a reviewed mapping
+// for WHB, not punctuation normalization or a general workbook identity bypass.
+const whbHeading = (heading: string, machineCode: string) =>
+  machineCode === "WHB" &&
+  /^W\s*&\s*H\s+B\s+M\/C(?:\s*-\s*SYNTHETIC DEMONSTRATION)?$/i.test(
+    heading.trim(),
+  );
+const whbCategoryHeaders: Record<string, string> = {
+  G5: "JOB CHANGE",
+  H5: "ROLL CHANGE",
+  I5: "START UP",
+  J5: "TRIM",
+  K5: "FILTER CHANGE",
+  L5: "PROCESS PROB",
+  P5: "RW",
+  Q5: "MECH",
+  R5: "ELECT",
+  S5: "POWER FAIL",
+  T5: "DIE LIP",
+  U5: "CLEARING",
+  X5: "FLUSHING",
+  AA5: "COLOUR CHANGE",
+  AB5: "PUNCH/DIE CLEANING",
+  AC5: "QC SAMPLE SCRAP",
+  AG5: "JOB CHANGE",
+  AH5: "START UP",
+  AI5: "FILTER CHANGE",
+  AJ5: "PROCESS PROB",
+  AK5: "RM",
+  AL5: "MECH",
+  AM5: "ELECT",
+  AN5: "PRE. MAINT",
+  AO5: "POWER FAIL",
+  AP5: "DIE LIP",
+  AQ5: "FLUSHING",
+  AR5: "PUNCH/DIE CLEANING",
+  AS5: "NO PLANNING",
+  L6: "OTHER",
+  M6: "NYLON FLOW",
+  N6: "PARTICAL",
+  O6: "LUMPS",
+  U6: "EVOH",
+  V6: "NYLON",
+  W6: "PE",
+  X6: "EVOH",
+  Y6: "NYLON",
+  Z6: "PE",
+};
 const round = (value: number) =>
   Math.round((value + Number.EPSILON) * 1000) / 1000;
 export const sumKg = (values: number[]) =>
@@ -179,7 +244,7 @@ function numeric(
   }
   return round(parsed);
 }
-function sheetInfo(sheet: ExcelJS.Worksheet): SheetInfo {
+function sheetInfo(sheet: ExcelJS.Worksheet, machineCode: string): SheetInfo {
   const heading = text(sheet.getCell("A1"));
   const result = {
     name: sheet.name,
@@ -194,10 +259,15 @@ function sheetInfo(sheet: ExcelJS.Worksheet): SheetInfo {
       reason:
         "EPL subset may overlap monthly records; choose the full monthly sheet.",
     };
-  if (!/^WH\s*-\s*C\b/i.test(heading))
+  const prefix = machineCode
+    .split("-")
+    .map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+    .join("\\s*-\\s*");
+  const whb = whbHeading(heading, machineCode);
+  if (!whb && !new RegExp(`^${prefix}(?=$|[\\s:/|])`, "i").test(heading.trim()))
     return {
       ...result,
-      reason: "The heading does not identify the WH-C pilot machine.",
+      reason: `The heading must identify the selected machine ${machineCode}.`,
     };
   const match = /^([A-Z]+)\s*-\s*(\d{2}|\d{4})$/.exec(norm(sheet.name));
   if (!match || !months[match[1]])
@@ -211,25 +281,36 @@ function sheetInfo(sheet: ExcelJS.Worksheet): SheetInfo {
   if (year < 2000 || year > 2100)
     return { ...result, reason: "Sheet year is outside the supported range." };
   result.month = `${year}-${String(months[match[1]]).padStart(2, "0")}`;
-  const required: Record<string, string> = {
-    A4: "DATE",
-    B4: "SHIFT",
-    C4: "CUSTOMER NAME",
-    D4: "PRODUCTION KGS",
-    E4: "PROD TOTAL",
-    F4: "NO. OF JOB CHANGES",
-    G4: "SCRAP",
-    AD4: "SCRAP TOTAL",
-    AE4: "PROD+SCRAP",
-    AG4: "DOWN TIME",
-    AS4: "REMARK",
-  };
+  const standard = sheet.getCell("A2").value === "maintenance-production-v1";
+  const required: Record<string, string> = standard
+    ? PRODUCTION_TEMPLATE_HEADERS
+    : {
+        A4: "DATE",
+        B4: "SHIFT",
+        C4: "CUSTOMER NAME",
+        D4: "PRODUCTION KGS",
+        E4: "PROD TOTAL",
+        F4: "NO. OF JOB CHANGES",
+        G4: "SCRAP",
+        AD4: "SCRAP TOTAL",
+        AE4: "PROD+SCRAP",
+        AG4: "DOWN TIME",
+        [whb ? "AT4" : "AS4"]: "REMARK",
+      };
   for (const [address, label] of Object.entries(required))
     if (norm(text(sheet.getCell(address))) !== label)
       return {
         ...result,
         reason: `Unrecognized header at ${address}; this layout needs review.`,
       };
+  if (whb && !standard) {
+    for (const [address, label] of Object.entries(whbCategoryHeaders))
+      if (norm(text(sheet.getCell(address))) !== label)
+        return {
+          ...result,
+          reason: `Unrecognized WHB category at ${address}; this layout needs review.`,
+        };
+  }
   const categoryHeaders = [
     "G5",
     "H5",
@@ -260,7 +341,10 @@ function sheetInfo(sheet: ExcelJS.Worksheet): SheetInfo {
     "AQ5",
     "AR5",
   ];
-  if (categoryHeaders.some((address) => !text(sheet.getCell(address)).trim()))
+  if (
+    !standard &&
+    categoryHeaders.some((address) => !text(sheet.getCell(address)).trim())
+  )
     return {
       ...result,
       reason: "Missing category headers; this layout needs review.",
@@ -365,7 +449,13 @@ export async function guardArchive(buffer: Buffer): Promise<void> {
     );
   });
 }
-export async function loadWorkbook(buffer: Buffer, filename: string) {
+export async function loadWorkbook(
+  buffer: Buffer,
+  filename: string,
+  machineCode = "WH-C",
+) {
+  if (!/^[A-Z0-9][A-Z0-9-]{0,31}$/.test(machineCode))
+    throw new BadRequestException("Invalid selected machine code.");
   if (
     !/\.xlsx$/i.test(filename) ||
     path.win32.basename(path.basename(filename)).length > 180
@@ -398,12 +488,13 @@ export async function loadWorkbook(buffer: Buffer, filename: string) {
     workbook,
     filename: path.win32.basename(path.basename(filename)),
     workbookHash: createHash("sha256").update(buffer).digest("hex"),
-    sheets: workbook.worksheets.map(sheetInfo),
+    machineCode,
+    sheets: workbook.worksheets.map((sheet) => sheetInfo(sheet, machineCode)),
   };
 }
-function rawRow(row: ExcelJS.Row) {
+function rawRow(row: ExcelJS.Row, maxColumn = 45) {
   const output: Record<string, unknown> = {};
-  for (let col = 1; col <= 45; col++) {
+  for (let col = 1; col <= maxColumn; col++) {
     const cell = row.getCell(col);
     if (blank(cell)) continue;
     let serialized: unknown;
@@ -436,10 +527,30 @@ export function parseSheet(
     /SYNTHETIC|DEMO/i.test(info.heading + " " + loaded.filename)
   )
     throw new BadRequestException(
-      "This workbook is labeled synthetic. Select Synthetic demonstration as its source.",
+      "This workbook is labeled synthetic and cannot be imported as company production.",
     );
+  const standard = sheet.getCell("A2").value === "maintenance-production-v1";
+  const whb = !standard && whbHeading(info.heading, loaded.machineCode);
+  const controlColumn = standard ? 7 : 5,
+    scrapControlColumn = standard ? 8 : 30,
+    jobChangesColumn = standard ? 5 : 6,
+    remarksColumn = standard ? 9 : whb ? 46 : 45;
+  if (standard) {
+    for (let row = 8; row <= sheet.rowCount; row++)
+      for (let col = 10; col <= sheet.columnCount; col++)
+        if (!blank(sheet.getCell(row, col)))
+          throw new BadRequestException(
+            `Unexpected data at ${sheet.getCell(row, col).address}; the standard template supports columns A–I only. Use an explicit mapping for other columns.`,
+          );
+  }
   const result: ParsedSheet = {
-    parserVersion: PARSER_VERSION,
+    parserVersion: standard
+      ? "machine-production-template-v1"
+      : whb
+        ? "whb-monthly-production-v1"
+        : loaded.machineCode === "WH-C"
+          ? PARSER_VERSION
+          : "monthly-production-layout-v1",
     sheet: sheetName,
     month: info.month,
     source,
@@ -451,15 +562,20 @@ export function parseSheet(
     ],
     days: [],
   };
+  if (whb)
+    result.warnings.push(
+      "Reviewed source mapping: “W & H B M/C” identifies registered machine WHB, confirmed by the owner. Scrap G–AC, daily controls E/AD, downtime AG–AS (unconfirmed units), remarks AT. Populated columns beyond AT exclude the affected date block; no values are silently dropped.",
+    );
   const scrapHeaders: Record<number, string> = {};
   const downtimeHeaders: Record<number, string> = {};
-  for (let col = 7; col <= 29; col++) {
+  if (standard) scrapHeaders[6] = "F: Scrap kg";
+  for (let col = 7; !standard && col <= 29; col++) {
     const parent = text(sheet.getCell(5, col)).trim();
     const child = text(sheet.getCell(6, col)).trim();
     scrapHeaders[col] =
       `${sheet.getColumn(col).letter}: ${parent}${child ? " / " + child : ""}`;
   }
-  for (let col = 33; col <= 44; col++)
+  for (let col = 33; !standard && col <= (whb ? 45 : 44); col++)
     downtimeHeaders[col] =
       `${sheet.getColumn(col).letter}: ${text(sheet.getCell(5, col)).trim()}`;
   let current: ParsedDay | null = null;
@@ -478,16 +594,53 @@ export function parseSheet(
       4,
       5,
       6,
-      ...Array.from({ length: 39 }, (_, j) => j + 7),
+      ...Array.from(
+        {
+          length:
+            (whb ? Math.max(remarksColumn, sheet.columnCount) : remarksColumn) -
+            6,
+        },
+        (_, j) => j + 7,
+      ),
     ].some((col) => !blank(row.getCell(col)));
+    // The reviewed WHB workbook leaves percentage formulas in otherwise empty
+    // rows. They are derived ratios, not jobs or daily reconciliation controls.
+    const populatedColumns = whb
+      ? Array.from({ length: sheet.columnCount }, (_, j) => j + 1).filter(
+          (col) => !blank(row.getCell(col)),
+        )
+      : [];
+    if (whb && populatedColumns.length === 1 && populatedColumns[0] === 32)
+      continue;
     if (!relevant) {
       current = null;
       continue;
     }
+    const whbSummaryAhead =
+      whb &&
+      !description.trim() &&
+      [1, 2, 3].some((offset) => {
+        const next = sheet.getRow(i + offset);
+        return (
+          blank(next.getCell(1)) &&
+          blank(next.getCell(2)) &&
+          norm(text(next.getCell(3))) === "DOWN TIME" &&
+          Array.from({ length: offset - 1 }, (_, j) =>
+            sheet.getRow(i + j + 1),
+          ).every(
+            (r) =>
+              blank(r.getCell(1)) &&
+              blank(r.getCell(2)) &&
+              !text(r.getCell(3)).trim(),
+          )
+        );
+      });
     if (
       blank(a) &&
       !shiftRaw &&
-      (!description.trim() || /DOWN TIME|SUMMARY\s*:|TOTAL/i.test(description))
+      ((!whb && !description.trim()) ||
+        whbSummaryAhead ||
+        /DOWN TIME|SUMMARY\s*:|TOTAL/i.test(description))
     ) {
       footer = true;
       current = null;
@@ -538,6 +691,15 @@ export function parseSheet(
     }
     const day = current;
     day.sourceEndRow = i;
+    if (whb)
+      for (let col = 47; col <= sheet.columnCount; col++)
+        if (!blank(row.getCell(col)))
+          problem(
+            day,
+            "UNMAPPED_COLUMN",
+            row.getCell(col).address,
+            "This populated column is outside the reviewed WHB mapping (A–AT). Review this date block before importing; no column meaning is guessed.",
+          );
     if (!["A", "B", "C"].includes(shiftRaw))
       problem(
         day,
@@ -546,7 +708,12 @@ export function parseSheet(
         "Shift must be A, B or C; no shift start time is inferred.",
       );
     const productionKg = numeric(row.getCell(4), day, "Production kg");
-    const changes = numeric(row.getCell(6), day, "Job changes", true);
+    const changes = numeric(
+      row.getCell(jobChangesColumn),
+      day,
+      "Job changes",
+      true,
+    );
     const scrap: Record<string, number> = {},
       downtime: Record<string, number> = {};
     for (const [col, header] of Object.entries(scrapHeaders)) {
@@ -561,9 +728,17 @@ export function parseSheet(
       );
       if (value !== null) downtime[header] = value;
     }
-    const control = numeric(row.getCell(5), day, "Daily production control");
+    const control = numeric(
+      row.getCell(controlColumn),
+      day,
+      "Daily production control",
+    );
     if (control !== null) productionControls.get(day.key)!.push(control);
-    const scrapControl = numeric(row.getCell(30), day, "Daily scrap control");
+    const scrapControl = numeric(
+      row.getCell(scrapControlColumn),
+      day,
+      "Daily scrap control",
+    );
     if (scrapControl !== null) scrapControls.get(day.key)!.push(scrapControl);
     if (description.trim() && productionKg === null)
       problem(
@@ -590,8 +765,11 @@ export function parseSheet(
       jobChanges: changes,
       scrap,
       downtime,
-      remarks: text(row.getCell(45)),
-      rawCells: rawRow(row),
+      remarks: text(row.getCell(remarksColumn)),
+      rawCells: rawRow(
+        row,
+        whb ? Math.max(remarksColumn, sheet.columnCount) : remarksColumn,
+      ),
     });
   }
   const seen = new Map<string, ParsedDay[]>();
@@ -608,7 +786,7 @@ export function parseSheet(
         problem(
           day,
           unique.length ? "CONFLICTING_CONTROL" : "MISSING_CONTROL",
-          `${field === "production" ? "E" : "AD"}${day.sourceStartRow}`,
+          `${sheet.getColumn(field === "production" ? controlColumn : scrapControlColumn).letter}${day.sourceStartRow}`,
           unique.length
             ? `Conflicting daily ${field} control totals.`
             : `Daily ${field} control total is missing.`,
@@ -619,7 +797,7 @@ export function parseSheet(
           problem(
             day,
             "REPEATED_CONTROL",
-            `${field === "production" ? "E" : "AD"}${day.sourceStartRow}`,
+            `${sheet.getColumn(field === "production" ? controlColumn : scrapControlColumn).letter}${day.sourceStartRow}`,
             `Repeated equal daily ${field} controls are retained once.`,
             "WARNING",
           );
@@ -632,7 +810,7 @@ export function parseSheet(
           problem(
             day,
             "CONTROL_MISMATCH",
-            `${field === "production" ? "E" : "AD"}${day.sourceStartRow}`,
+            `${sheet.getColumn(field === "production" ? controlColumn : scrapControlColumn).letter}${day.sourceStartRow}`,
             `Job/category sum does not reconcile to the daily ${field} control within 0.01 kg.`,
           );
       }

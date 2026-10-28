@@ -13,6 +13,7 @@ const { appModule, configure } = require("../../apps/api/dist/app");
 const { parseConfig } = require("../../apps/api/dist/config");
 const { VERIFIER } = require("../../apps/api/dist/auth");
 const { DocumentIndexer } = require("../../apps/api/dist/rag/indexer");
+const { settings } = require("../../apps/api/dist/rag/policy");
 const { textPdf } = require("../../apps/api/dist/tests/rag-fixture");
 const owner = process.env.TEST_DATABASE_URL,
   runtime = process.env.TEST_RUNTIME_DATABASE_URL;
@@ -488,6 +489,7 @@ try {
     });
   }
   const report = {
+    model: settings(config).answerModel,
     passed: results.every((r) => r.passed),
     cases: results.length,
     passedCases: results.filter((r) => r.passed).length,

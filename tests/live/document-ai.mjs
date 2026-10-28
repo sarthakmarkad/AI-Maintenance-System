@@ -13,6 +13,7 @@ const { appModule, configure } = require("../../apps/api/dist/app");
 const { parseConfig } = require("../../apps/api/dist/config");
 const { VERIFIER } = require("../../apps/api/dist/auth");
 const { DocumentIndexer } = require("../../apps/api/dist/rag/indexer");
+const { settings } = require("../../apps/api/dist/rag/policy");
 const { textPdf } = require("../../apps/api/dist/tests/rag-fixture");
 const owner = process.env.TEST_DATABASE_URL,
   runtime = process.env.TEST_RUNTIME_DATABASE_URL;
@@ -48,6 +49,7 @@ global.fetch = async (url, init) => {
     usage.push({
       status: response.status,
       model: body?.model,
+      finishReason: body?.choices?.[0]?.finish_reason,
       usage: body?.usage,
     });
   }
@@ -328,10 +330,13 @@ try {
     "NO_APPROVED_DOCUMENTS",
   );
   assert.equal(usage.length, before);
+  assert(
+    usage.every((attempt) => attempt.model === settings(config).answerModel),
+  );
   const result = {
     passed: true,
     provider: "commandcode",
-    model: "z-ai/glm-5.3-flash",
+    model: settings(config).answerModel,
     localEmbeddings: true,
     pages: 2,
     answerStatus: answer.status,

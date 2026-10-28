@@ -17,15 +17,19 @@ export type Principal = {
 export const REPOSITORY = Symbol("REPOSITORY");
 export const machineSelect = {
   id: true,
+  version: true,
   code: true,
   name: true,
   manufacturer: true,
   model: true,
   operationalStatus: true,
+  archivedAt: true,
+  archiveReason: true,
   createdAt: true,
   updatedAt: true,
   department: { select: { name: true } },
   location: { select: { name: true } },
+  photo: { select: { id: true, width: true, height: true } },
 } satisfies Prisma.MachineSelect;
 export type MachineRecord = Prisma.MachineGetPayload<{
   select: typeof machineSelect;
@@ -36,6 +40,8 @@ export interface Repository {
     user: Principal,
     limit: number,
     after?: string,
+    q?: string,
+    archived?: boolean,
   ): Promise<MachineRecord[]>;
   machine(user: Principal, code: string): Promise<MachineRecord | null>;
 }
@@ -89,9 +95,27 @@ export class PrismaRepository implements Repository {
         : {}),
     };
   }
-  machines(user: Principal, limit: number, after?: string) {
+  machines(
+    user: Principal,
+    limit: number,
+    after?: string,
+    q?: string,
+    archived = false,
+  ) {
     return this.client.machine.findMany({
-      where: { ...this.scope(user), ...(after ? { code: { gt: after } } : {}) },
+      where: {
+        ...this.scope(user),
+        archivedAt: archived ? { not: null } : null,
+        ...(after ? { code: { gt: after } } : {}),
+        ...(q
+          ? {
+              OR: [
+                { code: { contains: q, mode: "insensitive" as const } },
+                { name: { contains: q, mode: "insensitive" as const } },
+              ],
+            }
+          : {}),
+      },
       select: machineSelect,
       orderBy: { code: "asc" },
       take: limit,

@@ -18,7 +18,7 @@ test("login, machine registry and WH-C page use the API contract and fit the vie
     page.getByRole("heading", { name: /WH-C.*Blown-film line/ }),
   ).toBeVisible();
   await expect(
-    page.getByText("Not yet confirmed", { exact: true }).first(),
+    page.getByText("Not recorded", { exact: true }).first(),
   ).toBeVisible();
   await expect(page.getByText("Live status unavailable")).toBeVisible();
   await expect(

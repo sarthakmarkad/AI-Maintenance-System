@@ -1,0 +1,1 @@
+ALTER TYPE maintenance."WorkOrderStatus" ADD VALUE IF NOT EXISTS 'CANCELLED';

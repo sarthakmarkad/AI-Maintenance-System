@@ -2,6 +2,11 @@
 import { Evidence } from "./anomalies-workspace";
 import { WorkOrderAttachments } from "./work-order-attachments";
 import { WorkOrderReportButtons } from "./reports-workspace";
+import {
+  RcaDrafting,
+  RcaDraftHistory,
+  type RcaHumanFields,
+} from "./rca-drafting";
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -27,6 +32,9 @@ import {
 } from "@/lib/api";
 import { useAuth } from "./auth-provider";
 import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Textarea } from "./ui/textarea";
+import { FormPopup } from "./ui/form-popup";
 const statuses = [
   "REPORTED",
   "ASSIGNED",
@@ -34,6 +42,7 @@ const statuses = [
   "AWAITING_REVIEW",
   "APPROVED",
   "CLOSED",
+  "CANCELLED",
 ];
 const label = (v: string) =>
   v
@@ -68,6 +77,7 @@ const actionLabels: Record<string, string> = {
   approve: "Approve repair",
   return: "Return for more work",
   close: "Close work order",
+  cancel: "Cancel work order",
 };
 const plannedActionLabels: Record<string, string> = {
   start: "Start maintenance",
@@ -88,6 +98,7 @@ const confirmation: Record<string, string> = {
   approve: "Confirm approval",
   return: "Send back to technician",
   close: "Confirm closure",
+  cancel: "Confirm cancellation",
 };
 const fieldLabels: Record<string, string> = {
   findings: "Inspection findings",
@@ -153,8 +164,25 @@ export function WorkOrdersWorkspace({
     [success, setSuccess] = useState("");
   const [status, setStatus] = useState(""),
     [cursor, setCursor] = useState(""),
-    [attempt, setAttempt] = useState(0),
-    [reportOpen, setReportOpen] = useState(false);
+    [attempt, setAttempt] = useState(0);
+  const [search, setSearch] = useState("");
+  const searchTerm = search.trim().toLocaleLowerCase();
+  const visibleOrders =
+    list?.items.filter(
+      (item) =>
+        !searchTerm ||
+        [
+          item.title,
+          item.id,
+          orderRef(item.id),
+          item.technician?.displayName,
+          item.kind && label(item.kind),
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLocaleLowerCase()
+          .includes(searchTerm),
+    ) ?? [];
   const lastVersion = useRef<number | null>(null);
   const activeOrderId = useRef(orderId),
     previousOrderId = useRef(orderId);
@@ -305,17 +333,16 @@ export function WorkOrdersWorkspace({
         <div>
           <div className="eyebrow">{machine.code} / MAINTENANCE WORKFLOW</div>
           <h1>{orderId ? "Work order" : "Breakdowns & work orders"}</h1>
-          <p>
-            {orderId
-              ? "Repair evidence, engineering review and a clear handoff."
-              : "Operator reports and maintenance actions, with a traceable history."}
-          </p>
         </div>
-        {!orderId && user.role === "OPERATOR" && (
-          <Button onClick={() => setReportOpen((v) => !v)}>
-            <Plus size={16} />
-            {reportOpen ? "Hide issue report" : "Report an issue"}
-          </Button>
+        {!orderId && user.role === "OPERATOR" && !machine.archivedAt && (
+          <ReportForm
+            base={base}
+            token={token}
+            onSaved={(id) =>
+              router.push(`/machines/${machine.code}/work-orders/${id}`)
+            }
+            onFailure={failure}
+          />
         )}
       </div>
       {!orderId && (
@@ -334,16 +361,6 @@ export function WorkOrdersWorkspace({
             Imported readings do not automatically create breakdowns.
           </p>
         </div>
-      )}
-      {reportOpen && !orderId && user.role === "OPERATOR" && (
-        <ReportForm
-          base={base}
-          token={token}
-          onSaved={(id) =>
-            router.push(`/machines/${machine.code}/work-orders/${id}`)
-          }
-          onFailure={failure}
-        />
       )}
       {error && (
         <div className="inline-error" role="alert">
@@ -464,20 +481,30 @@ export function WorkOrdersWorkspace({
                 </div>
               </section>
             )}
-            <ol className="work-stages" aria-label="Work order stages">
-              {statuses.map((s, i) => (
-                <li
-                  key={s}
-                  aria-current={order.status === s ? "step" : undefined}
-                  className={
-                    i <= statuses.indexOf(order.status) ? "reached" : ""
-                  }
-                >
-                  <span>{i + 1}</span>
-                  {label(s)}
-                </li>
-              ))}
-            </ol>
+            {order.status === "CANCELLED" ? (
+              <p className="info-strip">
+                Cancelled · This order did not complete the approval and closure
+                workflow. Its retained action history records the cancellation
+                reason.
+              </p>
+            ) : (
+              <ol className="work-stages" aria-label="Work order stages">
+                {statuses
+                  .filter((s) => s !== "CANCELLED")
+                  .map((s, i) => (
+                    <li
+                      key={s}
+                      aria-current={order.status === s ? "step" : undefined}
+                      className={
+                        i <= statuses.indexOf(order.status) ? "reached" : ""
+                      }
+                    >
+                      <span>{i + 1}</span>
+                      {label(s)}
+                    </li>
+                  ))}
+              </ol>
+            )}
             <div className="work-detail-grid">
               <section className="panel">
                 <div className="panel-heading">
@@ -643,13 +670,24 @@ export function WorkOrdersWorkspace({
             <ActionForm
               key={`${order.id}-${order.version}`}
               order={order}
+              code={machine.code}
               base={base}
               token={token}
               busy={busy}
               conflict={conflict}
+              error={error}
               act={act}
               onFailure={failure}
             />
+            {order.kind === "BREAKDOWN" && (
+              <RcaHistoryPanel
+                key={`rca-history-${order.id}`}
+                code={machine.code}
+                order={order}
+                token={token}
+                onFailure={failure}
+              />
+            )}
             <section className="panel work-history">
               <div className="panel-heading">
                 <div>
@@ -751,7 +789,11 @@ export function WorkOrdersWorkspace({
             <div className="work-metrics">
               <section className="metric-card">
                 <h2>Open work orders</h2>
-                <p>{list.total - (list.counts.CLOSED ?? 0)}</p>
+                <p>
+                  {list.total -
+                    (list.counts.CLOSED ?? 0) -
+                    (list.counts.CANCELLED ?? 0)}
+                </p>
                 <small>Across all workflow stages before closure</small>
               </section>
               <section className="metric-card">
@@ -766,6 +808,18 @@ export function WorkOrdersWorkspace({
               </section>
             </div>
             <div className="work-list-toolbar">
+              <label className="work-search-field" htmlFor="work-order-search">
+                Search loaded work orders
+                <Input
+                  type="search"
+                  id="work-order-search"
+                  value={search}
+                  maxLength={160}
+                  placeholder="Title, WO reference or technician"
+                  onChange={(event) => setSearch(event.target.value)}
+                  aria-describedby="work-order-search-scope"
+                />
+              </label>
               <label htmlFor="order-status">
                 Workflow status
                 <select
@@ -788,6 +842,13 @@ export function WorkOrdersWorkspace({
                 {list.total} total work orders on {machine.code}
               </span>
             </div>
+            <p className="work-search-scope" id="work-order-search-scope">
+              Search covers the {list.items.length} loaded{" "}
+              {list.items.length === 1 ? "order" : "orders"} in this list.{" "}
+              {list.nextCursor
+                ? "Load more to include additional records."
+                : ""}
+            </p>
             {!list.items.length ? (
               <section className="state-card">
                 <ClipboardList size={32} />
@@ -801,9 +862,22 @@ export function WorkOrdersWorkspace({
                   repair and review history.
                 </p>
               </section>
+            ) : !visibleOrders.length ? (
+              <section className="state-card">
+                <ClipboardList size={28} />
+                <h2>No matching loaded work orders</h2>
+                <p>Try another title, WO reference or technician name.</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setSearch("")}
+                >
+                  Clear search
+                </Button>
+              </section>
             ) : (
               <div className="work-order-list">
-                {list.items.map((o) => (
+                {visibleOrders.map((o) => (
                   <Link
                     href={`/machines/${machine.code}/work-orders/${o.id}`}
                     className="work-order-card"
@@ -876,6 +950,8 @@ function ReportForm({
   onSaved: (id: string) => void;
   onFailure: (e: unknown) => Promise<void>;
 }) {
+  const [open, setOpen] = useState(false),
+    [formError, setFormError] = useState("");
   const [requestId] = useState(() => crypto.randomUUID()),
     [busy, setBusy] = useState(false),
     [title, setTitle] = useState(""),
@@ -885,7 +961,9 @@ function ReportForm({
     [observed, setObserved] = useState("");
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (busy) return;
     setBusy(true);
+    setFormError("");
     try {
       const saved = await api<WorkOrder>(base, token, undefined, {
         method: "POST",
@@ -899,114 +977,168 @@ function ReportForm({
           observedAt: observed ? instant(observed) : null,
         }),
       });
+      setOpen(false);
       onSaved(saved.id);
     } catch (error) {
+      setFormError(
+        error instanceof Error ? error.message : "Unable to save this report.",
+      );
       await onFailure(error);
     } finally {
       setBusy(false);
     }
   }
   return (
-    <section className="panel work-report">
-      <div className="panel-heading">
-        <h2>Report a breakdown or issue</h2>
-      </div>
-      <form className="work-form" onSubmit={submit} aria-label="Issue report">
-        <p>
-          Save the report first, then add photos or inspection documents on its
-          work-order page before assignment.
-        </p>
-        <label>
-          Issue title
-          <input
-            required
-            minLength={3}
-            maxLength={160}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            disabled={busy}
-          />
-        </label>
-        <label>
-          Observed symptoms
-          <textarea
-            required
-            minLength={3}
-            maxLength={4000}
-            rows={4}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            disabled={busy}
-          />
-        </label>
-        <div className="work-form-row">
+    <>
+      <Button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-haspopup="dialog"
+      >
+        <Plus size={16} />
+        Report an issue
+      </Button>
+      <FormPopup
+        open={open}
+        onOpenChange={setOpen}
+        title="Report a breakdown or issue"
+        description="Record what you observed. The Maintenance head assigns the technician."
+        busy={busy}
+        error={formError}
+      >
+        <form className="work-form" onSubmit={submit} aria-label="Issue report">
+          <p>
+            Save the report first, then add photos or inspection documents on
+            its work-order page before assignment.
+          </p>
           <label>
-            Reported priority
-            <select
-              value={priority}
-              onChange={(e) => setPriority(e.target.value)}
-              disabled={busy}
-            >
-              {["LOW", "NORMAL", "HIGH"].map((v) => (
-                <option key={v} value={v}>
-                  {label(v)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Reported impact
-            <select
-              value={impact}
-              onChange={(e) => setImpact(e.target.value)}
-              disabled={busy}
-            >
-              {["STOPPED", "DEGRADED", "OBSERVATION"].map((v) => (
-                <option key={v} value={v}>
-                  {label(v)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            First observed (IST, optional)
-            <input
-              type="datetime-local"
-              step="1"
-              value={observed}
-              onChange={(e) => setObserved(e.target.value)}
+            Issue title
+            <Input
+              required
+              minLength={3}
+              maxLength={160}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               disabled={busy}
             />
           </label>
-        </div>
-        <p>
-          Describe what you observed. Leave the observation time blank if it is
-          unknown. Report time is recorded when saved.
-        </p>
-        <Button type="submit" disabled={busy}>
-          {busy ? "Saving issue…" : "Save issue report"}
-        </Button>
-      </form>
-    </section>
+          <label>
+            Observed symptoms
+            <Textarea
+              required
+              minLength={3}
+              maxLength={4000}
+              rows={4}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              disabled={busy}
+            />
+          </label>
+          <div className="work-form-row">
+            <label>
+              Reported priority
+              <select
+                value={priority}
+                onChange={(e) => setPriority(e.target.value)}
+                disabled={busy}
+              >
+                {["LOW", "NORMAL", "HIGH"].map((v) => (
+                  <option key={v} value={v}>
+                    {label(v)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Reported impact
+              <select
+                value={impact}
+                onChange={(e) => setImpact(e.target.value)}
+                disabled={busy}
+              >
+                {["STOPPED", "DEGRADED", "OBSERVATION"].map((v) => (
+                  <option key={v} value={v}>
+                    {label(v)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              First observed (IST, optional)
+              <Input
+                type="datetime-local"
+                step="1"
+                value={observed}
+                onChange={(e) => setObserved(e.target.value)}
+                disabled={busy}
+              />
+            </label>
+          </div>
+          <p>
+            Leave the observation time blank if unknown. Report time is recorded
+            when saved.
+          </p>
+          <Button type="submit" disabled={busy}>
+            {busy ? "Saving issue…" : "Save issue report"}
+          </Button>
+        </form>
+      </FormPopup>
+    </>
   );
 }
+function RcaHistoryPanel({
+  code,
+  order,
+  token,
+  onFailure,
+}: {
+  code: string;
+  order: WorkOrder;
+  token: string;
+  onFailure: (error: unknown) => Promise<void>;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <details
+      className="panel"
+      onToggle={(event) => setOpen(event.currentTarget.open)}
+    >
+      <summary>AI drafting evidence</summary>
+      {open && (
+        <RcaDraftHistory
+          code={code}
+          orderId={order.id}
+          version={order.version}
+          token={token}
+          onFailure={(error) => void onFailure(error)}
+        />
+      )}
+    </details>
+  );
+}
+
 function ActionForm({
   order,
+  code,
   base,
   token,
   busy,
   conflict,
+  error,
   act,
   onFailure,
 }: {
   order: WorkOrder;
+  code: string;
   base: string;
   token: string;
   busy: boolean;
   conflict: boolean;
+  error: string;
   act: (action: string, body: Record<string, unknown>) => Promise<void>;
   onFailure: (e: unknown) => Promise<void>;
 }) {
+  const [open, setOpen] = useState(false);
   const planned = completionOnly(order.kind);
   const [action, setAction] = useState(""),
     [technicians, setTechnicians] = useState<EligibleTechnicians["items"]>([]),
@@ -1069,7 +1201,7 @@ function ActionForm({
                       restoredAt: instant(restored),
                     }),
               }
-            : action === "return"
+            : action === "return" || action === "cancel"
               ? { reason }
               : action === "approve" || action === "close"
                 ? note.trim()
@@ -1090,9 +1222,11 @@ function ActionForm({
       <div className="work-action-body">
         {!order.allowedActions.length ? (
           <p>
-            {order.status === "CLOSED"
-              ? "This work order is closed. Its report and history remain available."
-              : "No workflow action is available to your role or assignment at this stage. Assigned pilot users must select the Technician role to start or submit work."}
+            {order.status === "CANCELLED"
+              ? "This work order was cancelled. Its report and history remain available."
+              : order.status === "CLOSED"
+                ? "This work order is closed. Its report and history remain available."
+                : "No action is available for your active role or assignment at this stage. Only the assigned Technician can start or submit work."}
           </p>
         ) : (
           <>
@@ -1102,7 +1236,10 @@ function ActionForm({
                   key={a}
                   variant={action === a ? "default" : "outline"}
                   disabled={busy || conflict}
-                  onClick={() => setAction(a)}
+                  onClick={() => {
+                    setAction(a);
+                    setOpen(true);
+                  }}
                 >
                   {order.kind === "INVESTIGATION"
                     ? (investigationActionLabels[a] ??
@@ -1115,227 +1252,300 @@ function ActionForm({
               ))}
             </div>
             {action && (
-              <form
-                className="work-form"
-                aria-label="Work order action"
-                onSubmit={submit}
+              <FormPopup
+                open={open}
+                onOpenChange={setOpen}
+                title={
+                  order.kind === "INVESTIGATION"
+                    ? (investigationActionLabels[action] ??
+                      actionLabels[action] ??
+                      label(action))
+                    : planned
+                      ? (plannedActionLabels[action] ??
+                        actionLabels[action] ??
+                        label(action))
+                      : (actionLabels[action] ?? label(action))
+                }
+                description={`Work order ${orderRef(order.id)} · Version ${order.version}`}
+                busy={busy}
+                error={error}
               >
-                {action === "assign" && (
-                  <>
-                    {order.technician && (
-                      <p>
-                        Reassignment resets the current repair fields. Earlier
-                        submissions remain in history.
-                      </p>
-                    )}
-                    {rosterLoading ? (
-                      <p role="status">Loading eligible technicians…</p>
-                    ) : rosterError ? (
-                      <p>
-                        {rosterError}
-                        <Button
-                          variant="outline"
-                          type="button"
-                          onClick={() => setRosterAttempt((n) => n + 1)}
-                        >
-                          Retry technician list
-                        </Button>
-                      </p>
-                    ) : (
+                <form
+                  className="work-form"
+                  aria-label="Work order action"
+                  onSubmit={submit}
+                >
+                  {action === "assign" && (
+                    <>
+                      {order.technician && (
+                        <p>
+                          Reassignment resets the current repair fields. Earlier
+                          submissions remain in history.
+                        </p>
+                      )}
+                      {rosterLoading ? (
+                        <p role="status">Loading eligible technicians…</p>
+                      ) : rosterError ? (
+                        <p>
+                          {rosterError}
+                          <Button
+                            variant="outline"
+                            type="button"
+                            onClick={() => setRosterAttempt((n) => n + 1)}
+                          >
+                            Retry technician list
+                          </Button>
+                        </p>
+                      ) : (
+                        <label>
+                          Eligible technician
+                          <select
+                            required
+                            value={technicianId}
+                            onChange={(e) => setTechnicianId(e.target.value)}
+                            disabled={busy}
+                          >
+                            <option value="">Choose a technician</option>
+                            {technicians
+                              .filter(
+                                (t) => t.userId !== order.technician?.userId,
+                              )
+                              .map((t) => (
+                                <option key={t.userId} value={t.userId}>
+                                  {t.displayName}
+                                </option>
+                              ))}
+                          </select>
+                        </label>
+                      )}
+                      {!rosterLoading &&
+                        !rosterError &&
+                        !technicians.length && (
+                          <p>
+                            No eligible technicians. An administrator must
+                            provision an active technician and grant machine
+                            access.
+                          </p>
+                        )}
                       <label>
-                        Eligible technician
-                        <select
-                          required
-                          value={technicianId}
-                          onChange={(e) => setTechnicianId(e.target.value)}
+                        Assignment reason
+                        {order.technician ? " (required)" : " (optional)"}
+                        <textarea
+                          required={!!order.technician}
+                          minLength={3}
+                          maxLength={4000}
+                          value={reason}
+                          onChange={(e) => setReason(e.target.value)}
                           disabled={busy}
-                        >
-                          <option value="">Choose a technician</option>
-                          {technicians
-                            .filter(
-                              (t) => t.userId !== order.technician?.userId,
-                            )
-                            .map((t) => (
-                              <option key={t.userId} value={t.userId}>
-                                {t.displayName}
+                        />
+                      </label>
+                    </>
+                  )}
+                  {action === "start" && (
+                    <p>
+                      {planned
+                        ? order.kind === "INVESTIGATION"
+                          ? "Confirm that you are starting the assigned investigation. Completion time is recorded separately from engineering review."
+                          : "Confirm that you are starting the assigned maintenance. The performed time and review are recorded separately."
+                        : "Confirm that you are starting the assigned repair. The start time will be recorded separately from restoration."}
+                    </p>
+                  )}
+                  {action === "submit" && (
+                    <>
+                      {order.kind === "INVESTIGATION" && (
+                        <label>
+                          Investigation outcome
+                          <select
+                            aria-label="Investigation outcome"
+                            required
+                            value={outcome}
+                            disabled={busy}
+                            onChange={(e) => setOutcome(e.target.value)}
+                          >
+                            <option value="">Select outcome</option>
+                            {Object.entries(outcomes).map(([key, name]) => (
+                              <option key={key} value={key}>
+                                {name}
                               </option>
                             ))}
-                        </select>
+                          </select>
+                        </label>
+                      )}
+                      {[
+                        ["findings", findings, setFindings],
+                        ["rootCause", rootCause, setRootCause],
+                        ["correctiveAction", correctiveAction, setCorrective],
+                        ["preventiveAction", preventiveAction, setPreventive],
+                      ]
+                        .filter(([key]) => !planned || key !== "rootCause")
+                        .map(([key, value, setter]) => (
+                          <label key={String(key)}>
+                            {evidenceLabel(String(key), planned)}
+                            {order.kind === "INVESTIGATION" &&
+                            key === "preventiveAction" &&
+                            [
+                              "MAINTENANCE_REQUIRED",
+                              "SENSOR_CHECK_REQUIRED",
+                            ].includes(outcome)
+                              ? " (required next steps)"
+                              : ""}
+                            <textarea
+                              required={
+                                !planned ||
+                                key !== "preventiveAction" ||
+                                (order.kind === "INVESTIGATION" &&
+                                  [
+                                    "MAINTENANCE_REQUIRED",
+                                    "SENSOR_CHECK_REQUIRED",
+                                  ].includes(outcome))
+                              }
+                              minLength={3}
+                              maxLength={4000}
+                              rows={3}
+                              value={String(value)}
+                              disabled={busy}
+                              onChange={(e) =>
+                                (setter as (value: string) => void)(
+                                  e.target.value,
+                                )
+                              }
+                            />
+                          </label>
+                        ))}
+                      {!planned && (
+                        <RcaDrafting
+                          code={code}
+                          orderId={order.id}
+                          version={order.version}
+                          token={token}
+                          human={{
+                            findings,
+                            rootCause,
+                            correctiveAction,
+                            preventiveAction,
+                          }}
+                          disabled={busy || conflict}
+                          onFailure={(error) => {
+                            // RCA capacity/quota conflicts do not mean the work-order
+                            // version changed. Keep the manual submission path usable.
+                            if (
+                              error instanceof ApiError &&
+                              error.status === 401
+                            )
+                              void onFailure(error);
+                          }}
+                          onApply={(patch: Partial<RcaHumanFields>) => {
+                            if (patch.findings !== undefined)
+                              setFindings(patch.findings);
+                            if (patch.rootCause !== undefined)
+                              setRootCause(patch.rootCause);
+                            if (patch.correctiveAction !== undefined)
+                              setCorrective(patch.correctiveAction);
+                            if (patch.preventiveAction !== undefined)
+                              setPreventive(patch.preventiveAction);
+                          }}
+                        />
+                      )}
+                      <label>
+                        {planned
+                          ? order.kind === "INVESTIGATION"
+                            ? "Investigation completed (IST)"
+                            : "Maintenance performed (IST)"
+                          : "Service restored (IST)"}
+                        <input
+                          required
+                          type="datetime-local"
+                          step="1"
+                          value={planned ? performed : restored}
+                          onChange={(e) =>
+                            planned
+                              ? setPerformed(e.target.value)
+                              : setRestored(e.target.value)
+                          }
+                          disabled={busy}
+                        />
                       </label>
-                    )}
-                    {!rosterLoading && !rosterError && !technicians.length && (
                       <p>
-                        No eligible technicians. An administrator must provision
-                        an active technician and grant machine access.
+                        {planned
+                          ? order.kind === "INVESTIGATION"
+                            ? "Enter when the inspection was completed, between investigation creation and now. Investigations do not record a breakdown cause or restoration time. This submission requests engineering review."
+                            : "Enter the actual maintenance performed time, between work-order creation and now. Routine maintenance does not require a breakdown cause or restoration time. This submission requests engineering review."
+                          : "Enter the actual restoration time, between report time and now. This submission requests engineering review."}
                       </p>
-                    )}
+                    </>
+                  )}
+                  {action === "cancel" && (
+                    <p>
+                      Cancel this work order without marking work completed. Its
+                      original report, evidence and history remain available.
+                      {order.kind === "PLANNED"
+                        ? " This cancels only this occurrence. Pause the maintenance plan separately to stop future tasks."
+                        : ""}
+                    </p>
+                  )}
+                  {(action === "return" || action === "cancel") && (
                     <label>
-                      Assignment reason
-                      {order.technician ? " (required)" : " (optional)"}
+                      {action === "cancel"
+                        ? "Reason for cancellation"
+                        : "Reason for return"}
                       <textarea
-                        required={!!order.technician}
+                        required
                         minLength={3}
                         maxLength={4000}
+                        rows={3}
                         value={reason}
                         onChange={(e) => setReason(e.target.value)}
                         disabled={busy}
                       />
                     </label>
-                  </>
-                )}
-                {action === "start" && (
+                  )}
+                  {(action === "approve" || action === "close") && (
+                    <>
+                      <p>
+                        {action === "approve"
+                          ? planned
+                            ? order.kind === "INVESTIGATION"
+                              ? "Review the inspection findings and outcome before recording engineering approval."
+                              : "Review the performed work and inspection findings before recording engineering approval."
+                            : "Review the repair evidence and human RCA before recording engineering approval."
+                          : order.kind === "INVESTIGATION"
+                            ? "Close the approved investigation. Recommended maintenance or sensor work remains a separate follow-up; closure does not mean that work was completed."
+                            : "Confirm administrative closure of the approved work. Restoration and approval timestamps stay unchanged."}
+                      </p>
+                      <label>
+                        {action === "approve"
+                          ? "Engineering review note (optional)"
+                          : "Closure note (optional)"}
+                        <textarea
+                          minLength={3}
+                          maxLength={4000}
+                          rows={3}
+                          value={note}
+                          onChange={(e) => setNote(e.target.value)}
+                          disabled={busy}
+                        />
+                      </label>
+                    </>
+                  )}
+                  <Button
+                    disabled={
+                      busy ||
+                      conflict ||
+                      (action === "assign" &&
+                        (!technicianId || rosterLoading || !!rosterError))
+                    }
+                    type="submit"
+                  >
+                    {busy ? "Saving action…" : confirmation[action]}
+                  </Button>
+                </form>
+                {conflict && (
                   <p>
-                    {planned
-                      ? order.kind === "INVESTIGATION"
-                        ? "Confirm that you are starting the assigned investigation. Completion time is recorded separately from engineering review."
-                        : "Confirm that you are starting the assigned maintenance. The performed time and review are recorded separately."
-                      : "Confirm that you are starting the assigned repair. The start time will be recorded separately from restoration."}
+                    Close this form and reload the work order before trying
+                    again.
                   </p>
                 )}
-                {action === "submit" && (
-                  <>
-                    {order.kind === "INVESTIGATION" && (
-                      <label>
-                        Investigation outcome
-                        <select
-                          aria-label="Investigation outcome"
-                          required
-                          value={outcome}
-                          disabled={busy}
-                          onChange={(e) => setOutcome(e.target.value)}
-                        >
-                          <option value="">Select outcome</option>
-                          {Object.entries(outcomes).map(([key, name]) => (
-                            <option key={key} value={key}>
-                              {name}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                    )}
-                    {[
-                      ["findings", findings, setFindings],
-                      ["rootCause", rootCause, setRootCause],
-                      ["correctiveAction", correctiveAction, setCorrective],
-                      ["preventiveAction", preventiveAction, setPreventive],
-                    ]
-                      .filter(([key]) => !planned || key !== "rootCause")
-                      .map(([key, value, setter]) => (
-                        <label key={String(key)}>
-                          {evidenceLabel(String(key), planned)}
-                          {order.kind === "INVESTIGATION" &&
-                          key === "preventiveAction" &&
-                          [
-                            "MAINTENANCE_REQUIRED",
-                            "SENSOR_CHECK_REQUIRED",
-                          ].includes(outcome)
-                            ? " (required next steps)"
-                            : ""}
-                          <textarea
-                            required={
-                              !planned ||
-                              key !== "preventiveAction" ||
-                              (order.kind === "INVESTIGATION" &&
-                                [
-                                  "MAINTENANCE_REQUIRED",
-                                  "SENSOR_CHECK_REQUIRED",
-                                ].includes(outcome))
-                            }
-                            minLength={3}
-                            maxLength={4000}
-                            rows={3}
-                            value={String(value)}
-                            disabled={busy}
-                            onChange={(e) =>
-                              (setter as (value: string) => void)(
-                                e.target.value,
-                              )
-                            }
-                          />
-                        </label>
-                      ))}
-                    <label>
-                      {planned
-                        ? order.kind === "INVESTIGATION"
-                          ? "Investigation completed (IST)"
-                          : "Maintenance performed (IST)"
-                        : "Service restored (IST)"}
-                      <input
-                        required
-                        type="datetime-local"
-                        step="1"
-                        value={planned ? performed : restored}
-                        onChange={(e) =>
-                          planned
-                            ? setPerformed(e.target.value)
-                            : setRestored(e.target.value)
-                        }
-                        disabled={busy}
-                      />
-                    </label>
-                    <p>
-                      {planned
-                        ? order.kind === "INVESTIGATION"
-                          ? "Enter when the inspection was completed, between investigation creation and now. Investigations do not record a breakdown cause or restoration time. This submission requests engineering review."
-                          : "Enter the actual maintenance performed time, between work-order creation and now. Routine maintenance does not require a breakdown cause or restoration time. This submission requests engineering review."
-                        : "Enter the actual restoration time, between report time and now. This submission requests engineering review."}
-                    </p>
-                  </>
-                )}
-                {action === "return" && (
-                  <label>
-                    Reason for return
-                    <textarea
-                      required
-                      minLength={3}
-                      maxLength={4000}
-                      rows={3}
-                      value={reason}
-                      onChange={(e) => setReason(e.target.value)}
-                      disabled={busy}
-                    />
-                  </label>
-                )}
-                {(action === "approve" || action === "close") && (
-                  <>
-                    <p>
-                      {action === "approve"
-                        ? planned
-                          ? order.kind === "INVESTIGATION"
-                            ? "Review the inspection findings and outcome before recording engineering approval."
-                            : "Review the performed work and inspection findings before recording engineering approval."
-                          : "Review the repair evidence and human RCA before recording engineering approval."
-                        : order.kind === "INVESTIGATION"
-                          ? "Close the approved investigation. Recommended maintenance or sensor work remains a separate follow-up; closure does not mean that work was completed."
-                          : "Confirm administrative closure of the approved work. Restoration and approval timestamps stay unchanged."}
-                    </p>
-                    <label>
-                      {action === "approve"
-                        ? "Engineering review note (optional)"
-                        : "Closure note (optional)"}
-                      <textarea
-                        minLength={3}
-                        maxLength={4000}
-                        rows={3}
-                        value={note}
-                        onChange={(e) => setNote(e.target.value)}
-                        disabled={busy}
-                      />
-                    </label>
-                  </>
-                )}
-                <Button
-                  disabled={
-                    busy ||
-                    conflict ||
-                    (action === "assign" &&
-                      (!technicianId || rosterLoading || !!rosterError))
-                  }
-                  type="submit"
-                >
-                  {busy ? "Saving action…" : confirmation[action]}
-                </Button>
-              </form>
+              </FormPopup>
             )}
           </>
         )}

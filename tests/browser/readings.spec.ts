@@ -179,6 +179,13 @@ test("reading review excludes invalid rows, requires acknowledgement, commits an
     }),
   ).toBeVisible();
   await preview(page);
+  const sourceDetails = page
+    .locator("details")
+    .filter({ has: page.locator("summary", { hasText: /^Source details$/ }) });
+  await expect(sourceDetails.locator("small")).toBeHidden();
+  await sourceDetails.locator("summary").click();
+  await expect(sourceDetails).toContainText(stage.workbookHash.slice(0, 16));
+  await expect(sourceDetails).toContainText(stage.parserVersion);
   await expect(
     page.getByText("1 excluded rows", { exact: true }),
   ).toBeVisible();

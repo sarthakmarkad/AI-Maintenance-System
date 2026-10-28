@@ -1,17 +1,17 @@
 .chat {
-  --ink: #193c35;
-  --muted: #77867f;
+  --ink: #191917;
+  --muted: #64645d;
   display: flex;
   flex: 1;
   min-height: 0;
   position: relative;
-  border: 1px solid #dee5df;
-  border-radius: 18px;
+  border: 1px solid #deddd5;
+  border-radius: 12px;
   background: #fff;
   overflow: hidden;
   color: var(--ink);
   font-size: 14px;
-  box-shadow: 0 5px 24px #163f2f04;
+  box-shadow: 3px 3px 0 #191917;
 }
 .chat button {
   font: inherit;
@@ -29,7 +29,7 @@
     color 0.15s;
 }
 .chat button:hover {
-  background: #eef4ef;
+  background: #f0efe9;
 }
 .chat button:disabled {
   opacity: 0.42;
@@ -37,11 +37,11 @@
 }
 .chat button:focus-visible,
 .chat a:focus-visible {
-  outline: 2px solid #2a8e6d;
+  outline: 2px solid #52524c;
   outline-offset: 3px;
 }
 .chat a {
-  color: #2c765f;
+  color: #343430;
 }
 .chat p {
   line-height: 1.7;
@@ -59,8 +59,8 @@
   display: flex;
   flex-direction: column;
   padding: 22px 12px 14px;
-  background: #f6f8f5;
-  border-right: 1px solid #e6ebe5;
+  background: #fafaf7;
+  border-right: 1px solid #f0efe9;
   min-height: 0;
 }
 .historyHead {
@@ -70,7 +70,7 @@
   padding: 0 7px 21px;
   font-size: 12px;
   font-weight: 600;
-  color: #667a6e;
+  color: #52524c;
 }
 .historyHead > span {
   display: flex;
@@ -79,20 +79,20 @@
 }
 .chat .newChat {
   background: #fff;
-  border: 1px solid #d9e2da;
+  border: 1px solid #deddd5;
   padding: 11px;
   justify-content: flex-start;
-  box-shadow: 0 2px 3px #183b2a03;
+  box-shadow: 2px 2px 0 #191917;
   font-size: 13px;
   font-weight: 600;
   margin-bottom: 25px;
 }
 .sectionLabel {
   display: block;
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 1.5px;
   font-weight: 700;
-  color: #87958b;
+  color: #73736c;
 }
 .history > .sectionLabel {
   padding: 0 9px 10px;
@@ -105,7 +105,7 @@
   min-height: 0;
   flex: 1;
 }
-.chatList > button {
+.chatList button {
   padding: 11px 9px;
   justify-content: flex-start;
   font-size: 12px;
@@ -113,41 +113,41 @@
   flex-shrink: 0;
   min-width: 0;
 }
-.chatList > button span {
+.chatList button span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.chatList > button svg {
+.chatList button svg {
   flex-shrink: 0;
-  color: #839387;
+  color: #73736c;
 }
-.chatList > button[aria-current="page"] {
-  background: #e4eee5;
-  color: #265440;
+.chatList button[aria-current="page"] {
+  background: #f0efe9;
+  color: #343430;
   font-weight: 600;
 }
 .chatList > p {
   font-size: 12px;
-  color: #89958c;
+  color: #73736c;
   padding: 4px 9px;
 }
 .historyFoot {
   display: flex;
   align-items: center;
   gap: 7px;
-  border-top: 1px solid #e2e9e1;
+  border-top: 1px solid #deddd5;
   margin-top: 18px;
   padding: 14px 5px 0;
-  font-size: 9px;
-  color: #859187;
+  font-size: 12px;
+  color: #73736c;
   line-height: 1.6;
 }
 .privateDot {
   width: 5px;
   height: 5px;
   border-radius: 100%;
-  background: #7da58c;
+  background: #73736c;
   display: inline-block;
   flex-shrink: 0;
 }
@@ -160,12 +160,12 @@
   min-width: 0;
   flex: 1;
   min-height: 0;
-  background: linear-gradient(180deg, #fff, #fcfdfb);
+  background: #fafaf7;
 }
 .header {
   height: 76px;
   flex-shrink: 0;
-  border-bottom: 1px solid #edf0e9;
+  border-bottom: 1px solid #f0efe9;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -180,17 +180,17 @@
 }
 .headerLeft > button {
   padding: 6px;
-  color: #96a298;
+  color: #73736c;
 }
 .avatar {
   height: 36px;
   width: 36px;
   border-radius: 11px;
-  background: #eaf2e8;
+  background: #f0efe9;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #487751;
+  color: #52524c;
   flex-shrink: 0;
 }
 .header h1 {
@@ -199,8 +199,8 @@
   letter-spacing: -0.2px;
 }
 .header p {
-  font-size: 10px;
-  color: #8a978c;
+  font-size: 12px;
+  color: #73736c;
   margin-top: 3px;
 }
 .header p span {
@@ -216,21 +216,21 @@
   padding: 8px;
 }
 .chat .knowledgeButton {
-  border: 1px solid #e3e9e1;
-  font-size: 11px;
+  border: 1px solid #deddd5;
+  font-size: 12px;
   padding: 8px 10px;
   gap: 7px;
   background: #fff;
 }
 .knowledgeCount {
-  font-size: 9px;
+  font-size: 12px;
   border-radius: 5px;
   padding: 2px 5px;
-  background: #f1f5ed;
-  color: #6c8764;
+  background: #f0efe9;
+  color: #52524c;
 }
 .knowledgeButton.selected {
-  background: #eff5ec;
+  background: #f0efe9;
 }
 .messages {
   flex: 1;
@@ -243,7 +243,7 @@
 .loading {
   padding: 30px;
   text-align: center;
-  color: #7e8e81;
+  color: #73736c;
   font-size: 12px;
 }
 .welcome {
@@ -260,21 +260,21 @@
 .welcomeMark {
   width: 66px;
   height: 66px;
-  border: 1px solid #dfebdc;
-  background: linear-gradient(135deg, #f1f7e8, #e1efde);
-  border-radius: 22px;
+  border: 1px solid #deddd5;
+  background: #f5ff80;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #59834f;
+  color: #52524c;
   margin-bottom: 24px;
-  box-shadow: 0 8px 26px #68875c12;
+  box-shadow: 4px 4px 0 #191917;
 }
 .eyebrow {
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 2px;
   font-weight: 650;
-  color: #8a9a83;
+  color: #73736c;
   margin-bottom: 14px;
 }
 .welcome h2 {
@@ -282,11 +282,11 @@
   line-height: 1.2;
   letter-spacing: -1.2px;
   font-weight: 500;
-  color: #244538;
+  color: #343430;
 }
 .welcome > p {
   font-size: 12px;
-  color: #839080;
+  color: #73736c;
   line-height: 1.8;
   margin-top: 15px;
 }
@@ -298,7 +298,7 @@
   margin: 30px 0 20px;
 }
 .chat .starters > button {
-  border: 1px solid #e5eae0;
+  border: 1px solid #deddd5;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -310,30 +310,30 @@
   background: #fff;
 }
 .starters > button > svg:first-child {
-  color: #6e8d62;
+  color: #52524c;
 }
 .starters strong {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   line-height: 1.5;
 }
 .starters span {
-  font-size: 10px;
-  color: #8a9685;
+  font-size: 12px;
+  color: #73736c;
   line-height: 1.7;
   flex: 1;
 }
 .starters > button > svg:last-child {
   transform: rotate(45deg);
   align-self: flex-end;
-  color: #a3b29a;
+  color: #73736c;
 }
 .grounded {
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: 10px;
-  color: #95a08e;
+  font-size: 12px;
+  color: #73736c;
 }
 .transcript {
   max-width: 760px;
@@ -351,13 +351,13 @@
 .userBubble {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  background: #eaf0e6;
+  background: #f0efe9;
   border-radius: 16px 16px 4px 16px;
   padding: 12px 17px;
   max-width: 83%;
   font-size: 13px;
   line-height: 1.75;
-  color: #365237;
+  color: #343430;
 }
 .assistantRow {
   display: flex;
@@ -371,9 +371,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #e3ebdf;
-  background: #f4f7ef;
-  color: #6b8c5a;
+  border: 1px solid #deddd5;
+  background: #f0efe9;
+  color: #52524c;
   border-radius: 9px;
   margin-top: 1px;
 }
@@ -382,36 +382,36 @@
   flex: 1;
 }
 .replyName {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 650;
-  color: #556d50;
+  color: #52524c;
   margin: 4px 0 13px;
 }
 .replyName > span {
   margin: 0 4px;
-  color: #b1baaa;
+  color: #b6b6ac;
 }
 .replyName small {
-  font-size: 9px;
-  color: #a0aa98;
+  font-size: 12px;
+  color: #73736c;
   font-weight: 400;
 }
 .reply > p {
   font-size: 13px;
   line-height: 1.85;
   margin-bottom: 13px;
-  color: #435241;
+  color: #343430;
 }
 .chat .citation {
   display: inline-flex;
   vertical-align: super;
   line-height: 1;
-  font-size: 9px;
+  font-size: 12px;
   padding: 3px 5px;
   margin-left: 2px;
   min-width: 16px;
-  background: #edf3e6;
-  color: #60834e;
+  background: #f0efe9;
+  color: #52524c;
   border-radius: 4px;
   font-weight: 600;
 }
@@ -421,28 +421,28 @@
   margin-top: 10px;
 }
 .chat .replyActions button {
-  font-size: 10px;
-  color: #8d9d82;
+  font-size: 12px;
+  color: #73736c;
   padding: 5px 7px;
 }
 .replyActions button:first-child {
-  border: 1px solid #e7eddf;
+  border: 1px solid #f0efe9;
 }
 .sourceChanged,
 .conflict {
   display: block;
-  font-size: 11px;
+  font-size: 12px;
   color: #926a3b;
   margin: 7px 0 13px;
   font-weight: 500;
 }
 .partial {
-  font-size: 10px;
+  font-size: 12px;
   color: #9c8b66;
 }
 .chat .earlier {
-  font-size: 11px;
-  color: #8b9a83;
+  font-size: 12px;
+  color: #73736c;
   margin: 0 auto 24px;
   display: flex;
 }
@@ -450,7 +450,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #90a080;
+  color: #73736c;
   font-size: 12px;
   padding: 0 0 25px;
 }
@@ -472,21 +472,21 @@
 .composerWrap {
   padding: 16px 26px 14px;
   flex-shrink: 0;
-  background: linear-gradient(0deg, #fcfdfb 85%, #fcfdfb00);
+  background: #fafaf7;
   width: 100%;
   max-width: 820px;
   margin: 0 auto;
 }
 .composer {
   background: #fff;
-  border: 1px solid #dce5d5;
-  border-radius: 17px;
+  border: 1px solid #deddd5;
+  border-radius: 12px;
   padding: 14px 15px 9px;
-  box-shadow: 0 3px 12px #50763e06;
+  box-shadow: 3px 3px 0 #191917;
 }
 .composer:focus-within {
-  border-color: #a0b995;
-  box-shadow: 0 0 0 3px #8eb47610;
+  border-color: #73736c;
+  box-shadow: 3px 3px 0 #191917;
 }
 .composer textarea {
   display: block;
@@ -496,7 +496,7 @@
   background: none;
   font: inherit;
   font-size: 13px;
-  color: #384c32;
+  color: #343430;
   resize: none;
   line-height: 1.7;
   min-height: 46px;
@@ -504,7 +504,7 @@
   box-shadow: none !important;
 }
 .composer textarea::placeholder {
-  color: #a4afa0;
+  color: #73736c;
 }
 .composerBottom {
   display: flex;
@@ -516,36 +516,36 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 9px;
-  color: #a1ad9a;
+  font-size: 12px;
+  color: #73736c;
 }
 .chat .composerBottom > button {
   width: 31px;
   height: 31px;
   border-radius: 9px;
-  background: #386747;
+  background: #343430;
   color: #fff;
 }
 .chat .composerBottom > button:hover {
-  background: #294f35;
+  background: #343430;
 }
 .chat .composerBottom > button:disabled {
-  background: #dfe7da;
+  background: #deddd5;
   opacity: 1;
-  color: #a3b397;
+  color: #73736c;
 }
 .disclaimer {
   text-align: center;
-  font-size: 9px;
-  color: #9ba694;
+  font-size: 12px;
+  color: #73736c;
   margin-top: 10px !important;
 }
 .disclaimer span {
   display: none;
 }
 .notice {
-  font-size: 11px;
-  color: #718768;
+  font-size: 12px;
+  color: #52524c;
   margin-bottom: 10px !important;
 }
 .error {
@@ -573,7 +573,7 @@
   color: #8a8058;
   padding: 10px 12px;
   border-radius: 10px;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.7;
   margin-bottom: 10px;
 }
@@ -595,7 +595,7 @@
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  border-left: 1px solid #e5eadd;
+  border-left: 1px solid #deddd5;
   background: #fff;
   min-height: 0;
   z-index: 5;
@@ -606,7 +606,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #edf0e6;
+  border-bottom: 1px solid #f0efe9;
   gap: 8px;
 }
 .panelHeader h2 {
@@ -625,17 +625,17 @@
   flex: 1;
 }
 .panelBody > p {
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.8;
-  color: #8b9681;
+  color: #73736c;
 }
 .sourceSummary {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-  border: 1px solid #e6edde;
-  background: #f7faf2;
+  border: 1px solid #deddd5;
+  background: #fafaf7;
   border-radius: 10px;
   padding: 14px;
   margin: 17px 0;
@@ -645,12 +645,12 @@
   letter-spacing: -1px;
 }
 .sourceSummary > strong > span {
-  color: #a8b69b;
+  color: #73736c;
   font-size: 15px;
 }
 .sourceSummary > span {
-  font-size: 10px;
-  color: #90a080;
+  font-size: 12px;
+  color: #73736c;
   flex: 1;
 }
 .sourceSummary button {
@@ -661,10 +661,10 @@
   align-items: flex-start;
   gap: 11px;
   padding: 17px 0;
-  border-top: 1px solid #edf0e6;
+  border-top: 1px solid #f0efe9;
 }
 .knowledgeCard > svg {
-  color: #8fa07c;
+  color: #73736c;
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -678,19 +678,19 @@
   overflow-wrap: anywhere;
 }
 .knowledgeCard p {
-  font-size: 10px;
-  color: #9ba58d;
+  font-size: 12px;
+  color: #73736c;
   margin-top: 5px;
   line-height: 1.7;
 }
 .ready,
 .waiting {
   display: inline-block;
-  font-size: 9px;
+  font-size: 12px;
   padding: 3px 7px;
   border-radius: 5px;
-  background: #edf6e4;
-  color: #7c9c62;
+  background: #f0efe9;
+  color: #52524c;
   margin-top: 8px;
 }
 .waiting {
@@ -698,7 +698,7 @@
   color: #a19162;
 }
 .textButton {
-  font-size: 11px !important;
+  font-size: 12px !important;
   text-decoration: underline;
   margin-top: 7px;
 }
@@ -708,24 +708,24 @@
   gap: 9px;
   padding: 12px 0;
   font-size: 12px;
-  border-top: 1px solid #edf0e6;
+  border-top: 1px solid #f0efe9;
   margin-top: 10px;
 }
 .privacy {
-  font-size: 10px !important;
+  font-size: 12px !important;
   margin-top: 20px !important;
   line-height: 1.8 !important;
 }
 .sourceCard {
-  border: 1px solid #e3e9dc;
+  border: 1px solid #deddd5;
   padding: 15px;
   border-radius: 12px;
   margin-bottom: 14px;
   min-width: 0;
 }
 .activeSource {
-  border-color: #9cb687;
-  box-shadow: 0 0 0 2px #a8c09116;
+  border-color: #73736c;
+  box-shadow: 0 0 0 2px #73736c16;
 }
 .sourceNumber {
   display: inline-flex;
@@ -734,9 +734,9 @@
   justify-content: center;
   align-items: center;
   border-radius: 5px;
-  background: #eef4e7;
-  color: #7b9567;
-  font-size: 10px;
+  background: #f0efe9;
+  color: #52524c;
+  font-size: 12px;
   margin-bottom: 10px;
 }
 .sourceCard h3 {
@@ -746,24 +746,24 @@
   overflow-wrap: anywhere;
 }
 .sourceCard > p {
-  font-size: 10px;
-  color: #95a184;
+  font-size: 12px;
+  color: #73736c;
   margin-top: 6px;
 }
 .sourceCard blockquote {
-  border-left: 2px solid #b3c69c;
-  background: #f7faf1;
+  border-left: 2px solid #b6b6ac;
+  background: #fafaf7;
   margin: 14px 0;
   padding: 10px 12px;
   font-size: 12px;
   line-height: 1.8;
-  color: #637850;
+  color: #52524c;
   overflow-wrap: anywhere;
 }
 .sourceCard details {
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.8;
-  color: #8c9c7d;
+  color: #73736c;
   margin-top: 12px;
 }
 .sourceCard summary {
@@ -773,12 +773,12 @@
   padding-top: 10px;
 }
 .chat .download {
-  border: 1px solid #e4eadd;
+  border: 1px solid #deddd5;
   padding: 9px 10px;
-  font-size: 10px;
+  font-size: 12px;
   margin-top: 16px;
   width: 100%;
-  color: #7a8d68;
+  color: #52524c;
 }
 .mobileOnly,
 .scrim,
@@ -814,14 +814,14 @@
     right: 0;
     top: 0;
     bottom: 0;
-    box-shadow: -10px 0 35px #2d4d2810;
+    box-shadow: -10px 0 35px #34343010;
     width: 320px;
   }
   .chat .panelScrim {
     display: block !important;
     position: absolute;
     inset: 0;
-    background: #183d2523;
+    background: #17171523;
     border-radius: 0;
     z-index: 4;
     cursor: default;
@@ -856,7 +856,7 @@
     font-size: 12px;
   }
   .header p {
-    font-size: 9px;
+    font-size: 12px;
   }
   .avatar {
     width: 30px;
@@ -904,7 +904,7 @@
     position: absolute;
     inset: 0;
     z-index: 6;
-    background: #1b3b283d;
+    background: #1717153d;
     border-radius: 0;
     display: block !important;
   }
@@ -915,7 +915,7 @@
   .welcomeMark {
     width: 52px;
     height: 52px;
-    border-radius: 17px;
+    border-radius: 12px;
     margin-bottom: 20px;
   }
   .eyebrow {
@@ -927,7 +927,7 @@
     line-height: 1.2;
   }
   .welcome > p {
-    font-size: 11px;
+    font-size: 12px;
     max-width: 270px;
   }
   .starters {
@@ -948,7 +948,7 @@
     display: none;
   }
   .starters strong {
-    font-size: 11px;
+    font-size: 12px;
   }
   .starters > button > svg:last-child {
     align-self: center;
@@ -966,10 +966,10 @@
     line-height: 1.85;
   }
   .replyName small {
-    font-size: 8px;
+    font-size: 12px;
   }
   .replyName {
-    font-size: 10px;
+    font-size: 12px;
   }
   .assistantRow {
     gap: 8px;
@@ -991,17 +991,17 @@
     line-height: 1.5;
   }
   .composerBottom > span {
-    font-size: 8px;
+    font-size: 12px;
   }
   .disclaimer {
-    font-size: 8px;
+    font-size: 12px;
     margin-top: 8px !important;
   }
   .panel {
     width: min(340px, 100%);
   }
   .availability {
-    font-size: 10px;
+    font-size: 12px;
     padding: 9px 10px;
   }
   .panelHeader {
@@ -1014,7 +1014,7 @@
 
 @media (min-width: 761px) and (max-height: 850px) {
   .welcome {
-    padding: 20px 26px 16px;
+    padding: 12px 26px;
   }
   .welcomeMark {
     display: none;
@@ -1026,7 +1026,17 @@
     margin-top: 10px;
   }
   .starters {
-    margin: 18px 0 12px;
+    margin: 12px 0 8px;
+  }
+  .welcome .eyebrow {
+    font-size: 10px;
+    margin-bottom: 10px;
+  }
+  .starters span {
+    line-height: 1.55;
+  }
+  .starters > button > svg:last-child {
+    display: none;
   }
   .chat .starters > button {
     padding: 12px;
@@ -1039,15 +1049,15 @@
 }
 .responseMode {
   display: block;
-  color: #77867f;
-  font-size: 10px;
+  color: #52524c;
+  font-size: 12px;
   margin: 5px 0 9px;
 }
 
 .replyContent {
   font-size: 14px;
   line-height: 1.75;
-  color: #34483f;
+  color: #343430;
   overflow-wrap: anywhere;
 }
 .chat .replyContent p {
@@ -1060,7 +1070,7 @@
   font-size: 15px;
   line-height: 1.45;
   font-weight: 650;
-  color: #193c35;
+  color: #171715;
 }
 .chat .replyContent > :first-child {
   margin-top: 0;
@@ -1097,26 +1107,26 @@
   margin: 0 0 15px;
 }
 .chat .answerPoints > li::marker {
-  color: #7b9285;
+  color: #73736c;
 }
 .replyContent blockquote {
   margin: 12px 0;
   padding: 2px 0 2px 14px;
-  border-left: 3px solid #d9e4dd;
-  color: #63756a;
+  border-left: 3px solid #deddd5;
+  color: #52524c;
 }
 .replyContent code {
   font-family: ui-monospace, SFMono-Regular, monospace;
   font-size: 0.9em;
-  background: #f1f5f2;
+  background: #f0efe9;
   border-radius: 4px;
   padding: 2px 4px;
 }
 .replyContent pre {
   margin: 12px 0;
   padding: 14px;
-  background: #f1f5f2;
-  border: 1px solid #e0e8e2;
+  background: #f0efe9;
+  border: 1px solid #deddd5;
   border-radius: 8px;
   white-space: pre;
   overflow-x: auto;
@@ -1138,13 +1148,13 @@
 }
 .replyTable th,
 .replyTable td {
-  border: 1px solid #dce5de;
+  border: 1px solid #deddd5;
   padding: 9px 12px;
   text-align: left;
   vertical-align: top;
 }
 .replyTable th {
-  background: #f1f5f2;
+  background: #f0efe9;
   font-weight: 650;
 }
 .replyContent a {
@@ -1158,4 +1168,20 @@
 .chat .pointCitations .citation {
   vertical-align: baseline;
   margin: 0 4px 0 0;
+}
+
+.chatRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.chatRow > button:first-child {
+  flex: 1;
+  width: 0;
+}
+.chatRow > button:last-child {
+  flex: 0 0 34px;
+  justify-content: center;
+  padding: 8px;
 }

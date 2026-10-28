@@ -9,20 +9,27 @@ const buttonVariants = cva("button", {
       outline: "button-outline",
       ghost: "button-ghost",
     },
+    size: {
+      default: "button-size-default",
+      sm: "button-size-sm",
+      icon: "button-size-icon",
+    },
   },
-  defaultVariants: { variant: "default" },
+  defaultVariants: { variant: "default", size: "default" },
 });
 export function Button({
   className,
   variant,
+  size,
   asChild = false,
   ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement> &
+}: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & { asChild?: boolean }) {
   const Component = asChild ? Slot : "button";
   return (
     <Component
-      className={cn(buttonVariants({ variant }), className)}
+      data-slot="button"
+      className={cn(buttonVariants({ variant, size }), className)}
       {...props}
     />
   );

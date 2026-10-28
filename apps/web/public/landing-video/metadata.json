@@ -1,0 +1,23 @@
+{
+  "durationSeconds": 50,
+  "width": 1280,
+  "height": 720,
+  "fps": 24,
+  "codec": "H.264",
+  "pixelFormat": "yuv420p",
+  "audio": false,
+  "bytes": 4402590,
+  "method": "AI-generated concept still + deterministic original UI storyboard + Pillow motion rendering + ffmpeg encoding",
+  "sceneStartsSeconds": [
+    0,
+    3,
+    8,
+    13,
+    19,
+    24,
+    30,
+    35,
+    40,
+    45
+  ]
+}

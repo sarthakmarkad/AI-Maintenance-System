@@ -1,11 +1,18 @@
 "use client";
 import Link from "next/link";
 import { WorkOrderNotifications } from "./work-order-notifications";
+import { PageFinder } from "./page-finder";
 import { useRouter, usePathname } from "next/navigation";
 import {
+  Users,
   Boxes,
   ChevronRight,
-  Factory,
+  ScanLine,
+  Menu,
+  X,
+  Home,
+  BookOpen,
+  Sparkles,
   LogOut,
   ShieldCheck,
   BarChart3,
@@ -14,6 +21,7 @@ import {
   CalendarDays,
   ChartNoAxesCombined,
   FileText,
+  Mail,
 } from "lucide-react";
 import { getSupabase } from "@/lib/supabase";
 import { api, type Me } from "@/lib/api";
@@ -40,14 +48,105 @@ export function Shell({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const inProduction = pathname.includes("/production");
-  const inReadings = pathname.includes("/readings");
-  const inOrders = pathname.includes("/work-orders");
-  const inPerformance = pathname.includes("/performance");
   const inAssistant = pathname.includes("/assistant");
-  const inDocuments = pathname.includes("/documents");
-  const inReports = pathname.includes("/reports");
-  const inCalendar = pathname.includes("/calendar");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const sections = [
+    {
+      name: "Workspace",
+      links: [
+        { title: "Asset registry", href: "/machines", icon: Boxes },
+        ...(user?.role === "ADMINISTRATOR"
+          ? [{ title: "Team", href: "/team", icon: Users }]
+          : []),
+        ...(code
+          ? [
+              {
+                title: "Machine overview",
+                href: `/machines/${code}`,
+                icon: ScanLine,
+              },
+            ]
+          : []),
+      ],
+    },
+    ...(code
+      ? [
+          {
+            name: "Operations",
+            links: [
+              {
+                title: "Work orders",
+                href: `/machines/${code}/work-orders`,
+                icon: ClipboardList,
+              },
+              {
+                title: "Maintenance calendar",
+                href: `/machines/${code}/calendar`,
+                icon: CalendarDays,
+              },
+              ...(user && ["TECHNICIAN", "MAINTENANCE_HEAD"].includes(user.role)
+                ? [
+                    {
+                      title: "Email alerts",
+                      href: `/machines/${code}/notification-settings`,
+                      icon: Mail,
+                    },
+                  ]
+                : []),
+            ],
+          },
+          {
+            name: "Insights",
+            links: [
+              {
+                title: "Production",
+                href: `/machines/${code}/production`,
+                icon: BarChart3,
+              },
+              {
+                title: "Process trends",
+                href: `/machines/${code}/readings`,
+                icon: Activity,
+              },
+              {
+                title: "Maintenance performance",
+                href: `/machines/${code}/performance`,
+                icon: ChartNoAxesCombined,
+              },
+              {
+                title: "Maintenance reports",
+                href: `/machines/${code}/reports`,
+                icon: FileText,
+              },
+            ],
+          },
+          {
+            name: "Knowledge",
+            links: [
+              {
+                title: "Manuals & SOPs",
+                href: `/machines/${code}/documents`,
+                icon: BookOpen,
+              },
+              {
+                title: "AI assistant",
+                href: `/machines/${code}/assistant`,
+                icon: Sparkles,
+              },
+            ],
+          },
+        ]
+      : []),
+  ];
+  const activeTitle =
+    sections
+      .flatMap((section) => section.links)
+      .find(
+        (link) =>
+          link.href === pathname ||
+          (link.title === "Work orders" &&
+            pathname.startsWith(link.href + "/")),
+      )?.title ?? "Workspace";
   const [signingOut, setSigningOut] = useState(false);
   const [error, setError] = useState("");
   const [switchingRole, setSwitchingRole] = useState(false);
@@ -86,107 +185,101 @@ export function Shell({
     }
   }
   return (
-    <div className={`app-shell ${inAssistant ? "chat-shell" : ""}`}>
-      <aside className="sidebar">
-        <Link href="/machines" className="brand">
-          <span className="brand-mark">
-            <Factory size={23} />
-          </span>
-          <span>
-            SUPREME<small>Maintenance intelligence</small>
-          </span>
-        </Link>
-        <div className="workspace-label">PILOT WORKSPACE</div>
-        <nav aria-label="Main navigation">
-          <Link
-            className={`nav-item ${inProduction || inReadings || inOrders || inCalendar || inPerformance || inReports || inDocuments || inAssistant ? "" : "active"}`}
-            href="/machines"
-          >
-            <Boxes size={18} />
-            Asset registry
-            <span className="nav-dot" />
+    <div
+      className={`app-shell ${inAssistant ? "chat-shell" : ""} ${menuOpen ? "navigation-open" : ""}`}
+    >
+      <a href="#workspace-content" className="skip-link">
+        Skip to workspace
+      </a>
+      <aside
+        className="sidebar"
+        onKeyDown={(event) => {
+          if (event.key === "Escape") {
+            setMenuOpen(false);
+            document.getElementById("workspace-menu-toggle")?.focus();
+          }
+        }}
+      >
+        <div className="sidebar-brand-row">
+          <Link href="/" className="brand" aria-label="Supreme home">
+            <span className="brand-mark">
+              <ScanLine size={23} />
+            </span>
+            <span>
+              SUPREME<small>Maintenance intelligence</small>
+            </span>
           </Link>
-          {code && (
-            <Link
-              className={`nav-item ${inProduction ? "active" : ""}`}
-              href={`/machines/${code}/production`}
-            >
-              <BarChart3 size={18} />
-              Production
-            </Link>
-          )}
-          {code && (
-            <Link
-              className={`nav-item ${inReadings ? "active" : ""}`}
-              href={`/machines/${code}/readings`}
-            >
-              <Activity size={18} />
-              Process trends
-            </Link>
-          )}
-          {code && (
-            <Link
-              className={`nav-item ${inOrders ? "active" : ""}`}
-              href={`/machines/${code}/work-orders`}
-            >
-              <ClipboardList size={18} />
-              Work orders
-            </Link>
-          )}
-          {code && (
-            <Link
-              className={`nav-item ${inCalendar ? "active" : ""}`}
-              href={`/machines/${code}/calendar`}
-            >
-              <CalendarDays size={18} />
-              Maintenance calendar
-            </Link>
-          )}
-          {code && (
-            <Link
-              className={`nav-item ${inPerformance ? "active" : ""}`}
-              href={`/machines/${code}/performance`}
-            >
-              <ChartNoAxesCombined size={18} />
-              Maintenance performance
-            </Link>
-          )}
-          {code && (
-            <Link
-              className={`nav-item ${inReports ? "active" : ""}`}
-              href={`/machines/${code}/reports`}
-            >
-              <FileText size={18} />
-              Maintenance reports
-            </Link>
-          )}
-          {code && (
-            <Link
-              className={`nav-item ${inDocuments ? "active" : ""}`}
-              href={`/machines/${code}/documents`}
-            >
-              <FileText size={18} />
-              Manuals & SOPs
-            </Link>
-          )}
-          {code && (
-            <Link
-              className={`nav-item ${inAssistant ? "active" : ""}`}
-              href={`/machines/${code}/assistant`}
-            >
-              <FileText size={18} />
-              AI assistant
-            </Link>
-          )}
+          <button
+            id="workspace-menu-toggle"
+            type="button"
+            className="mobile-menu-toggle"
+            aria-expanded={menuOpen}
+            aria-controls="workspace-navigation"
+            aria-label={menuOpen ? "Close navigation" : "Open navigation"}
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            {menuOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
+        <div className="workspace-context">
+          <span className="signal-square" />
+          <div>
+            <strong>{code || "Asset workspace"}</strong>
+            <small>
+              {code ? "Selected machine" : "Your authorized assets"}
+            </small>
+          </div>
+          <span className="workspace-context-tag">ASSETS</span>
+        </div>
+        <nav
+          id="workspace-navigation"
+          aria-label="Main navigation"
+          className="sidebar-navigation"
+        >
+          {sections.map((section) => (
+            <div className="nav-group" key={section.name}>
+              <span className="nav-group-label">{section.name}</span>
+              {section.links.map(({ href, title, icon: Icon }) => {
+                const active =
+                  href === pathname ||
+                  (title === "Work orders" && pathname.startsWith(href + "/"));
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={`nav-item ${active ? "active" : ""}`}
+                    aria-current={active ? "page" : undefined}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <Icon size={17} />
+                    <span>{title}</span>
+                    {active && <span className="nav-active-marker" />}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
+          <Link
+            href="/"
+            className="nav-item nav-home"
+            onClick={() => setMenuOpen(false)}
+          >
+            <Home size={17} />
+            <span>Back to website</span>
+          </Link>
         </nav>
         <div className="sidebar-note">
-          <ShieldCheck size={20} />
+          <ShieldCheck size={19} />
           <strong>Built on trusted records</strong>
-          <p>One pilot line. A clear foundation for maintenance decisions.</p>
+          <p>
+            Connected evidence.
+            <br />
+            Human decisions.
+          </p>
         </div>
         <div className="sidebar-footer">
-          <span className="tiny-dot" />
-          WH-C pilot · Maintenance
+          <span className="signal-square" /> {code || "ASSET REGISTRY"} /
+          MAINTENANCE
         </div>
       </aside>
       <div className="workspace">
@@ -195,11 +288,25 @@ export function Shell({
             <Link href="/machines">Asset registry</Link>
             {code && (
               <>
-                <ChevronRight size={14} />
-                <span>{code}</span>
+                <ChevronRight size={13} />
+                <Link href={`/machines/${code}`}>{code}</Link>
               </>
             )}
+            {activeTitle !== "Asset registry" &&
+              activeTitle !== "Machine overview" && (
+                <>
+                  <ChevronRight size={13} />
+                  <span>{activeTitle}</span>
+                </>
+              )}
           </div>
+          {user && (
+            <PageFinder
+              key={`${user.userId}:${user.role}`}
+              sections={sections}
+              onNavigate={() => setMenuOpen(false)}
+            />
+          )}
           <div className="account">
             <span className="avatar">
               {user?.displayName.slice(0, 1).toUpperCase() || "S"}
@@ -232,9 +339,11 @@ export function Shell({
             </div>
             <Button
               variant="ghost"
+              size="icon"
               onClick={signOut}
               disabled={signingOut}
               aria-label="Sign out"
+              title="Sign out"
             >
               <LogOut size={17} />
             </Button>
@@ -245,8 +354,8 @@ export function Shell({
             {error}
           </p>
         )}
-        <main className="main-content">
-          {code === "WH-C" &&
+        <main className="main-content" id="workspace-content" tabIndex={-1}>
+          {code &&
             user &&
             !inAssistant &&
             session &&
@@ -261,10 +370,8 @@ export function Shell({
           {children}
         </main>
         <footer className="workspace-footer">
-          <span>
-            Supreme Industries · Machine maintenance & performance intelligence
-          </span>
-          <span>Local pilot / v0.7</span>
+          <span>Supreme Industries · Maintenance intelligence</span>
+          <span>MACHINE RECORDS / HUMAN DECISIONS</span>
         </footer>
       </div>
     </div>

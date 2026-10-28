@@ -60,6 +60,12 @@ model AppUser {
   @@schema("maintenance")
 }
 model Membership {
+  staffInvitationsCreated TeamInvitation[] @relation("StaffInvitationCreator")
+  staffInvitationsAccepted TeamInvitation[] @relation("StaffInvitationAcceptor")
+  staffActions TeamAction[]
+  staffEmailRequests TeamInvitationEmail[]
+  teamVersion Int @default(1)
+  staffEmail String? @db.VarChar(254)
   id String @id @default(uuid()) @db.Uuid
   userId String @unique @db.Uuid
   orgId String @db.Uuid
@@ -90,6 +96,8 @@ model Membership {
   @@unique([orgId, id])
   @@index([orgId, role, active])
   @@schema("maintenance")
+  ExternalNotificationPreference ExternalNotificationPreference[]
+  RcaDraftRequest                RcaDraftRequest[]
 }
 model MembershipRoleGrant {
   id String @id @default(uuid()) @db.Uuid
@@ -108,10 +116,15 @@ model Machine {
   orgId String @db.Uuid
   code String @db.VarChar(32)
   name String @db.VarChar(160)
-  manufacturer String @db.VarChar(160)
+  manufacturer String? @db.VarChar(160)
+  version Int @default(1)
+  registrationKey String? @db.Uuid
+  registrationHash String? @db.VarChar(64)
   model String? @db.VarChar(160)
   // Unknown means unknown: registry metadata is not a live health measurement.
   operationalStatus String @default("NOT_MONITORED") @db.VarChar(32)
+  archivedAt DateTime? @db.Timestamptz(3)
+  archiveReason String? @db.VarChar(4000)
   departmentId String? @db.Uuid
   locationId String? @db.Uuid
   createdAt DateTime @default(now()) @db.Timestamptz(3)
@@ -119,6 +132,7 @@ model Machine {
   organization Organization @relation(fields: [orgId], references: [id], onDelete: Restrict)
   department Department? @relation(fields: [orgId, departmentId], references: [orgId, id], onDelete: Restrict)
   location Location? @relation(fields: [orgId, locationId], references: [orgId, id], onDelete: Restrict)
+  photo MachinePhoto?
   access MachineAccess[]
   productionImports ProductionImport[]
   productionDays ProductionDay[]
@@ -132,9 +146,11 @@ model Machine {
   anomalyReviews AnomalyReview[]
   @@unique([orgId, id])
   @@unique([orgId, code])
+  @@unique([orgId, registrationKey])
   @@index([orgId, departmentId])
   @@index([orgId, locationId])
   @@schema("maintenance")
+  ExternalNotificationPreference ExternalNotificationPreference[]
 }
 model MachineAccess {
   orgId String @db.Uuid
@@ -312,6 +328,7 @@ enum WorkOrderStatus {
   AWAITING_REVIEW
   APPROVED
   CLOSED
+  CANCELLED
   @@schema("maintenance")
 }
 enum WorkOrderPriority {
@@ -377,6 +394,7 @@ model WorkOrder {
   @@index([orgId,machineId,status,reportedAt])
   @@index([orgId,technicianId])
   @@schema("maintenance")
+  RcaDraftRequest      RcaDraftRequest[]
 }
 enum WorkOrderKind {
   BREAKDOWN
@@ -516,6 +534,7 @@ model WorkOrderEvent {
   @@unique([orderId,version])
   @@index([orgId,machineId,orderId,version])
   @@schema("maintenance")
+  ExternalNotificationOutbox ExternalNotificationOutbox[]
 }
 
 model WorkOrderAttachment {
@@ -704,8 +723,20 @@ model DocumentChat {
  machine Machine @relation(fields:[orgId,machineId],references:[orgId,id],onDelete:Restrict)
  owner Membership @relation(fields:[orgId,userId],references:[orgId,userId],onDelete:Restrict)
  turns DocumentChatTurn[]
+ archive DocumentChatArchive?
  @@unique([orgId,machineId,userId,actorRole,id])
  @@index([orgId,machineId,userId,actorRole,updatedAt,id],map:"DocumentChat_owner_updated_idx")
+ @@schema("maintenance")
+}
+model DocumentChatArchive {
+ chatId String @id @db.Uuid
+ orgId String @db.Uuid
+ machineId String @db.Uuid
+ userId String @db.Uuid
+ actorRole Role
+ at DateTime @default(now()) @db.Timestamptz(3)
+ chat DocumentChat @relation(fields:[orgId,machineId,userId,actorRole,chatId],references:[orgId,machineId,userId,actorRole,id],onDelete:Restrict)
+ @@unique([orgId,machineId,userId,actorRole,chatId])
  @@schema("maintenance")
 }
 model DocumentChatTurn {
@@ -725,4 +756,200 @@ model DocumentChatTurn {
  @@unique([chatId,ordinal])
  @@unique([orgId,machineId,userId,actorRole,requestId])
  @@schema("maintenance")
+}
+
+// SQL migration retains check constraints, immutable/audit triggers and partial indexes.
+model ExternalNotificationAttempt {
+  id                         String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  outboxId                   String                     @db.Uuid
+  attempt                    Int
+  status                     String                     @db.VarChar(16)
+  code                       String?                    @db.VarChar(40)
+  providerId                 String?                    @db.VarChar(100)
+  leaseToken                 String?                    @db.Uuid
+  late                       Boolean                    @default(false)
+  at                         DateTime                   @default(dbgenerated("clock_timestamp()")) @db.Timestamptz(3)
+  ExternalNotificationOutbox ExternalNotificationOutbox @relation(fields: [outboxId], references: [id], onUpdate: NoAction)
+
+  @@index([outboxId, at, id], map: "ExternalNotificationAttempt_outbox_idx")
+  @@schema("maintenance")
+}
+
+// SQL migration retains check constraints, immutable/audit triggers and partial indexes.
+model ExternalNotificationOutbox {
+  id                             String                         @id @db.Uuid
+  orgId                          String                         @db.Uuid
+  machineId                      String                         @db.Uuid
+  userId                         String                         @db.Uuid
+  role                           Role
+  preferenceId                   String                         @db.Uuid
+  eventId                        String                         @db.Uuid
+  destination                    String                         @db.VarChar(254)
+  payload                        Json
+  status                         String                         @default("PENDING") @db.VarChar(16)
+  attemptCount                   Int                            @default(0)
+  nextAttemptAt                  DateTime                       @default(dbgenerated("clock_timestamp()")) @db.Timestamptz(3)
+  firstAttemptAt                 DateTime?                      @db.Timestamptz(3)
+  leaseToken                     String?                        @db.Uuid
+  leaseUntil                     DateTime?                      @db.Timestamptz(3)
+  providerId                     String?                        @db.VarChar(100)
+  code                           String?                        @db.VarChar(40)
+  createdAt                      DateTime                       @default(dbgenerated("clock_timestamp()")) @db.Timestamptz(3)
+  updatedAt                      DateTime                       @default(dbgenerated("clock_timestamp()")) @db.Timestamptz(3)
+  ExternalNotificationAttempt    ExternalNotificationAttempt[]
+  WorkOrderEvent                 WorkOrderEvent                 @relation(fields: [orgId, machineId, eventId], references: [orgId, machineId, id], onUpdate: NoAction)
+  ExternalNotificationPreference ExternalNotificationPreference @relation(fields: [orgId, machineId, userId, role, preferenceId], references: [orgId, machineId, userId, role, id], onUpdate: NoAction)
+
+  @@unique([orgId, machineId, userId, role, eventId, preferenceId])
+  @@index([orgId, machineId, eventId], map: "ExternalNotificationOutbox_event_idx")
+  @@index([orgId, machineId, userId, role, createdAt(sort: Desc), id], map: "ExternalNotificationOutbox_owner_idx")
+  @@index([orgId, machineId, userId, role, preferenceId], map: "ExternalNotificationOutbox_preference_idx")
+  @@schema("maintenance")
+}
+
+// SQL migration retains check constraints, immutable/audit triggers and partial indexes.
+model ExternalNotificationPreference {
+  id                         String                       @id @db.Uuid
+  orgId                      String                       @db.Uuid
+  machineId                  String                       @db.Uuid
+  userId                     String                       @db.Uuid
+  role                       Role
+  version                    Int
+  enabled                    Boolean
+  destination                String?                      @db.VarChar(254)
+  enabledAt                  DateTime?                    @db.Timestamptz(3)
+  verifiedAt                 DateTime?                    @db.Timestamptz(3)
+  requestId                  String                       @db.Uuid
+  fingerprint                String                       @db.VarChar(64)
+  createdAt                  DateTime                     @default(dbgenerated("clock_timestamp()")) @db.Timestamptz(3)
+  ExternalNotificationOutbox ExternalNotificationOutbox[]
+  Machine                    Machine                      @relation(fields: [orgId, machineId], references: [orgId, id], onUpdate: NoAction)
+  Membership                 Membership                   @relation(fields: [orgId, userId], references: [orgId, userId], onUpdate: NoAction)
+
+  @@unique([orgId, machineId, userId, role, id], map: "ExternalNotificationPreferenc_orgId_machineId_userId_role_i_key")
+  @@unique([orgId, machineId, userId, role, requestId], map: "ExternalNotificationPreferenc_orgId_machineId_userId_role_r_key")
+  @@unique([orgId, machineId, userId, role, version], map: "ExternalNotificationPreferenc_orgId_machineId_userId_role_v_key")
+  @@index([orgId, machineId, userId, role, version(sort: Desc)], map: "ExternalNotificationPreference_latest_idx")
+  @@schema("maintenance")
+}
+
+// SQL migration retains check constraints, immutable/audit triggers and partial indexes.
+model RcaDraftReceipt {
+  requestId       String          @id @db.Uuid
+  status          String          @db.VarChar(16)
+  reason          String?         @db.VarChar(64)
+  draft           Json?
+  completedAt     DateTime        @default(now()) @db.Timestamptz(3)
+  RcaDraftRequest RcaDraftRequest @relation(fields: [requestId], references: [id], onUpdate: NoAction)
+
+  @@schema("maintenance")
+}
+
+// SQL migration retains check constraints, immutable/audit triggers and partial indexes.
+model RcaDraftRequest {
+  id              String           @id @db.Uuid
+  orgId           String           @db.Uuid
+  machineId       String           @db.Uuid
+  orderId         String           @db.Uuid
+  userId          String           @db.Uuid
+  requestId       String           @db.Uuid
+  fingerprint     String           @db.VarChar(64)
+  version         Int
+  sourceHash      String           @db.VarChar(64)
+  model           String           @db.VarChar(100)
+  policy          String           @db.VarChar(64)
+  snapshot        Json
+  createdAt       DateTime         @default(now()) @db.Timestamptz(3)
+  RcaDraftReceipt RcaDraftReceipt?
+  WorkOrder       WorkOrder        @relation(fields: [orgId, machineId, orderId], references: [orgId, machineId, id], onUpdate: NoAction)
+  Membership      Membership       @relation(fields: [orgId, userId], references: [orgId, userId], onUpdate: NoAction)
+
+  @@unique([orgId, userId, requestId])
+  @@index([orgId, machineId, orderId, createdAt(sort: Desc), id(sort: Desc)], map: "RcaDraftRequest_history")
+  @@index([orgId, userId, createdAt(sort: Desc)], map: "RcaDraftRequest_quota")
+  @@schema("maintenance")
+}
+
+// Current registry photo only; replacement/removal retains immutable audit metadata.
+model MachinePhoto {
+  machineId String @id @db.Uuid
+  orgId String @db.Uuid
+  id String @unique @default(uuid()) @db.Uuid
+  content Bytes
+  sha256 String @db.VarChar(64)
+  byteSize Int
+  width Int
+  height Int
+  source Json
+  uploadedBy String @db.Uuid
+  uploaderName String @db.VarChar(160)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  machine Machine @relation(fields:[orgId,machineId],references:[orgId,id],onDelete:Restrict)
+  @@unique([orgId,machineId])
+  @@schema("maintenance")
+}
+
+// Staff lifecycle is mutated only by narrowly scoped audited team functions.
+// Composite organization/member foreign keys are defined in migration 032.
+model TeamInvitation {
+  creator Membership @relation("StaffInvitationCreator",fields:[orgId,createdBy],references:[orgId,userId],onDelete:Restrict)
+  acceptor Membership? @relation("StaffInvitationAcceptor",fields:[orgId,acceptedBy],references:[orgId,userId],onDelete:Restrict)
+  emailRequests TeamInvitationEmail[]
+  id String @id @db.Uuid
+  orgId String @db.Uuid
+  requestId String @db.Uuid
+  createdBy String @db.Uuid
+  email String @db.VarChar(254)
+  displayName String @db.VarChar(120)
+  role Role
+  machineIds String[] @db.Uuid
+  tokenHash String @db.VarChar(64)
+  status String @default("PENDING") @db.VarChar(16)
+  version Int @default(1)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  expiresAt DateTime @db.Timestamptz(3)
+  acceptedAt DateTime? @db.Timestamptz(3)
+  acceptedBy String? @db.Uuid
+  revokedAt DateTime? @db.Timestamptz(3)
+  @@unique([orgId,id])
+  @@unique([orgId,createdBy,requestId])
+  @@index([orgId,status,createdAt])
+  @@index([email,status])
+  @@index([orgId,createdBy])
+  @@index([orgId,acceptedBy])
+  @@schema("maintenance")
+}
+model TeamAction {
+  actor Membership @relation(fields:[orgId,actorId],references:[orgId,userId],onDelete:Restrict)
+  id String @id @db.Uuid
+  orgId String @db.Uuid
+  actorId String @db.Uuid
+  requestId String @db.Uuid
+  action String @db.VarChar(40)
+  targetId String @db.Uuid
+  fingerprint String @db.VarChar(64)
+  result Json
+  at DateTime @default(now()) @db.Timestamptz(3)
+  @@unique([orgId,actorId,requestId])
+  @@index([orgId,targetId,at])
+  @@schema("maintenance")
+}
+model TeamInvitationEmail {
+  invitation TeamInvitation @relation(fields:[orgId,invitationId],references:[orgId,id],onDelete:Restrict)
+  actor Membership @relation(fields:[orgId,actorId],references:[orgId,userId],onDelete:Restrict)
+  id String @id @db.Uuid
+  orgId String @db.Uuid
+  invitationId String @db.Uuid
+  actorId String @db.Uuid
+  requestId String @db.Uuid
+  status String @default("PENDING") @db.VarChar(16)
+  code String? @db.VarChar(80)
+  providerId String? @db.VarChar(100)
+  leaseUntil DateTime @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  finishedAt DateTime? @db.Timestamptz(3)
+  @@unique([orgId,actorId,requestId])
+  @@index([orgId,invitationId,createdAt])
+  @@index([orgId,actorId])
+  @@schema("maintenance")
 }

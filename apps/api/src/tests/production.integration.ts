@@ -179,6 +179,21 @@ test("preview persists provenance and errors without adding production totals", 
     }),
   );
 });
+test("import receipt keys reject null lists and null elements at the database boundary", async () => {
+  for (const expression of ["NULL::text[]", "ARRAY[NULL]::text[]"]) {
+    await assert.rejects(
+      db.$executeRawUnsafe(
+        `UPDATE maintenance."ProductionImport" SET "committedDayKeys" = ${expression} WHERE id = $1::uuid`,
+        previewId,
+      ),
+    );
+  }
+  assert.deepEqual(
+    (await db.productionImport.findUniqueOrThrow({ where: { id: previewId } }))
+      .committedDayKeys,
+    [],
+  );
+});
 test("invalid selections, edited payloads and missing acknowledgements are rejected atomically", async () => {
   for (const body of [
     { dayKeys: ["row-12"], acknowledgeWarnings: true },

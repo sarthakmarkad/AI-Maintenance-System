@@ -11,6 +11,7 @@ import { spawnSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { resolve } from "node:path";
 import { parse } from "dotenv";
+import { nativeDatabaseConfig } from "./postgres-connection.mjs";
 const local = resolve(".local"),
   data = resolve(local, "pgdata");
 function run(cmd, args, options = {}) {
@@ -59,16 +60,12 @@ if (!existsSync(data)) {
   );
 }
 const env = parse(readFileSync(".env"));
-const ownerUrl = new URL(env.DIRECT_URL);
-const runtimeUrl = new URL(env.DATABASE_URL);
-if (
-  ownerUrl.hostname !== "127.0.0.1" ||
-  ownerUrl.port !== "55432" ||
-  ownerUrl.username !== "maintenance_owner"
-)
-  throw new Error(
-    "Local bootstrap requires its own generated local configuration.",
-  );
+const {
+  owner: ownerUrl,
+  runtime: runtimeUrl,
+  databases,
+  testOnly,
+} = nativeDatabaseConfig(env);
 const state = spawnSync("pg_ctl", ["-D", data, "status"], { encoding: "utf8" });
 if (state.status !== 0) {
   mkdirSync(resolve(local, "socket"), { recursive: true });
@@ -91,7 +88,7 @@ const pgEnv = {
   PGPASSWORD: decodeURIComponent(ownerUrl.password),
   PGDATABASE: "postgres",
 };
-for (const name of ["maintenance", "maintenance_test"]) {
+for (const name of databases) {
   const found = run(
     "psql",
     ["-tAc", `SELECT 1 FROM pg_database WHERE datname='${name}'`],
@@ -107,5 +104,7 @@ run("psql", ["-v", "ON_ERROR_STOP=1"], {
   input: `DO $$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname='maintenance_runtime') THEN CREATE ROLE maintenance_runtime LOGIN PASSWORD '${pass}' NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT; END IF; END $$;`,
 });
 console.log(
-  "Project PostgreSQL ready on 127.0.0.1:55432. Private local configuration written to .env.",
+  testOnly
+    ? "Local test PostgreSQL ready on 127.0.0.1:55432. Hosted app connections unchanged."
+    : "Project PostgreSQL ready on 127.0.0.1:55432. Private local configuration retained in .env.",
 );

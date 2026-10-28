@@ -5,6 +5,7 @@ import { ShieldCheck } from "lucide-react";
 import { api, ApiError, type Me } from "@/lib/api";
 import { exchangeGoogleCodeOnce } from "@/lib/google-auth";
 import { getSupabase } from "@/lib/supabase";
+import type { StaffInvitations } from "@/components/team-types";
 import { Button } from "@/components/ui/button";
 
 type Callback = { code: string | null; flowId?: string; denied: boolean };
@@ -47,13 +48,50 @@ export default function AuthCallback() {
     exchangeGoogleCodeOnce(code, flowId)
       .then(async (session) => {
         if (!active) return;
+        if (session.redirectType === "recovery") {
+          router.replace("/reset-password");
+          return;
+        }
         try {
           await api<Me>("/me", session.access_token);
           if (active) router.replace("/machines");
         } catch (e) {
           if (!active) return;
-          if (e instanceof ApiError && e.status === 403) setState("membership");
-          else if (e instanceof ApiError && e.status === 401) {
+          if (e instanceof ApiError && e.status === 403) {
+            try {
+              const pending = await api<StaffInvitations>(
+                "/team/onboarding/available",
+                session.access_token,
+                undefined,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: "{}",
+                },
+              );
+              if (
+                active &&
+                pending.items?.some(
+                  (i) =>
+                    typeof i.email === "string" && typeof i.role === "string",
+                )
+              ) {
+                router.replace("/join");
+                return;
+              }
+              if (active) setState("membership");
+            } catch (onboardingError) {
+              if (active)
+                setState(
+                  onboardingError instanceof ApiError &&
+                    (onboardingError.status === 0 ||
+                      onboardingError.status === 429 ||
+                      onboardingError.status >= 500)
+                    ? "unavailable"
+                    : "membership",
+                );
+            }
+          } else if (e instanceof ApiError && e.status === 401) {
             await getSupabase()?.auth.signOut({ scope: "local" });
             if (active) setState("error");
           } else setState("unavailable");
@@ -96,7 +134,7 @@ export default function AuthCallback() {
           <>
             <p role="alert">
               {state === "membership"
-                ? "Your Google sign-in succeeded, but this account has no active workspace membership. Ask your administrator to assign your role and machine access, then sign in again."
+                ? "Your sign-in succeeded, but this account has no active workspace membership. Open your staff invitation to join, or contact your Administrator for access."
                 : state === "unavailable"
                   ? "We could not verify your workspace access. Check your connection and try again."
                   : "The sign-in was cancelled, expired or could not be verified. Start again from this browser."}

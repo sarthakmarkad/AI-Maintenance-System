@@ -417,7 +417,7 @@ test("planned reports retain unreleased, skipped and paused obligations, current
   const q = "report=planned-maintenance&from=2026-09-01&to=2026-09-04";
   const p = (await get("/preview?" + q).expect(200)).body;
   assert.equal(p.total, 4);
-  assert.deepEqual(p.counts, { open: 2, closed: 1, skipped: 1 });
+  assert.deepEqual(p.counts, { open: 2, closed: 1, cancelled: 0, skipped: 1 });
   assert.equal(p.basis, "Due date");
   assert(p.rows.some((r: any) => r.cells[2] === "TEST tech2"));
   assert(p.rows.some((r: any) => r.cells[3] === "Not released"));
@@ -657,4 +657,28 @@ test("preview limit is explicit while exports retain all matching rows; excess r
   await db.workOrder.createMany({ data: data.slice(55) });
   await get("/preview?" + q).expect(422);
   await get("/export?" + q + "&format=pdf").expect(422);
+});
+
+test("cancelled work stays exportable and is excluded from open report filters", async () => {
+  const order = (
+    await postWork("")
+      .send({
+        requestId: randomUUID(),
+        title: "TEST cancelled report",
+        description: "TEST duplicate report",
+        priority: "NORMAL",
+        impact: "OBSERVATION",
+      })
+      .expect(201)
+  ).body;
+  await postWork(`/${order.id}/actions/cancel`, "head")
+    .send({ version: order.version, reason: "TEST duplicate report" })
+    .expect(200);
+  const day = new Date(Date.now() + 330 * 60000).toISOString().slice(0, 10);
+  const q = `report=work-orders&from=${day}&to=${day}&basis=created`;
+  const all = (await get("/preview?" + q).expect(200)).body;
+  assert.ok(all.rows.some((r: any) => r.orderId === order.id));
+  assert.ok(all.counts.cancelled >= 1);
+  const open = (await get("/preview?" + q + "&status=OPEN").expect(200)).body;
+  assert.ok(!open.rows.some((r: any) => r.orderId === order.id));
 });

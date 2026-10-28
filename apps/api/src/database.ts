@@ -1,14 +1,12 @@
 import { Inject, Injectable, OnModuleDestroy } from "@nestjs/common";
 import { PrismaClient } from "@prisma/client";
 import { CONFIG, type Config } from "./config";
+import { postgresClient } from "./postgres";
 @Injectable()
 export class Database implements OnModuleDestroy {
   readonly client?: PrismaClient;
   constructor(@Inject(CONFIG) config: Config) {
-    if (config.DATABASE_URL)
-      this.client = new PrismaClient({
-        datasources: { db: { url: config.DATABASE_URL } },
-      });
+    if (config.DATABASE_URL) this.client = postgresClient(config.DATABASE_URL);
   }
   async ready(): Promise<boolean> {
     if (!this.client) return false;

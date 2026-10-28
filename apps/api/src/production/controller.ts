@@ -1,3 +1,5 @@
+import type { Response } from "express";
+import { XLSX_TYPE, templateMonth } from "../imports/templates";
 import {
   Body,
   Controller,
@@ -6,6 +8,7 @@ import {
   Param,
   Post,
   Query,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -19,6 +22,7 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiParam,
+  ApiProduces,
   ApiQuery,
   ApiResponse,
   ApiTags,
@@ -78,6 +82,40 @@ export class ProductionController {
   constructor(
     @Inject(ProductionService) private readonly service: ProductionService,
   ) {}
+  @Get("template")
+  @ApiProduces(XLSX_TYPE)
+  @Roles(...importers)
+  @ApiQuery({
+    name: "month",
+    required: false,
+    type: String,
+    description: "YYYY-MM; defaults to the current IST month.",
+  })
+  @ApiOkResponse({ schema: { type: "string", format: "binary" } })
+  async template(
+    @CurrentUser() user: Principal,
+    @Param("code") code: string,
+    @Query() raw: unknown,
+    @Res() response: Response,
+  ) {
+    const input = validated(
+      z
+        .object({
+          month: z
+            .string()
+            .regex(/^(?:20[0-9]{2}|2100)-(?:0[1-9]|1[0-2])$/)
+            .optional(),
+        })
+        .strict(),
+      raw,
+    );
+    const month = input.month ?? templateMonth();
+    const bytes = await this.service.template(user, code, month);
+    response
+      .type(XLSX_TYPE)
+      .attachment(`${code}-production-${month}.xlsx`)
+      .send(bytes);
+  }
   @Post("inspect")
   @Roles(...importers)
   @UseInterceptors(upload())

@@ -95,7 +95,7 @@ export class DocumentChatService {
         const c = await this.context(tx, user, code);
         const cursor = before
           ? await tx.documentChat.findFirst({
-              where: { ...c.owner, id: before },
+              where: { ...c.owner, id: before, archive: { is: null } },
             })
           : null;
         if (before && !cursor)
@@ -103,6 +103,7 @@ export class DocumentChatService {
         const rows = await tx.documentChat.findMany({
           where: {
             ...c.owner,
+            archive: { is: null },
             ...(cursor
               ? {
                   OR: [
@@ -132,7 +133,9 @@ export class DocumentChatService {
     return this.db.$transaction(
       async (tx) => {
         const c = await this.context(tx, user, code),
-          chat = await tx.documentChat.findFirst({ where: { ...c.owner, id } });
+          chat = await tx.documentChat.findFirst({
+            where: { ...c.owner, id, archive: { is: null } },
+          });
         if (!chat) throw new NotFoundException("Conversation not found.");
         const rows = await tx.documentChatTurn.findMany({
           where: { chatId: id, ...(before ? { ordinal: { lt: before } } : {}) },
@@ -151,6 +154,30 @@ export class DocumentChatService {
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
     );
+  }
+  async archive(user: Principal, code: string, id: string) {
+    return this.db.$transaction(async (tx) => {
+      const first = await this.context(tx, user, code);
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`chat:${first.scope.orgId}:${first.scope.machineId}:${user.userId}:${user.role}`}))`;
+      const c = await this.context(tx, user, code);
+      const chat = await tx.documentChat.findFirst({
+        where: { ...c.owner, id },
+      });
+      if (!chat) throw new NotFoundException("Conversation not found.");
+      if (await tx.documentChatArchive.findUnique({ where: { chatId: id } }))
+        return { removed: true };
+      await tx.documentChatArchive.create({ data: { chatId: id, ...c.owner } });
+      await tx.auditEvent.create({
+        data: {
+          orgId: c.scope.orgId,
+          actorId: c.user.userId,
+          entityId: id,
+          action: "DOCUMENT_CHAT_ARCHIVE",
+          detail: { actorRole: c.user.role },
+        },
+      });
+      return { removed: true };
+    });
   }
   async send(
     user: Principal,
@@ -171,6 +198,12 @@ export class DocumentChatService {
           }),
           current = await currentApproved(tx, c.scope);
         if (prior) {
+          if (
+            await tx.documentChatArchive.findUnique({
+              where: { chatId: prior.chatId },
+            })
+          )
+            throw new NotFoundException("Conversation was removed.");
           if (prior.fingerprint !== fingerprint)
             throw new ConflictException(
               "This message key was already used for different content.",
@@ -185,7 +218,7 @@ export class DocumentChatService {
         }
         const chat = input.chatId
           ? await tx.documentChat.findFirst({
-              where: { ...c.owner, id: input.chatId },
+              where: { ...c.owner, id: input.chatId, archive: { is: null } },
             })
           : null;
         if (input.chatId && !chat)
@@ -277,6 +310,12 @@ export class DocumentChatService {
           });
         const current = await currentApproved(tx, c.scope);
         if (prior) {
+          if (
+            await tx.documentChatArchive.findUnique({
+              where: { chatId: prior.chatId },
+            })
+          )
+            throw new NotFoundException("Conversation was removed.");
           if (prior.fingerprint !== fingerprint)
             throw new ConflictException(
               "This message key was already used for different content.",
@@ -305,6 +344,10 @@ export class DocumentChatService {
           ordinal = (initial.chat?.version ?? 0) + 1,
           at = new Date();
         if (initial.chat) {
+          if (await tx.documentChatArchive.findUnique({ where: { chatId } }))
+            throw new ConflictException(
+              "This conversation was removed while the reply was being prepared.",
+            );
           const changed = await tx.documentChat.updateMany({
             where: { id: chatId, ...c.owner, version: initial.chat.version },
             data: { version: ordinal, updatedAt: at },

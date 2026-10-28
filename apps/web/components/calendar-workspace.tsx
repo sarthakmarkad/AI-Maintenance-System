@@ -25,6 +25,7 @@ import {
 } from "@/lib/api";
 import { useAuth } from "./auth-provider";
 import { Button } from "./ui/button";
+import { FormPopup } from "./ui/form-popup";
 const localDate = (d: Date) =>
   new Date(d.getTime() + 330 * 60000).toISOString().slice(0, 10);
 const time = (v: string) =>
@@ -236,9 +237,6 @@ export function CalendarWorkspace({
         <div>
           <div className="eyebrow">{machine.code} / PLANNED MAINTENANCE</div>
           <h1>Maintenance calendar</h1>
-          <p>
-            Fixed schedules, clear ownership and a reviewed maintenance history.
-          </p>
         </div>
         <div className="calendar-heading-actions">
           <Button variant="outline" disabled={busy} onClick={reload}>
@@ -246,12 +244,9 @@ export function CalendarWorkspace({
             Reload calendar
           </Button>
           {canManage && (
-            <Button
-              disabled={busy || conflict}
-              onClick={() => setForm((v) => !v)}
-            >
+            <Button disabled={busy || conflict} onClick={() => setForm(true)}>
               <Plus size={15} />
-              {form ? "Hide plan form" : "Create maintenance plan"}
+              Create maintenance plan
             </Button>
           )}
         </div>
@@ -285,9 +280,12 @@ export function CalendarWorkspace({
           {success}
         </p>
       )}
-      {form && canManage && (
+      {canManage && (
         <PlanForm
           key={"plan-" + reset}
+          open={form}
+          onOpenChange={setForm}
+          error={error}
           roster={roster}
           rosterError={rosterError}
           busy={busy || conflict}
@@ -296,6 +294,7 @@ export function CalendarWorkspace({
           onFailure={failure}
           onSaved={() => {
             setForm(false);
+            setReset((n) => n + 1);
             setAttempt((n) => n + 1);
             setTab("plans");
             setSuccess(
@@ -470,13 +469,18 @@ export function CalendarWorkspace({
                   }}
                 >
                   <option value="">All tasks</option>
-                  {["UPCOMING", "DUE", "OVERDUE", "COMPLETED", "SKIPPED"].map(
-                    (s) => (
-                      <option key={s} value={s}>
-                        {pretty(s)}
-                      </option>
-                    ),
-                  )}
+                  {[
+                    "UPCOMING",
+                    "DUE",
+                    "OVERDUE",
+                    "COMPLETED",
+                    "SKIPPED",
+                    "CANCELLED",
+                  ].map((s) => (
+                    <option key={s} value={s}>
+                      {pretty(s)}
+                    </option>
+                  ))}
                 </select>
               </label>
             </div>
@@ -486,7 +490,7 @@ export function CalendarWorkspace({
                 <h2>No scheduled tasks in this view</h2>
                 <p>
                   {canManage
-                    ? "Create a maintenance plan to schedule work for WH-C, or choose another date or status."
+                    ? "Create a maintenance plan, or choose another date or status."
                     : "The maintenance head can create plans. Choose another date or status to see existing tasks."}
                 </p>
               </section>
@@ -503,6 +507,8 @@ export function CalendarWorkspace({
                     open={editor === o.id}
                     toggle={() => setEditor(editor === o.id ? "" : o.id)}
                     disabled={busy || conflict || loading}
+                    saving={busy}
+                    error={error}
                     onSkip={(reason) =>
                       action(`/occurrences/${o.id}/skip`, {
                         version: o.version,
@@ -566,10 +572,7 @@ export function CalendarWorkspace({
             <section className="state-card">
               <CalendarDays size={32} />
               <h2>No maintenance plans yet</h2>
-              <p>
-                The maintenance head can create the first plan. No sample
-                company schedule has been invented.
-              </p>
+              <p>The Maintenance head can create the first plan.</p>
             </section>
           ) : (
             plans.items.map((p) => (
@@ -615,19 +618,24 @@ export function CalendarWorkspace({
                       >
                         {p.active ? "Pause plan" : "Resume plan"}
                       </Button>
-                      {editor === p.id && (
-                        <PlanStateForm
-                          plan={p}
-                          disabled={busy || conflict}
-                          save={(reason) =>
-                            action(`/plans/${p.id}/state`, {
-                              version: p.version,
-                              active: !p.active,
-                              reason,
-                            })
-                          }
-                        />
-                      )}
+                      <PlanStateForm
+                        key={p.version}
+                        open={editor === p.id}
+                        onOpenChange={(value) => {
+                          if (!value) setEditor("");
+                        }}
+                        saving={busy}
+                        error={error}
+                        plan={p}
+                        disabled={busy || conflict}
+                        save={(reason) =>
+                          action(`/plans/${p.id}/state`, {
+                            version: p.version,
+                            active: !p.active,
+                            reason,
+                          })
+                        }
+                      />
                     </>
                   )}
                 </div>
@@ -651,8 +659,8 @@ export function CalendarWorkspace({
               <Bell size={32} />
               <h2>No current reminders for this role</h2>
               <p>
-                Reminders refresh while the API is running. New due stages
-                appear once and retain their read history.
+                Reminders appear here when scheduled work is upcoming, due or
+                overdue.
               </p>
             </section>
           ) : (
@@ -719,6 +727,9 @@ export function CalendarWorkspace({
   );
 }
 function PlanForm({
+  open,
+  onOpenChange,
+  error,
   roster,
   rosterError,
   busy,
@@ -727,6 +738,9 @@ function PlanForm({
   onSaved,
   onFailure,
 }: {
+  open: boolean;
+  onOpenChange: (value: boolean) => void;
+  error: string;
   roster: EligibleTechnicians["items"];
   rosterError: string;
   busy: boolean;
@@ -766,10 +780,14 @@ function PlanForm({
     }
   }
   return (
-    <section className="panel">
-      <div className="panel-heading">
-        <h2>Create a recurring plan</h2>
-      </div>
+    <FormPopup
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Create a recurring plan"
+      description="Fixed calendar dates in IST. Late completion does not move the next due date."
+      busy={saving}
+      error={error}
+    >
       <form
         className="work-form"
         aria-label="Maintenance plan"
@@ -874,7 +892,7 @@ function PlanForm({
           {!roster.length && !rosterError && (
             <p>
               No eligible technicians are available. An active technician with
-              WH-C access is required.
+              access to this machine is required.
             </p>
           )}
           <Button type="submit" disabled={!roster.length || !!rosterError}>
@@ -882,47 +900,64 @@ function PlanForm({
           </Button>
         </fieldset>
       </form>
-    </section>
+    </FormPopup>
   );
 }
 function PlanStateForm({
+  open,
+  onOpenChange,
+  saving,
+  error,
   plan,
   disabled,
   save,
 }: {
+  open: boolean;
+  onOpenChange: (value: boolean) => void;
+  saving: boolean;
+  error: string;
   plan: Plan;
   disabled: boolean;
   save: (reason: string) => Promise<void>;
 }) {
   const [reason, setReason] = useState("");
   return (
-    <form
-      className="work-form calendar-inline-form"
-      onSubmit={(e) => {
-        e.preventDefault();
-        void save(reason);
-      }}
+    <FormPopup
+      open={open}
+      onOpenChange={onOpenChange}
+      title={plan.active ? "Pause maintenance plan" : "Resume maintenance plan"}
+      description={plan.title}
+      busy={saving}
+      error={error}
     >
-      <p>
-        {plan.active
-          ? "Pausing stops creation of additional occurrences. Existing tasks remain scheduled and continue to remind their owners."
-          : "Resuming catches up all missed fixed-date occurrences; it does not move the anchor."}
-      </p>
-      <label>
-        Reason for schedule change
-        <textarea
-          required
-          minLength={3}
-          maxLength={4000}
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
-          disabled={disabled}
-        />
-      </label>
-      <Button type="submit" disabled={disabled}>
-        {plan.active ? "Confirm pause" : "Confirm resume"}
-      </Button>
-    </form>
+      <form
+        className="work-form calendar-inline-form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          void save(reason);
+        }}
+      >
+        <p>
+          {plan.active
+            ? "Pausing stops creation of additional occurrences. Existing tasks remain scheduled and continue to remind their owners."
+            : "Resuming catches up all missed fixed-date occurrences; it does not move the anchor."}
+        </p>
+        <label>
+          Reason for schedule change
+          <textarea
+            required
+            minLength={3}
+            maxLength={4000}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            disabled={disabled}
+          />
+        </label>
+        <Button type="submit" disabled={disabled}>
+          {plan.active ? "Confirm pause" : "Confirm resume"}
+        </Button>
+      </form>
+    </FormPopup>
   );
 }
 function TaskCard({
@@ -934,6 +969,8 @@ function TaskCard({
   open,
   toggle,
   disabled,
+  saving,
+  error,
   onSkip,
   onRelease,
 }: {
@@ -945,6 +982,8 @@ function TaskCard({
   open: boolean;
   toggle: () => void;
   disabled: boolean;
+  saving: boolean;
+  error: string;
   onSkip: (reason: string) => Promise<void>;
   onRelease: (id: string) => Promise<void>;
 }) {
@@ -992,9 +1031,18 @@ function TaskCard({
         o.status !== "SKIPPED" && (
           <>
             <Button variant="outline" disabled={disabled} onClick={toggle}>
-              {open ? "Cancel task action" : "Manage scheduled task"}
+              Manage scheduled task
             </Button>
-            {open && (
+            <FormPopup
+              open={open}
+              onOpenChange={(value) => {
+                if (!value && open) toggle();
+              }}
+              title="Manage scheduled task"
+              description={`${o.title} · Due ${time(o.dueAt)}`}
+              busy={saving}
+              error={error}
+            >
               <form
                 className="work-form calendar-inline-form"
                 aria-label="Scheduled task action"
@@ -1074,7 +1122,7 @@ function TaskCard({
                   {action === "release" ? "Create work order" : "Confirm skip"}
                 </Button>
               </form>
-            )}
+            </FormPopup>
           </>
         )
       )}

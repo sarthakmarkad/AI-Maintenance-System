@@ -48,6 +48,7 @@ export const actionName = z.enum([
   "approve",
   "return",
   "close",
+  "cancel",
 ]);
 export const actionSchemas = {
   assign: z
@@ -73,6 +74,7 @@ export const actionSchemas = {
   approve: z.object({ version, note: text.optional() }).strict(),
   return: z.object({ version, reason: text }).strict(),
   close: z.object({ version, note: text.optional() }).strict(),
+  cancel: z.object({ version, reason: text }).strict(),
 };
 export const listQuery = z
   .object({
@@ -112,10 +114,17 @@ export const investigationFingerprint = (
     .update(`investigation:${reviewId}:${technicianId}`)
     .digest("hex");
 export function allowedActions(
-  order: Pick<Issue, "status" | "technicianId">,
+  order: Pick<Issue, "status" | "technicianId" | "kind">,
   user: Principal,
 ): Action[] {
   const result: Action[] = [];
+  if (
+    user.role === Role.MAINTENANCE_HEAD &&
+    ["REPORTED", "ASSIGNED", "IN_PROGRESS", "AWAITING_REVIEW"].includes(
+      order.status,
+    )
+  )
+    result.push("cancel");
   if (
     user.role === Role.MAINTENANCE_HEAD &&
     ["REPORTED", "ASSIGNED", "IN_PROGRESS"].includes(order.status)
@@ -164,28 +173,29 @@ export class WorkOrdersService {
       membershipId: member.id,
       displayName: member.user.displayName,
     };
-    const machine =
-      code === "WH-C"
-        ? await tx.machine.findFirst({
-            where: {
-              orgId: live.orgId,
-              code,
-              ...([Role.OPERATOR, Role.TECHNICIAN].includes(
-                live.role as "OPERATOR" | "TECHNICIAN",
-              )
-                ? {
-                    access: {
-                      some: {
-                        orgId: live.orgId,
-                        membershipId: live.membershipId,
-                      },
-                    },
-                  }
-                : {}),
-            },
-            select: { id: true },
-          })
-        : null;
+    if (code === "WH-B")
+      throw new NotFoundException(
+        "WH-B is reference-only and has no operational maintenance workspace.",
+      );
+    const machine = await tx.machine.findFirst({
+      where: {
+        orgId: live.orgId,
+        code,
+        ...([Role.OPERATOR, Role.TECHNICIAN].includes(
+          live.role as "OPERATOR" | "TECHNICIAN",
+        )
+          ? {
+              access: {
+                some: {
+                  orgId: live.orgId,
+                  membershipId: live.membershipId,
+                },
+              },
+            }
+          : {}),
+      },
+      select: { id: true, archivedAt: true },
+    });
     if (!machine)
       throw new NotFoundException(
         "Machine not found or unavailable to your account.",
@@ -818,7 +828,7 @@ export class WorkOrdersService {
                           restoredAt: next.restoredAt,
                         }),
                   }
-                : action === "return"
+                : action === "return" || action === "cancel"
                   ? { reason: String(input.reason) }
                   : action === "approve" || action === "close"
                     ? {

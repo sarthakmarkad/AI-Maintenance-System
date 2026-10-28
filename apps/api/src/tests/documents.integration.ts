@@ -152,7 +152,9 @@ before(async () => {
   app = module.createNestApplication();
   app.useLogger(false);
   configure(app, config);
-  await app.init();
+  // Keep one listener across the high-volume revision checks; avoid per-request
+  // Supertest listener close/keep-alive races.
+  await app.listen(0, "127.0.0.1");
 });
 after(async () => {
   if (app) await app.close();

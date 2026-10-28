@@ -37,3 +37,20 @@ test("configuration fails closed and never includes secrets in validation messag
     /not a secret/,
   );
 });
+
+test("CommandCode accepts reviewed chatbot models and rejects unknown model IDs", () => {
+  for (const model of ["deepseek/deepseek-v4.1-flash", "z-ai/glm-5.3-flash"])
+    assert.equal(
+      parseConfig({ COMMANDCODE_MODEL: model }).COMMANDCODE_MODEL,
+      model,
+    );
+  for (const model of [
+    "deepseek/deepseek-v4.1-flash-fast",
+    "deepseek-4.1",
+    "unknown/model",
+  ])
+    assert.throws(
+      () => parseConfig({ COMMANDCODE_MODEL: model }),
+      /COMMANDCODE_MODEL/,
+    );
+});

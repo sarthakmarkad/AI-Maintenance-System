@@ -588,6 +588,61 @@ const transcript = (id: string, who: Who = "head") =>
   request(app.getHttpServer())
     .get(chatBase + "/chats/" + id)
     .set("Authorization", `Bearer ${ids[who]}`);
+test("own chat removal is private, audited and cannot be revived by a saved retry", async () => {
+  const key = randomUUID();
+  const saved = (await message("hello", "head", undefined, key).expect(200))
+    .body;
+  const remove = (who: Who = "head") =>
+    request(app.getHttpServer())
+      .post(chatBase + `/chats/${saved.chatId}/archive`)
+      .set("Authorization", `Bearer ${ids[who]}`)
+      .send({});
+  await remove("admin").expect(404);
+  await remove().expect(200);
+  await remove().expect(200);
+  await transcript(saved.chatId).expect(404);
+  await message("hello", "head", undefined, key).expect(404);
+  await message("hello", "head", saved.chatId).expect(404);
+  const list = (
+    await request(app.getHttpServer())
+      .get(chatBase + "/chats")
+      .set("Authorization", `Bearer ${ids.head}`)
+      .expect(200)
+  ).body;
+  assert.ok(!list.items.some((c: any) => c.id === saved.chatId));
+  assert.equal(
+    await db.documentChatTurn.count({ where: { chatId: saved.chatId } }),
+    1,
+  );
+  assert.equal(
+    await db.auditEvent.count({
+      where: { entityId: saved.chatId, action: "DOCUMENT_CHAT_ARCHIVE" },
+    }),
+    1,
+  );
+  await assert.rejects(
+    db.documentChatArchive.delete({ where: { chatId: saved.chatId } }),
+  );
+});
+test("removing a conversation during generation prevents a new saved or delivered reply", async () => {
+  const saved = (await message("hello", "head").expect(200)).body;
+  conversationHook = async () => {
+    await request(app.getHttpServer())
+      .post(chatBase + `/chats/${saved.chatId}/archive`)
+      .set("Authorization", `Bearer ${ids.head}`)
+      .send({})
+      .expect(200);
+  };
+  try {
+    await message("hello", "head", saved.chatId).expect(409);
+  } finally {
+    conversationHook = null;
+  }
+  assert.equal(
+    await db.documentChatTurn.count({ where: { chatId: saved.chatId } }),
+    1,
+  );
+});
 test("general chat replies are private, persisted and duplicate-safe; browser-authored history is rejected", async () => {
   const key = randomUUID(),
     a = (await message("hello", "head", undefined, key).expect(200)).body;

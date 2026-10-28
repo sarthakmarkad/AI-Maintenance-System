@@ -10,6 +10,7 @@ import {
   type WorkOrderAttachment,
 } from "@/lib/api";
 import { Button } from "./ui/button";
+import { FormPopup } from "./ui/form-popup";
 import { AttachmentPhotoViewer } from "./attachment-photo-viewer";
 const time = (value: string) =>
   new Intl.DateTimeFormat("en-IN", {
@@ -39,6 +40,7 @@ export function WorkOrderAttachments({
   onUploaded: () => void;
   onFailure: (error: unknown) => Promise<void>;
 }) {
+  const [formOpen, setFormOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null),
     [description, setDescription] = useState(""),
     [uploading, setUploading] = useState(false),
@@ -107,6 +109,7 @@ export function WorkOrderAttachments({
       setDescription("");
       requestId.current = "";
       if (input.current) input.current.value = "";
+      setFormOpen(false);
       onUploaded();
     } catch (e) {
       await failure(e);
@@ -214,56 +217,79 @@ export function WorkOrderAttachments({
           Saved attachments stay in the maintenance history. Files cannot be
           replaced or deleted.
         </p>
-        {error && (
+        {error && !formOpen && (
           <p className="inline-error" role="alert">
             {error}
           </p>
         )}
         {order.canUploadAttachment ? (
-          <form className="attachment-form" onSubmit={(e) => void upload(e)}>
-            <h3>Add supporting evidence</h3>
-            <p>
-              JPEG, PNG or PDF, up to 5 MB each. Upload files before submitting
-              work for review.
-            </p>
-            <label htmlFor="work-attachment-file">
-              Choose a photo or document
-              <input
-                ref={input}
-                id="work-attachment-file"
-                type="file"
-                accept="image/jpeg,image/png,application/pdf,.jpg,.jpeg,.png,.pdf"
-                required
-                disabled={disabled || uploading}
-                onChange={(e) => {
-                  setFile(e.target.files?.[0] ?? null);
-                  requestId.current = "";
-                  setError("");
-                }}
-              />
-            </label>
-            <label htmlFor="work-attachment-description">
-              What does this attachment show?
-              <textarea
-                id="work-attachment-description"
-                required
-                minLength={3}
-                maxLength={1000}
-                rows={2}
-                value={description}
-                disabled={disabled || uploading}
-                onChange={(e) => {
-                  setDescription(e.target.value);
-                  requestId.current = "";
-                }}
-                placeholder="For example: inspection photo showing the observed condition"
-              />
-            </label>
-            <Button type="submit" disabled={disabled || uploading || !file}>
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setFormOpen(true)}
+              disabled={disabled || uploading}
+              aria-haspopup="dialog"
+            >
               <Upload size={16} />
-              {uploading ? "Saving attachment…" : "Save attachment"}
+              Add supporting evidence
             </Button>
-          </form>
+            <FormPopup
+              open={formOpen}
+              onOpenChange={setFormOpen}
+              title="Add supporting evidence"
+              description="Upload a photo or document to this work order."
+              busy={uploading}
+              error={error}
+            >
+              <form
+                className="attachment-form"
+                onSubmit={(e) => void upload(e)}
+              >
+                <p>
+                  JPEG, PNG or PDF, up to 5 MB each. Upload files before
+                  submitting work for review.
+                </p>
+                <label htmlFor="work-attachment-file">
+                  Choose a photo or document
+                  <input
+                    ref={input}
+                    id="work-attachment-file"
+                    type="file"
+                    accept="image/jpeg,image/png,application/pdf,.jpg,.jpeg,.png,.pdf"
+                    required
+                    disabled={disabled || uploading}
+                    onChange={(e) => {
+                      setFile(e.target.files?.[0] ?? null);
+                      requestId.current = "";
+                      setError("");
+                    }}
+                  />
+                </label>
+                <label htmlFor="work-attachment-description">
+                  What does this attachment show?
+                  <textarea
+                    id="work-attachment-description"
+                    required
+                    minLength={3}
+                    maxLength={1000}
+                    rows={2}
+                    value={description}
+                    disabled={disabled || uploading}
+                    onChange={(e) => {
+                      setDescription(e.target.value);
+                      requestId.current = "";
+                    }}
+                    placeholder="For example: inspection photo showing the observed condition"
+                  />
+                </label>
+                <Button type="submit" disabled={disabled || uploading || !file}>
+                  <Upload size={16} />
+                  {uploading ? "Saving attachment…" : "Save attachment"}
+                </Button>
+              </form>
+            </FormPopup>
+          </>
         ) : (
           <p className="attachment-guidance">
             {attachments.length >= limit

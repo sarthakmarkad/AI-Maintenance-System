@@ -1,3 +1,5 @@
+import type { Response } from "express";
+import { XLSX_TYPE } from "../imports/templates";
 import {
   Body,
   Controller,
@@ -6,6 +8,7 @@ import {
   Param,
   Post,
   Query,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -19,6 +22,7 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiParam,
+  ApiProduces,
   ApiQuery,
   ApiResponse,
   ApiTags,
@@ -54,6 +58,21 @@ export class ReadingsController {
   constructor(
     @Inject(ReadingsService) private readonly service: ReadingsService,
   ) {}
+  @Get("template")
+  @ApiProduces(XLSX_TYPE)
+  @Roles(...importers)
+  @ApiOkResponse({ schema: { type: "string", format: "binary" } })
+  async template(
+    @CurrentUser() user: Principal,
+    @Param("code") code: string,
+    @Res() response: Response,
+  ) {
+    const bytes = await this.service.template(user, code);
+    response
+      .type(XLSX_TYPE)
+      .attachment(`${code}-synthetic-process-template.xlsx`)
+      .send(bytes);
+  }
   @Post("previews")
   @Roles(...importers)
   @UseInterceptors(

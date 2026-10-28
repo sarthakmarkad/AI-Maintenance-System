@@ -95,7 +95,7 @@ export class PerformanceService {
           );
         const openWhere = {
           ...filter,
-          status: { not: "CLOSED" as const },
+          status: { notIn: ["CLOSED" as const, "CANCELLED" as const] },
           reportedAt: { lte: now },
         };
         const grouped = await tx.workOrder.groupBy({
@@ -176,7 +176,10 @@ export class PerformanceService {
         const onTime = completed.filter(
           (o) => o.workOrder!.closedAt! <= o.dueAt,
         ).length;
-        const eligible = occurrences.length - skipped;
+        const eligible =
+          occurrences.length -
+          skipped -
+          occurrences.filter((o) => o.workOrder?.status === "CANCELLED").length;
         return {
           policyVersion: PERFORMANCE_POLICY,
           timezone: "Asia/Kolkata",
@@ -191,7 +194,7 @@ export class PerformanceService {
             overduePlanned,
             total: grouped.reduce((s, g) => s + g._count._all, 0),
             statuses: Object.values(WorkOrderStatus)
-              .filter((s) => s !== "CLOSED")
+              .filter((s) => s !== "CLOSED" && s !== "CANCELLED")
               .map((status) => ({
                 key: status,
                 count:
@@ -217,6 +220,9 @@ export class PerformanceService {
           planned: {
             applicable: plannedApplicable,
             due: occurrences.length,
+            cancelled: occurrences.filter(
+              (o) => o.workOrder?.status === "CANCELLED",
+            ).length,
             skipped,
             eligible,
             completed: completed.length,

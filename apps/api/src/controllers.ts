@@ -31,6 +31,8 @@ const listSchema = z
   .object({
     limit: z.coerce.number().int().min(1).max(100).default(25),
     after: codeSchema.optional(),
+    q: z.string().trim().max(100).optional(),
+    archived: z.enum(["true", "false"]).optional(),
   })
   .strict();
 @ApiTags("Health")
@@ -108,6 +110,18 @@ export class MachinesController {
     type: String,
     description: "Last machine code returned; scoped keyset pagination.",
   })
+  @ApiQuery({
+    name: "q",
+    required: false,
+    type: String,
+    description: "Search machine code or name within current access.",
+  })
+  @ApiQuery({
+    name: "archived",
+    required: false,
+    enum: ["true", "false"],
+    description: "Select active (default) or archived machines.",
+  })
   async list(@CurrentUser() user: Principal, @Query() query: unknown) {
     const parsed = listSchema.safeParse(query);
     if (!parsed.success)
@@ -116,8 +130,14 @@ export class MachinesController {
           .map((i) => `${i.path.join(".")}: ${i.message}`)
           .join("; "),
       );
-    const { limit, after } = parsed.data;
-    const rows = await this.repo.machines(user, limit + 1, after);
+    const { limit, after, q, archived } = parsed.data;
+    const rows = await this.repo.machines(
+      user,
+      limit + 1,
+      after,
+      q,
+      archived === "true",
+    );
     const items = rows.slice(0, limit);
     return {
       items,

@@ -3,6 +3,20 @@ import { createHash } from "node:crypto";
 import path from "node:path";
 import { readingWorkbook, type Cell } from "./xlsx";
 import { strictDate } from "../production/parser";
+export const READING_HEADERS = [
+  "reading_id",
+  "machine_id",
+  "measured_at_ist",
+  "demo_shift",
+  "hot_temp_c",
+  "cold_temp_c",
+  "pressure_bar",
+  "data_source",
+  "hot_review",
+  "cold_review",
+  "pressure_review",
+] as const;
+
 export const READING_PARSER = "whc-synthetic-readings-v1";
 export const REVIEW_POLICY = "demo-hourly-bands-v1";
 export const PARAMETERS = [
@@ -88,6 +102,7 @@ function number(cell: Cell | undefined): number | null {
 export async function parseReadings(
   buffer: Buffer,
   filename: string,
+  machineCode = "WH-C",
 ): Promise<ReadingStage> {
   filename = path.win32.basename(path.basename(filename));
   if (!/\.xlsx$/i.test(filename) || filename.length > 180 || buffer.length < 4)
@@ -98,7 +113,7 @@ export async function parseReadings(
   const guide = (address: string) =>
     workbook.guide.get(+address.slice(1))?.[address]?.value;
   if (
-    guide("B5") !== "WH-C" ||
+    guide("B5") !== machineCode ||
     guide("B10") !== "SYNTHETIC" ||
     guide("B12") !== "Asia/Kolkata (UTC+05:30)" ||
     ["C16", "D16", "C17", "D17", "C18", "D18"].some(
@@ -106,23 +121,10 @@ export async function parseReadings(
     )
   )
     throw new BadRequestException(
-      "Guide must identify WH-C, SYNTHETIC, Asia/Kolkata and the supplied demonstration bands. Engineering limits are not imported.",
+      `Guide must identify ${machineCode}, SYNTHETIC, Asia/Kolkata and the supplied demonstration bands. Engineering limits are not imported.`,
     );
-  const headers = [
-    "reading_id",
-    "machine_id",
-    "measured_at_ist",
-    "demo_shift",
-    "hot_temp_c",
-    "cold_temp_c",
-    "pressure_bar",
-    "data_source",
-    "hot_review",
-    "cold_review",
-    "pressure_review",
-  ];
   if (
-    headers.some(
+    READING_HEADERS.some(
       (h, i) =>
         workbook.rows.get(1)?.[String.fromCharCode(65 + i) + "1"]?.value !== h,
     )
@@ -155,9 +157,9 @@ export async function parseReadings(
     };
     if (!/^[A-Za-z0-9_-]{1,64}$/.test(row.sourceId))
       row.problems.push(`A${index}: missing or invalid reading ID.`);
-    if (v("B") !== "WH-C" || v("H") !== "SYNTHETIC")
+    if (v("B") !== machineCode || v("H") !== "SYNTHETIC")
       row.problems.push(
-        `B${index}/H${index}: only WH-C synthetic observations are accepted.`,
+        `B${index}/H${index}: only ${machineCode} synthetic observations are accepted.`,
       );
     if (!local)
       row.problems.push(
@@ -206,7 +208,8 @@ export async function parseReadings(
       "Choose a workbook spanning at most 31 days.",
     );
   return {
-    parserVersion: READING_PARSER,
+    parserVersion:
+      machineCode === "WH-C" ? READING_PARSER : "machine-synthetic-readings-v1",
     policyVersion: REVIEW_POLICY,
     source: "SYNTHETIC",
     sheet: "Hourly_Readings",

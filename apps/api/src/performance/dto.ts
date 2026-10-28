@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { WorkOrderKind, WorkOrderStatus } from "@prisma/client";
 import { ScheduleStatusDto } from "../calendar/dto";
 export class PerformanceCountDto {
@@ -36,6 +36,7 @@ export class PerformanceCurrentDto {
   items!: PerformanceOpenOrderDto[];
 }
 export class PerformancePlannedDto {
+  @ApiPropertyOptional() cancelled?: number;
   @ApiProperty() applicable!: boolean;
   @ApiProperty() due!: number;
   @ApiProperty() skipped!: number;

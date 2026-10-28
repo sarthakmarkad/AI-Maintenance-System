@@ -1,4 +1,26 @@
+import {
+  TeamController,
+  TeamOnboardingController,
+  TeamPublicLimit,
+} from "./team/controller";
+import { TeamService } from "./team/service";
+import { MachineRegistrationController } from "./machines/controller";
+import { MachinesService } from "./machines/service";
 import { DocumentChatService } from "./rag/chat";
+import { RcaController } from "./rca/controller";
+import { RcaService } from "./rca/service";
+import { RCA_AI, RcaAiProvider } from "./rca/provider";
+import { ExternalNotificationsController } from "./external-notifications/controller";
+import { ExternalNotificationsService } from "./external-notifications/service";
+import { ExternalNotificationsWorker } from "./external-notifications/worker";
+import {
+  NOTIFICATION_CONTACT,
+  SupabaseNotificationContactResolver,
+} from "./external-notifications/contact";
+import {
+  NOTIFICATION_EMAIL,
+  ResendNotificationEmailProvider,
+} from "./external-notifications/provider";
 import { DocumentAiController } from "./rag/controller";
 import { DocumentAiService } from "./rag/service";
 import { DocumentIndexer } from "./rag/indexer";
@@ -49,9 +71,12 @@ import { correlation, Errors } from "./http";
 export function appModule(config: Config) {
   @Module({
     controllers: [
+      TeamController,
+      TeamOnboardingController,
       HealthController,
       MeController,
       MachinesController,
+      MachineRegistrationController,
       ProductionController,
       ReadingsController,
       WorkOrdersController,
@@ -63,10 +88,15 @@ export function appModule(config: Config) {
       NotificationsController,
       DocumentsController,
       DocumentAiController,
+      RcaController,
+      ExternalNotificationsController,
     ],
     providers: [
       { provide: CONFIG, useValue: config },
       Database,
+      TeamService,
+      TeamPublicLimit,
+      MachinesService,
       { provide: REPOSITORY, useClass: PrismaRepository },
       { provide: VERIFIER, useClass: SupabaseVerifier },
       AuthGuard,
@@ -88,6 +118,18 @@ export function appModule(config: Config) {
       DocumentChatService,
       DocumentIndexer,
       DocumentAiWorker,
+      RcaService,
+      { provide: RCA_AI, useClass: RcaAiProvider },
+      ExternalNotificationsService,
+      ExternalNotificationsWorker,
+      {
+        provide: NOTIFICATION_CONTACT,
+        useClass: SupabaseNotificationContactResolver,
+      },
+      {
+        provide: NOTIFICATION_EMAIL,
+        useClass: ResendNotificationEmailProvider,
+      },
       { provide: RAG_AI, useClass: DocumentAiProvider },
       { provide: PDF_EXTRACTOR, useClass: PopplerExtractor },
       ReportExportLimit,
@@ -107,7 +149,7 @@ export function configure(
   app.useGlobalFilters(new Errors());
   app.enableCors({
     origin: config.WEB_ORIGIN,
-    methods: ["GET", "POST", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "OPTIONS"],
     allowedHeaders: [
       "Authorization",
       "Content-Type",
@@ -122,9 +164,9 @@ export function configure(
     new DocumentBuilder()
       .setTitle("Supreme Maintenance API")
       .setDescription(
-        "Milestones 1–12. Scoped registry, imports/trends, maintenance work orders and notifications, planned maintenance, reviewed statistical patterns, maintenance performance, private attachments/reports and approved machine references with cited document assistance.",
+        "Milestones 1–14. Scoped registry, imports/trends, maintenance work orders and notifications, planned maintenance, reviewed statistical patterns, private evidence/reports, approved references and document chat, opt-in external email handoffs and human-reviewed AI RCA drafting.",
       )
-      .setVersion("0.12.0")
+      .setVersion("0.14.0")
       .addBearerAuth()
       .build(),
   );

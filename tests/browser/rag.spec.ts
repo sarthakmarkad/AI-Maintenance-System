@@ -176,6 +176,12 @@ async function fixture(
       });
       return;
     }
+    if (path.endsWith("/archive")) {
+      const chatId = path.split("/").at(-2);
+      const position = threads.findIndex((c) => c.id === chatId);
+      if (position >= 0) threads.splice(position, 1);
+      return route.fulfill({ json: { removed: true } });
+    }
     if (path.endsWith("/chats")) {
       await route.fulfill({
         json: {
@@ -238,6 +244,63 @@ async function send(page: Page, text = question) {
   ).toBeVisible();
   await expect(page).toHaveURL(/\?chat=/);
 }
+test("a user removes a saved conversation through a confirmation popup", async ({
+  page,
+}) => {
+  const f = await fixture(page);
+  await send(page, "hiii");
+  if (test.info().project.name === "mobile")
+    await page
+      .getByRole("button", { name: "Show conversation history", exact: true })
+      .click();
+  await page
+    .getByRole("button", { name: "Remove conversation: hiii", exact: true })
+    .click();
+  await page.screenshot({
+    path: `.local/removal-chat-${test.info().project.name}.png`,
+    fullPage: true,
+  });
+  await page
+    .getByRole("dialog", { name: "Remove conversation" })
+    .getByRole("button", { name: "Confirm removal" })
+    .click();
+  await expect(page).toHaveURL(/\/assistant$/);
+  await expect.poll(() => f.threads.length).toBe(0);
+  await expect(
+    page.getByRole("article", { name: /Assistant reply/ }),
+  ).toHaveCount(0);
+});
+test("successful removal stays removed when the conversation-list refresh fails", async ({
+  page,
+}) => {
+  await fixture(page);
+  await send(page, "hiii");
+  await page.route("**/assistant/chats", (route) =>
+    route.fulfill({ status: 503, json: { message: "TEST list unavailable" } }),
+  );
+  if (test.info().project.name === "mobile")
+    await page
+      .getByRole("button", { name: "Show conversation history", exact: true })
+      .click();
+  await page
+    .getByRole("button", { name: "Remove conversation: hiii", exact: true })
+    .click();
+  await page
+    .getByRole("dialog", { name: "Remove conversation" })
+    .getByRole("button", { name: "Confirm removal" })
+    .click();
+  await expect(
+    page.getByRole("button", {
+      name: "Remove conversation: hiii",
+      exact: true,
+    }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByText(
+      "Conversation removed. The list could not refresh; reopen this page to reload it.",
+    ),
+  ).toBeVisible();
+});
 for (const role of [
   "OPERATOR",
   "TECHNICIAN",

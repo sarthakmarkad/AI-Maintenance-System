@@ -8,7 +8,7 @@ Work in this repository root. Read README.md and docs/DECISIONS.md before change
 - Preserve Next.js / React / TypeScript + NestJS REST + Prisma/PostgreSQL + Supabase Auth.
 - Never add a development identity bypass to the application. Test doubles belong in tests only.
 - Roles and organization scope come from trusted application records. Administrator is not an engineering approver.
-- WH-C is the only pilot. Model unknown. WH-B is reference-only.
+- WH-C is the original workbook/process-data pilot; its model is unknown. Registered organization machines may use generic maintenance workflows. Preserve the original WH-C layout and the tested standard machine-specific templates. Require explicit reviewed mappings for other layouts/units/parameters. WH-B is reference-only.
 - SRS v1.0 is baseline; its full text was not supplied. Do not invent authoritative requirements.
 - Synthetic process data cannot establish causes of authentic production losses.
 - No deployment/publication without an explicit user request.

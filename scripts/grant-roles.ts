@@ -1,5 +1,6 @@
 import "dotenv/config";
-import { PrismaClient, Role } from "@prisma/client";
+import { Role } from "@prisma/client";
+import { postgresClient } from "../apps/api/src/postgres";
 import { z } from "zod";
 const [userId, ...roles] = process.argv.slice(2);
 const parsed = z
@@ -13,9 +14,7 @@ if (!parsed.success || !process.env.DIRECT_URL)
     "Usage: npm run db:grant-roles -- <verified-existing-Auth-UUID> <ROLE...>. Requires trusted owner access.",
   );
 const input = parsed.data;
-const db = new PrismaClient({
-  datasources: { db: { url: process.env.DIRECT_URL } },
-});
+const db = postgresClient(process.env.DIRECT_URL);
 async function main() {
   const result = await db.$transaction(async (tx) => {
     const member = await tx.membership.findUnique({

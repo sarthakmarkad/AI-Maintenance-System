@@ -1,5 +1,6 @@
 import {
   CanActivate,
+  ConflictException,
   ExecutionContext,
   ForbiddenException,
   Inject,
@@ -40,7 +41,7 @@ export class SupabaseVerifier implements IdentityVerifier {
           },
           global: {
             fetch: (input, init) =>
-              fetch(input, { ...init, signal: AbortSignal.timeout(8000) }),
+              fetch(input, { ...init, signal: AbortSignal.timeout(4000) }),
           },
         },
       );
@@ -52,19 +53,28 @@ export class SupabaseVerifier implements IdentityVerifier {
       );
     try {
       // getUser contacts the configured Auth server. Never decode-and-trust browser claims.
-      const { data, error } = await this.client.auth.getUser(token);
-      if (error) {
-        if (!error.status || error.status >= 500)
-          throw new ServiceUnavailableException(
-            "Authentication service is unavailable. Try again.",
+      // Retry only the read-only identity check, never the protected operation.
+      // Two four-second attempts preserve the previous eight-second bound.
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const { data, error } = await this.client.auth.getUser(token);
+        if (error) {
+          const transient = !error.status || error.status >= 500;
+          if (transient && attempt === 0) continue;
+          if (transient || error.status === 429)
+            throw new ServiceUnavailableException(
+              "Authentication service is temporarily unavailable. Your changes have not been submitted. Try again.",
+            );
+          throw new UnauthorizedException(
+            "Your session is invalid or expired. Sign in again.",
           );
-        throw new UnauthorizedException(
-          "Your session is invalid or expired. Sign in again.",
-        );
+        }
+        if (!data.user || !z.string().uuid().safeParse(data.user.id).success)
+          throw new UnauthorizedException("Invalid authenticated identity.");
+        return data.user.id;
       }
-      if (!data.user || !z.string().uuid().safeParse(data.user.id).success)
-        throw new UnauthorizedException("Invalid authenticated identity.");
-      return data.user.id;
+      throw new ServiceUnavailableException(
+        "Authentication service is unavailable. Try again.",
+      );
     } catch (error) {
       if (
         error instanceof UnauthorizedException ||
@@ -106,6 +116,23 @@ export class AuthGuard implements CanActivate {
     if (requestedRole && principal.role !== requestedRole)
       throw new ForbiddenException("This role is not granted to your account.");
     req.principal = principal;
+    if (
+      typeof req.params.code === "string" &&
+      !["GET", "HEAD", "OPTIONS"].includes(req.method) &&
+      !req.path.endsWith("/lifecycle") &&
+      !(
+        req.method === "PUT" &&
+        req.path.endsWith("/external-notifications/preference") &&
+        req.body?.enabled === false
+      ) &&
+      !/\/assistant\/chats\/[^/]+\/archive$/.test(req.path)
+    ) {
+      const machine = await this.repo.machine(principal, req.params.code);
+      if (machine?.archivedAt)
+        throw new ConflictException(
+          "This machine is archived and read only. Ask an Administrator to restore it.",
+        );
+    }
     return true;
   }
 }

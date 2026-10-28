@@ -25,9 +25,9 @@ The assigned technician starts the planned work and submits inspection findings,
 
 ## Pause, skip and changes
 
-Pausing stops creation of additional occurrences. Already generated tasks remain obligations, stay visible and continue to remind their owners. Resuming catches up missed fixed dates. A head can skip an unreleased occurrence with a reason without changing the next due date; released work must follow its work-order review/closure flow. Skip and release lock the same occurrence, so simultaneous requests cannot produce both outcomes.
+Pausing stops creation of additional occurrences. Already generated tasks remain obligations, stay visible and continue to remind their owners. Resuming catches up missed fixed dates. A head can skip an unreleased occurrence with a reason without changing the next due date; released work follows its review/closure flow or is explicitly cancelled by the head with a reason. Skip and release lock the same occurrence, so simultaneous requests cannot produce both outcomes.
 
-Plan cadence, first date, title, instructions, priority and default assignment are immutable in this milestone. Create a replacement plan and explicitly handle outstanding occurrences if those need to change. There is no silent rescheduling, bulk deletion, cancellation of released work, reopening or generic edit API. Plan state changes and skips are versioned and audited.
+Plan cadence, first date, title, instructions, priority and default assignment are immutable in this milestone. Create a replacement plan and explicitly handle outstanding occurrences if those need to change. There is no silent rescheduling, bulk deletion, permanent deletion of released work, reopening or generic edit API. Plan state changes and skips are versioned and audited.
 
 ## Durable scheduling and reminders
 
@@ -35,7 +35,7 @@ The NestJS background worker runs at startup and every 30 seconds while the API 
 
 Each run handles up to 100 active plans and 250 newly eligible reminders. A process cursor rotates through larger plan sets; durable plan cursors survive restarts. Large missed backlogs may require several runs. A catching-up or failed-refresh notice distinguishes incomplete generation from a fully current schedule. This is a local bounded scheduler, not a deployed Redis/BullMQ queue or an availability guarantee.
 
-Reminder stages are Upcoming (within the configured 1–14 day lead), Due today and Overdue. Each occurrence/stage has one immutable reminder record. Readers only see the current stage, so old upcoming reminders do not stack beside overdue reminders. Closed/skipped tasks disappear from the actionable inbox without deleting their reminder history.
+Reminder stages are Upcoming (within the configured 1–14 day lead), Due today and Overdue. Each occurrence/stage has one immutable reminder record. Readers only see the current stage, so old upcoming reminders do not stack beside overdue reminders. Closed/skipped/cancelled tasks disappear from the actionable inbox without deleting their reminder history.
 
 Heads and supervisors see scoped outstanding reminders. Technicians see their own assigned work, following reassignment. Other roles have no personal reminder inbox items. Mark-read receipts are append-only and unique per reminder, identity and active role; reading in one pilot role does not mark another role's view read. Revoked grants and assignment changes apply on subsequent reads. The calendar polls every 30 seconds while idle, preserves open form drafts and suspends automatic refresh during a conflict or action edit.
 
@@ -65,3 +65,8 @@ Strict schemas reject unknown fields, invalid calendar dates, client-supplied or
 Migrations and restricted grants are applied to local operational and isolated test databases. Real PostgreSQL HTTP tests cover scope/roles, recurrence retries, pause/catch-up, reminder deduplication/ownership/role-specific reads, release/skip races, full planned completion/review/closure, audit rollback, paging and SQL protections. Desktop/mobile browser fixtures exercise create/retry, date/status selection, pause/resume/skip, release, planned submission, reminders, conflicts and expiry. They are not hosted browser authentication claims.
 
 Actual stored-role service reads and an empty scheduler run used the restricted operational connection through trusted local administration. No fake plans or incidents were inserted. The built-in browser redirected to login; no new credential entry or authenticated live calendar acceptance is claimed. The user can open the calendar in their signed-in browser and select Maintenance head to create the first real plan. Existing company production/readings, the user's work-order/history and role records were compared against the pre-change snapshot; original workbook hashes remain unchanged.
+
+
+## Cancelled occurrences
+
+A cancelled PLANNED order remains linked to its original occurrence, appears under the CANCELLED filter and stops actionable reminders. It does not count as completed maintenance and cannot be released a second time. Only that occurrence is cancelled; pause the plan to stop future generation. Machine archival requires paused plans and resolved or explicitly skipped obligations. See RECORD-REMOVAL.md.

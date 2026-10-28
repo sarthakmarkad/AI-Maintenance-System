@@ -1,13 +1,13 @@
 @import "tailwindcss";
 :root {
-  --ink: #142a2c;
-  --muted: #657472;
-  --green: #176b52;
-  --paper: #f5f7f4;
-  --border: #e1e7e0;
-  --navy: #102a2b;
+  --ink: #171715;
+  --muted: #52524c;
+  --green: #343430;
+  --paper: #fafaf7;
+  --border: #deddd5;
+  --navy: #171715;
   --radius: 0.75rem;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist), Arial, Helvetica, sans-serif;
   color: var(--ink);
   background: var(--paper);
 }
@@ -33,7 +33,7 @@ input {
 button:focus-visible,
 a:focus-visible,
 input:focus-visible {
-  outline: 2px solid #269671;
+  outline: 2px solid #52524c;
 }
 button:disabled,
 input:disabled {
@@ -66,7 +66,7 @@ button {
   color: white;
 }
 .button-primary:hover {
-  background: #10543f;
+  background: #171715;
 }
 .button-outline {
   background: white;
@@ -78,7 +78,7 @@ button {
   color: var(--muted);
 }
 .button-ghost:hover {
-  background: #edf1ed;
+  background: #f0efe9;
 }
 .app-shell {
   display: flex;
@@ -88,7 +88,7 @@ button {
   width: 244px;
   flex-shrink: 0;
   background: var(--navy);
-  color: #d4e4dd;
+  color: #deddd5;
   position: fixed;
   inset: 0 auto 0 0;
   padding: 32px 22px;
@@ -99,7 +99,7 @@ button {
   display: flex;
   align-items: center;
   gap: 11px;
-  color: #f0f5f0;
+  color: #f0efe9;
   font-size: 18px;
   font-weight: 800;
   letter-spacing: 2px;
@@ -107,24 +107,24 @@ button {
 .brand-mark {
   width: 38px;
   height: 42px;
-  border: 1px solid #668e7d;
+  border: 1px solid #52524c;
   border-radius: 8px;
   display: grid;
   place-items: center;
-  color: #a4d8ba;
+  color: #b6b6ac;
 }
 .brand small {
   display: block;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 400;
   letter-spacing: 0.2px;
-  color: #a6bfb4;
+  color: #b6b6ac;
   margin-top: 5px;
 }
 .workspace-label {
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 1.8px;
-  color: #809f94;
+  color: #73736c;
   margin: 53px 12px 18px;
 }
 .nav-item {
@@ -136,36 +136,36 @@ button {
   font-size: 13px;
 }
 .nav-item.active {
-  background: #22443f;
-  color: #d4efdf;
+  background: #171715;
+  color: #deddd5;
 }
 .nav-dot {
   width: 5px;
   height: 5px;
-  background: #a6d3ad;
+  background: #b6b6ac;
   border-radius: 50%;
   margin-left: auto;
 }
 .sidebar-note {
   margin-top: auto;
-  border: 1px solid #31504a;
+  border: 1px solid #343430;
   padding: 18px 15px;
   border-radius: 8px;
-  color: #a9cbb9;
+  color: #b6b6ac;
 }
 .sidebar-note strong {
   display: block;
   font-size: 12px;
   margin: 12px 0 9px;
-  color: #d3e5da;
+  color: #deddd5;
 }
 .sidebar-note p {
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.8;
 }
 .sidebar-footer {
-  font-size: 10px;
-  color: #99b6a8;
+  font-size: 12px;
+  color: #73736c;
   margin-top: 25px;
   display: flex;
   align-items: center;
@@ -175,7 +175,7 @@ button {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #99b6a8;
+  background: #73736c;
 }
 .workspace {
   margin-left: 244px;
@@ -211,19 +211,19 @@ button {
 .avatar {
   display: grid;
   place-items: center;
-  background: #e5eee5;
-  color: #345e44;
+  background: #f0efe9;
+  color: #343430;
   width: 33px;
   height: 33px;
   font-size: 12px;
   border-radius: 50%;
 }
 .account strong {
-  font-size: 11px;
+  font-size: 12px;
   display: block;
 }
 .account small {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted);
   display: block;
   margin-top: 3px;
@@ -236,10 +236,10 @@ button {
   flex: 1;
 }
 .eyebrow {
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 1.8px;
   font-weight: 700;
-  color: #687c70;
+  color: #52524c;
   margin-bottom: 13px;
 }
 .page-heading {
@@ -256,7 +256,7 @@ button {
   font-weight: 650;
 }
 .heading-divider {
-  color: #b8c3b9;
+  color: #b6b6ac;
   font-weight: 300;
   padding: 0 14px;
 }
@@ -270,10 +270,10 @@ button {
   margin-top: 9px;
 }
 .pill {
-  font-size: 10px;
+  font-size: 12px;
   padding: 8px 11px;
-  border: 1px solid #d6dfd4;
-  background: #fcfdfb;
+  border: 1px solid #deddd5;
+  background: #fafaf7;
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -283,7 +283,7 @@ button {
 .status-dot {
   width: 6px;
   height: 6px;
-  background: #8b9d91;
+  background: #73736c;
   border-radius: 50%;
   display: inline-block;
 }
@@ -291,13 +291,13 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted);
   margin-bottom: 23px;
 }
 .machine-hero {
-  border: 1px solid #dce6da;
-  background: #ecf2e9;
+  border: 1px solid #deddd5;
+  background: #f0efe9;
   display: flex;
   overflow: hidden;
   border-radius: 11px;
@@ -308,11 +308,11 @@ button {
   flex: 1.1;
 }
 .tag {
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 1.5px;
   display: inline-block;
-  border: 1px solid #bed0b8;
-  color: #476143;
+  border: 1px solid #b6b6ac;
+  color: #343430;
   padding: 6px 8px;
   border-radius: 3px;
   font-weight: 700;
@@ -325,8 +325,8 @@ button {
   margin: 15px 0 12px;
 }
 .hero-copy p {
-  font-size: 11px;
-  color: #596c5d;
+  font-size: 12px;
+  color: #52524c;
   line-height: 1.8;
   max-width: 360px;
 }
@@ -335,8 +335,8 @@ button {
   flex-wrap: wrap;
   gap: 11px 19px;
   margin-top: 22px;
-  font-size: 9px;
-  color: #45614e;
+  font-size: 12px;
+  color: #343430;
 }
 .hero-meta span {
   display: flex;
@@ -347,8 +347,8 @@ button {
   flex: 1;
   display: flex;
   align-items: center;
-  background: #e3ede2;
-  border-left: 1px solid #d9e5d7;
+  background: #f0efe9;
+  border-left: 1px solid #deddd5;
   max-width: 440px;
 }
 .line-illustration {
@@ -372,8 +372,8 @@ button {
   align-items: center;
   justify-content: space-between;
   padding: 20px 23px;
-  border-bottom: 1px solid #edf0eb;
-  color: #7d8c80;
+  border-bottom: 1px solid #f0efe9;
+  color: #52524c;
 }
 .panel-heading h2 {
   font-size: 13px;
@@ -389,14 +389,14 @@ button {
   justify-content: space-between;
   gap: 16px;
   padding: 14px 0;
-  border-bottom: 1px solid #eef1eb;
-  font-size: 10px;
+  border-bottom: 1px solid #f0efe9;
+  font-size: 12px;
 }
 .profile-list div:last-child {
   border: 0;
 }
 .profile-list dt {
-  color: #748071;
+  color: #52524c;
 }
 .profile-list dd {
   margin: 0;
@@ -414,11 +414,11 @@ button {
 .empty-icon {
   height: 52px;
   width: 52px;
-  background: #f0f4ed;
+  background: #f0efe9;
   border-radius: 12px;
   display: grid;
   place-items: center;
-  color: #7c957d;
+  color: #73736c;
   margin-bottom: 18px;
 }
 .empty-records h3 {
@@ -426,21 +426,21 @@ button {
   font-weight: 500;
 }
 .empty-records p {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
   line-height: 1.8;
   max-width: 300px;
   margin: 10px 0 19px;
 }
 .coming-label {
-  font-size: 9px;
+  font-size: 12px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #4b6c4f;
+  color: #52524c;
   padding: 7px 9px;
   border-radius: 4px;
-  background: #eff4ed;
+  background: #f0efe9;
 }
 .workflow-panel {
   background: #fff;
@@ -455,12 +455,12 @@ button {
   font-weight: 500;
 }
 .workflow-panel p {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted);
   margin-top: 8px;
 }
 .workflow-panel .eyebrow {
-  font-size: 8px;
+  font-size: 12px;
   margin-bottom: 9px;
 }
 .workflow-steps {
@@ -470,10 +470,10 @@ button {
   gap: 18px;
   margin-top: 24px;
   padding-top: 21px;
-  border-top: 1px solid #edf0eb;
+  border-top: 1px solid #f0efe9;
 }
 .workflow-steps > svg {
-  color: #b4bfb1;
+  color: #b6b6ac;
 }
 .workflow-steps div {
   display: grid;
@@ -482,21 +482,21 @@ button {
 }
 .workflow-steps div > span {
   grid-row: span 2;
-  font-size: 9px;
-  color: #6e866b;
+  font-size: 12px;
+  color: #52524c;
   padding-top: 3px;
 }
 .workflow-steps strong {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 .workflow-steps small {
-  font-size: 9px;
+  font-size: 12px;
   color: var(--muted);
 }
 .info-strip {
-  font-size: 10px;
-  color: #72806e;
+  font-size: 12px;
+  color: #52524c;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -509,8 +509,8 @@ button {
 .workspace-footer {
   display: flex;
   justify-content: space-between;
-  font-size: 9px;
-  color: #869182;
+  font-size: 12px;
+  color: #73736c;
   border-top: 1px solid var(--border);
   padding: 17px 38px;
   gap: 15px;
@@ -528,13 +528,13 @@ button {
   transition: box-shadow 0.2s;
 }
 .asset-card:hover {
-  box-shadow: 0 4px 20px #1e483014;
+  box-shadow: 0 4px 20px #17171514;
 }
 .asset-card-top {
   display: flex;
   justify-content: space-between;
   margin-bottom: 35px;
-  color: #78917b;
+  color: #52524c;
 }
 .machine-code {
   font-size: 13px;
@@ -543,7 +543,7 @@ button {
   font-weight: 700;
 }
 .asset-card > svg {
-  color: #6a886c;
+  color: #52524c;
 }
 .asset-card h2 {
   font-size: 20px;
@@ -560,8 +560,8 @@ button {
   border-top: 1px solid var(--border);
   padding-top: 18px;
   margin-top: 27px;
-  font-size: 10px;
-  color: #5a775d;
+  font-size: 12px;
+  color: #52524c;
 }
 .asset-card-bottom .status-dot {
   margin-right: 6px;
@@ -592,7 +592,7 @@ button {
 }
 .state-card small,
 .state-card a {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
 }
 .loading-state {
@@ -608,8 +608,8 @@ button {
 .loader {
   width: 27px;
   height: 27px;
-  border: 2px solid #dde8da;
-  border-top-color: #4b7c50;
+  border: 2px solid #deddd5;
+  border-top-color: #52524c;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -625,7 +625,7 @@ button {
 }
 .login-story {
   background: var(--navy);
-  color: #edf6e8;
+  color: #f0efe9;
   padding: 43px 55px;
   display: flex;
   flex-direction: column;
@@ -637,15 +637,15 @@ button {
   position: absolute;
   width: 390px;
   height: 390px;
-  border: 1px solid #355649;
+  border: 1px solid #343430;
   border-radius: 50%;
   right: -270px;
   top: 15%;
   box-shadow:
-    0 0 0 60px #193732,
-    0 0 0 61px #355649,
-    0 0 0 120px #15322e,
-    0 0 0 121px #355649;
+    0 0 0 60px #171715,
+    0 0 0 61px #343430,
+    0 0 0 120px #171715,
+    0 0 0 121px #343430;
   pointer-events: none;
 }
 .login-story .brand {
@@ -658,8 +658,8 @@ button {
   z-index: 1;
 }
 .login-intro .eyebrow {
-  color: #9bb99e;
-  font-size: 10px;
+  color: #73736c;
+  font-size: 12px;
   margin-bottom: 28px;
 }
 .login-intro h1 {
@@ -669,11 +669,11 @@ button {
   letter-spacing: -3px;
 }
 .login-intro em {
-  color: #b7d8a9;
+  color: #b6b6ac;
   font-style: normal;
 }
 .login-intro > p {
-  color: #a9bfb1;
+  color: #b6b6ac;
   line-height: 1.9;
   font-size: 13px;
   max-width: 300px;
@@ -681,18 +681,18 @@ button {
 }
 .login-divider {
   width: 45px;
-  border-top: 1px solid #7b9a7d;
+  border-top: 1px solid #73736c;
   margin: 35px 0 21px;
 }
 .story-footnote {
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.9;
-  color: #9fb8a9;
+  color: #73736c;
 }
 .login-bottom {
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 1.7px;
-  color: #7e9d8d;
+  color: #73736c;
   z-index: 1;
 }
 .login-form-panel {
@@ -700,7 +700,7 @@ button {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  background: #fafbf8;
+  background: #fafaf7;
   padding: 55px 35px;
   position: relative;
 }
@@ -724,13 +724,13 @@ button {
   flex-direction: column;
 }
 .login-form-wrap label {
-  font-size: 11px;
+  font-size: 12px;
   margin-bottom: 9px;
   font-weight: 600;
 }
 .login-form-wrap input {
   padding: 13px 14px;
-  border: 1px solid #d7dfd2;
+  border: 1px solid #deddd5;
   background: white;
   border-radius: 6px;
   margin-bottom: 22px;
@@ -738,7 +738,7 @@ button {
   color: var(--ink);
 }
 .login-form-wrap input::placeholder {
-  color: #9aa598;
+  color: #73736c;
 }
 .login-submit {
   margin-top: 4px;
@@ -751,21 +751,21 @@ button {
   justify-content: center;
   gap: 7px;
   margin-top: 23px;
-  font-size: 10px;
-  color: #788774;
+  font-size: 12px;
+  color: #52524c;
 }
 .login-help {
-  font-size: 11px;
+  font-size: 12px;
   text-align: center;
-  color: #87917e;
+  color: #73736c;
   line-height: 1.8;
   margin-top: 32px;
 }
 .login-version {
   position: absolute;
   bottom: 25px;
-  color: #8a9584;
-  font-size: 9px;
+  color: #73736c;
+  font-size: 12px;
 }
 .config-notice {
   margin-top: 23px;
@@ -773,14 +773,14 @@ button {
   background: #fff8e8;
   border: 1px solid #eee1bc;
   border-radius: 6px;
-  font-size: 11px;
+  font-size: 12px;
   color: #79662f;
 }
 .config-notice strong {
   font-weight: 600;
 }
 .config-notice p {
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.8;
   margin-top: 6px;
 }
@@ -805,7 +805,7 @@ button {
     font-size: 13px;
   }
   .hero-meta {
-    font-size: 11px;
+    font-size: 12px;
   }
   .profile-list div {
     font-size: 12px;
@@ -850,7 +850,7 @@ button {
     font-size: 20px;
   }
   .profile-list div {
-    font-size: 9px;
+    font-size: 12px;
   }
   .detail-grid {
     gap: 16px;
@@ -859,10 +859,10 @@ button {
     gap: 9px;
   }
   .workflow-steps strong {
-    font-size: 10px;
+    font-size: 12px;
   }
   .workflow-steps small {
-    font-size: 8px;
+    font-size: 12px;
   }
   .login-story {
     padding: 35px;
@@ -885,10 +885,10 @@ button {
     display: none;
   }
   .sidebar .brand small {
-    font-size: 9px;
+    font-size: 12px;
   }
   .nav-item {
-    font-size: 10px;
+    font-size: 12px;
     padding: 9px;
   }
   .nav-item svg {
@@ -909,7 +909,7 @@ button {
     gap: 7px;
   }
   .account strong {
-    font-size: 10px;
+    font-size: 12px;
   }
   .main-content {
     padding: 25px 20px 10px;
@@ -936,7 +936,7 @@ button {
     width: 100%;
     max-height: 220px;
     border-left: 0;
-    border-top: 1px solid #d9e5d7;
+    border-top: 1px solid #deddd5;
     justify-content: center;
   }
   .line-illustration {
@@ -950,13 +950,13 @@ button {
     font-size: 12px;
   }
   .hero-meta {
-    font-size: 10px;
+    font-size: 12px;
   }
   .detail-grid {
     grid-template-columns: 1fr;
   }
   .profile-list div {
-    font-size: 11px;
+    font-size: 12px;
   }
   .workflow-panel {
     padding: 22px;
@@ -970,16 +970,16 @@ button {
     display: none;
   }
   .workflow-steps strong {
-    font-size: 11px;
+    font-size: 12px;
   }
   .workflow-steps small {
-    font-size: 9px;
+    font-size: 12px;
   }
   .info-strip {
-    font-size: 10px;
+    font-size: 12px;
   }
   .workspace-footer {
-    font-size: 8px;
+    font-size: 12px;
     padding: 15px 20px;
     flex-direction: column;
     gap: 5px;
@@ -1009,7 +1009,7 @@ button {
   }
   .login-intro .eyebrow {
     margin-bottom: 16px;
-    font-size: 9px;
+    font-size: 12px;
   }
   .login-form-panel {
     padding: 40px 27px 65px;
@@ -1046,10 +1046,10 @@ button {
 .file-field {
   display: flex;
   flex-direction: column;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   gap: 8px;
-  color: #526651;
+  color: #52524c;
 }
 .production-toolbar form {
   display: flex;
@@ -1059,22 +1059,22 @@ button {
 .production-toolbar input,
 .production-toolbar select,
 .sheet-controls select {
-  border: 1px solid #d8e1d3;
+  border: 1px solid #deddd5;
   border-radius: 6px;
   padding: 10px 12px;
-  background: #fcfdfb;
+  background: #fafaf7;
   color: var(--ink);
-  font-size: 11px;
+  font-size: 12px;
   min-height: 37px;
 }
 .production-toolbar select {
   min-width: 230px;
 }
 .dataset-note {
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.7;
   margin: 12px 0 22px;
-  color: #637b62;
+  color: #52524c;
 }
 .synthetic-note {
   background: #fff5dc;
@@ -1097,8 +1097,8 @@ button {
   min-width: 0;
 }
 .metric-card h2 {
-  font-size: 10px;
-  color: #6d7b68;
+  font-size: 12px;
+  color: #52524c;
   font-weight: 500;
 }
 .metric-card p {
@@ -1110,14 +1110,14 @@ button {
   overflow-wrap: anywhere;
 }
 .metric-card p > span {
-  font-size: 11px;
+  font-size: 12px;
   margin-left: 6px;
   letter-spacing: 0;
-  color: #72846d;
+  color: #52524c;
 }
 .metric-card small {
-  font-size: 9px;
-  color: #85907d;
+  font-size: 12px;
+  color: #73736c;
   line-height: 1.7;
   display: block;
 }
@@ -1127,9 +1127,9 @@ button {
   margin-top: 22px;
 }
 .production-chart .panel-heading p {
-  font-size: 10px;
+  font-size: 12px;
   margin-top: 8px;
-  color: #73856e;
+  color: #52524c;
 }
 .chart-frame {
   padding: 20px 8px 0;
@@ -1138,13 +1138,13 @@ button {
   height: 310px;
 }
 .chart-footnote {
-  font-size: 10px;
-  color: #7b8973;
+  font-size: 12px;
+  color: #52524c;
   padding: 4px 24px 20px;
   line-height: 1.7;
 }
 .production-daily .panel-heading > span {
-  font-size: 10px;
+  font-size: 12px;
 }
 .table-scroll {
   overflow-x: auto;
@@ -1153,21 +1153,21 @@ button {
 .table-scroll table {
   border-collapse: collapse;
   width: 100%;
-  font-size: 11px;
+  font-size: 12px;
   text-align: left;
 }
 .table-scroll th {
   font-weight: 500;
-  color: #6b7b63;
-  background: #f8faf6;
-  font-size: 9px;
+  color: #52524c;
+  background: #fafaf7;
+  font-size: 12px;
   letter-spacing: 0.2px;
   white-space: nowrap;
 }
 .table-scroll th,
 .table-scroll td {
   padding: 13px 22px;
-  border-bottom: 1px solid #edf1e8;
+  border-bottom: 1px solid #f0efe9;
   vertical-align: top;
   line-height: 1.6;
 }
@@ -1176,17 +1176,17 @@ button {
 }
 .table-scroll td > small {
   display: block;
-  font-size: 9px;
-  color: #7f8b76;
+  font-size: 12px;
+  color: #52524c;
   margin-top: 4px;
 }
 .table-scroll td > strong {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
 }
 .last-import {
-  font-size: 9px;
-  color: #819074;
+  font-size: 12px;
+  color: #52524c;
   margin-top: 20px;
   line-height: 1.8;
 }
@@ -1197,16 +1197,16 @@ button {
   font-size: 16px;
 }
 .import-panel .eyebrow {
-  font-size: 8px;
+  font-size: 12px;
   margin-bottom: 8px;
 }
 .import-body {
   padding: 23px;
 }
 .import-intro {
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.8;
-  color: #6b7f63;
+  color: #52524c;
   max-width: 800px;
 }
 .upload-controls,
@@ -1224,16 +1224,16 @@ button {
 }
 .file-field input {
   padding: 15px;
-  border: 1px dashed #b4c9a9;
-  background: #f6faf3;
+  border: 1px dashed #b6b6ac;
+  background: #fafaf7;
   border-radius: 6px;
-  font-size: 11px;
-  color: #4f6846;
+  font-size: 12px;
+  color: #343430;
 }
 .file-field input::file-selector-button {
   background: white;
-  border: 1px solid #d3dfcc;
-  color: #3e5c35;
+  border: 1px solid #deddd5;
+  color: #343430;
   border-radius: 4px;
   padding: 7px 10px;
   margin-right: 12px;
@@ -1244,8 +1244,8 @@ button {
 }
 .sheet-notes {
   width: 100%;
-  font-size: 10px;
-  color: #718266;
+  font-size: 12px;
+  color: #52524c;
 }
 .sheet-notes ul {
   padding-left: 17px;
@@ -1258,18 +1258,18 @@ button {
 .source-rows summary,
 .raw-source summary {
   cursor: pointer;
-  color: #4a6a40;
-  font-size: 10px;
+  color: #343430;
+  font-size: 12px;
   line-height: 1.8;
 }
 .operation-status {
-  font-size: 11px;
-  color: #6c8660;
+  font-size: 12px;
+  color: #52524c;
   margin-top: 20px;
 }
 .production-preview {
   margin-top: 25px;
-  border-top: 1px solid #e5ecdf;
+  border-top: 1px solid #deddd5;
   padding-top: 24px;
 }
 .preview-heading {
@@ -1283,23 +1283,23 @@ button {
   font-weight: 500;
 }
 .preview-heading p {
-  font-size: 11px;
-  color: #6b7e61;
+  font-size: 12px;
+  color: #52524c;
   margin-top: 9px;
   overflow-wrap: anywhere;
 }
 .preview-heading small {
-  font-size: 9px;
-  color: #8a987f;
+  font-size: 12px;
+  color: #73736c;
   display: block;
   margin-top: 7px;
 }
 .validation-notes {
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.8;
-  background: #f5f8f1;
+  background: #f0efe9;
   padding: 14px 18px;
-  border: 1px solid #e3ebdc;
+  border: 1px solid #deddd5;
   border-radius: 7px;
   margin-top: 20px;
 }
@@ -1317,7 +1317,7 @@ button {
   margin-top: 20px;
 }
 .day-review {
-  border: 1px solid #dde6d6;
+  border: 1px solid #deddd5;
   border-radius: 7px;
   padding: 17px;
 }
@@ -1339,7 +1339,7 @@ button {
 }
 .day-choice input,
 .acknowledgement input {
-  accent-color: #376d46;
+  accent-color: #343430;
   margin: 2px 0 0;
   min-width: 14px;
   min-height: 14px;
@@ -1349,14 +1349,14 @@ button {
 }
 .day-choice small {
   display: block;
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1.7;
-  color: #7c8a71;
+  color: #52524c;
   margin-top: 5px;
   overflow-wrap: anywhere;
 }
 .review-status {
-  font-size: 8px;
+  font-size: 12px;
   color: #916b46;
   background: #fff1dd;
   padding: 5px 7px;
@@ -1364,24 +1364,24 @@ button {
   white-space: nowrap;
 }
 .review-status.valid {
-  color: #42733b;
-  background: #edf5e7;
+  color: #343430;
+  background: #f0efe9;
 }
 .day-quantities {
   display: flex;
   gap: 12px 28px;
   flex-wrap: wrap;
   margin: 16px 0 12px;
-  font-size: 9px;
-  color: #7e8c72;
+  font-size: 12px;
+  color: #52524c;
 }
 .day-quantities strong {
   font-weight: 500;
-  color: #40523a;
+  color: #343430;
   margin-left: 5px;
 }
 .row-problems {
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.8;
   padding-left: 15px;
   margin: 13px 0;
@@ -1394,12 +1394,12 @@ button {
 }
 .source-rows {
   padding-top: 11px;
-  border-top: 1px solid #edf1e7;
+  border-top: 1px solid #f0efe9;
 }
 .source-rows table {
   min-width: 690px;
   margin-top: 12px;
-  font-size: 10px;
+  font-size: 12px;
 }
 .source-rows th,
 .source-rows td {
@@ -1415,51 +1415,51 @@ button {
   margin-top: 14px;
 }
 .raw-source pre {
-  font-size: 9px;
+  font-size: 12px;
   max-height: 250px;
   overflow: auto;
-  background: #f5f7f2;
+  background: #f0efe9;
   padding: 14px;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 .commit-review {
   padding: 21px;
-  background: #f3f7ef;
-  border: 1px solid #dfe9d7;
+  background: #f0efe9;
+  border: 1px solid #deddd5;
   border-radius: 7px;
   margin-top: 20px;
 }
 .commit-review p {
-  font-size: 11px;
-  color: #4d6542;
+  font-size: 12px;
+  color: #343430;
   line-height: 1.8;
 }
 .acknowledgement {
   display: flex;
   gap: 9px;
   align-items: start;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.8;
   margin: 18px 0;
 }
 .commit-review > small {
   display: block;
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1.8;
-  color: #7c8f6e;
+  color: #52524c;
   margin-top: 13px;
 }
 .import-success {
   display: flex;
   align-items: start;
   gap: 12px;
-  border: 1px solid #c3d8b6;
-  background: #f0f7e8;
+  border: 1px solid #b6b6ac;
+  background: #f0efe9;
   border-radius: 7px;
   padding: 16px;
-  font-size: 11px;
-  color: #4d743c;
+  font-size: 12px;
+  color: #343430;
   line-height: 1.8;
   margin-top: 21px;
 }
@@ -1482,7 +1482,7 @@ button {
   min-height: 250px;
 }
 .production-history .button {
-  font-size: 10px;
+  font-size: 12px;
   padding: 4px 8px;
 }
 @media (max-width: 1150px) {
@@ -1535,12 +1535,12 @@ button {
     margin: 15px 0 10px;
   }
   .metric-card small {
-    font-size: 8px;
+    font-size: 12px;
   }
   .production-daily th,
   .production-daily td {
     padding: 12px;
-    font-size: 10px;
+    font-size: 12px;
   }
   .import-body {
     padding: 17px;
@@ -1558,7 +1558,7 @@ button {
   }
   .file-field input {
     max-width: 100%;
-    font-size: 10px;
+    font-size: 12px;
     padding: 12px;
   }
   .preview-heading {
@@ -1575,18 +1575,18 @@ button {
     gap: 10px;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    font-size: 8px;
+    font-size: 12px;
   }
   .day-quantities strong {
     display: block;
     margin: 5px 0 0;
-    font-size: 10px;
+    font-size: 12px;
   }
   .day-choice {
-    font-size: 11px;
+    font-size: 12px;
   }
   .day-choice small {
-    font-size: 8px;
+    font-size: 12px;
   }
   .review-status {
     font-size: 7px;
@@ -1596,20 +1596,20 @@ button {
     padding: 16px;
   }
   .commit-review p {
-    font-size: 10px;
+    font-size: 12px;
   }
   .commit-review .button {
     width: 100%;
   }
   .acknowledgement {
-    font-size: 10px;
+    font-size: 12px;
   }
   .chart-frame {
     padding-left: 0;
     padding-right: 0;
   }
   .chart-footnote {
-    font-size: 9px;
+    font-size: 12px;
     padding: 4px 16px 18px;
   }
   .production-chart .panel-heading {
@@ -1620,10 +1620,10 @@ button {
     font-size: 12px;
   }
   .production-chart .panel-heading p {
-    font-size: 8px;
+    font-size: 12px;
   }
   .production-chart .pill {
-    font-size: 8px;
+    font-size: 12px;
   }
   .production-history table {
     min-width: 560px;
@@ -1642,7 +1642,7 @@ button {
   line-height: 1.7;
 }
 .synthetic-banner strong {
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.8px;
 }
 .synthetic-banner p {
@@ -1660,7 +1660,7 @@ button {
   gap: 8px;
 }
 .readings-filters small {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
 }
 .reading-import {
@@ -1714,7 +1714,7 @@ button {
 }
 .reading-preview-table {
   max-height: 350px;
-  border: 1px solid #dfe5df;
+  border: 1px solid #deddd5;
   border-radius: 6px;
 }
 .reading-preview-table th {
@@ -1730,7 +1730,7 @@ button {
   max-width: 300px;
   max-height: 220px;
   overflow: auto;
-  font-size: 10px;
+  font-size: 12px;
 }
 .reading-preview-table ul {
   padding-left: 16px;
@@ -1751,8 +1751,8 @@ button {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #2d715d;
-  background: #edf7ef;
+  color: #343430;
+  background: #f0efe9;
   padding: 14px;
   border-radius: 6px;
 }
@@ -1773,7 +1773,7 @@ button {
 .reading-freshness span {
   display: block;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   margin-bottom: 7px;
 }
 .reading-freshness p {
@@ -1791,7 +1791,7 @@ button {
 }
 .reading-chart .panel-heading p,
 .panel-heading > div > p {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
   margin: 8px 0 0;
   line-height: 1.7;
@@ -1809,7 +1809,7 @@ button {
 }
 .reading-statistics dt {
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 .reading-statistics dd {
   margin: 4px 0 0;
@@ -1819,7 +1819,7 @@ button {
   padding: 0 24px 20px;
   margin: 10px 0 0;
   color: #7e6c3c;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.6;
 }
 .reading-review-body > p {
@@ -1845,7 +1845,7 @@ button {
   margin: 8px 0;
 }
 .reading-review-card small {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted);
   line-height: 1.8;
 }
@@ -1853,7 +1853,7 @@ button {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
+  font-size: 12px;
 }
 .reading-pagination {
   display: flex;
@@ -1861,17 +1861,17 @@ button {
   justify-content: space-between;
   padding: 18px;
   gap: 10px;
-  font-size: 11px;
+  font-size: 12px;
 }
 .readings-workspace > .panel + .panel {
   margin-top: 24px;
 }
 .table-scroll details {
-  font-size: 11px;
+  font-size: 12px;
 }
 .table-scroll summary {
   cursor: pointer;
-  color: #2d715d;
+  color: #343430;
 }
 .table-scroll details small {
   display: block;
@@ -1893,7 +1893,7 @@ button {
     font-size: 26px;
   }
   .reading-metrics .metric-card p small {
-    font-size: 10px;
+    font-size: 12px;
   }
   .reading-freshness,
   .reading-review-grid {
@@ -1908,7 +1908,7 @@ button {
     gap: 8px;
   }
   .reading-chart .pill {
-    font-size: 8px;
+    font-size: 12px;
     padding: 5px;
   }
   .reading-chart-canvas {
@@ -1924,7 +1924,7 @@ button {
     justify-content: center;
   }
   .reading-pagination .button {
-    font-size: 10px;
+    font-size: 12px;
   }
   .readings-filters > div {
     flex: 1;
@@ -1943,15 +1943,15 @@ button {
   padding: 20px;
 }
 .readings-filters label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  color: #526651;
+  color: #52524c;
 }
 .readings-filters input {
-  border: 1px solid #d8e1d3;
+  border: 1px solid #deddd5;
   border-radius: 6px;
   padding: 10px 12px;
-  background: #fcfdfb;
+  background: #fafaf7;
   color: var(--ink);
   font-size: 12px;
   min-height: 40px;
@@ -1959,7 +1959,7 @@ button {
   max-width: 100%;
 }
 .reading-metrics .metric-card > span {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
   line-height: 1.7;
   display: block;
@@ -2026,7 +2026,7 @@ button {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  color: #62765f;
+  color: #52524c;
   font-size: 14px;
   line-height: 1.7;
   margin: 22px 0;
@@ -2063,9 +2063,9 @@ button {
 .work-list-toolbar select {
   width: 100%;
   min-width: 0;
-  border: 1px solid #d5dfd7;
+  border: 1px solid #deddd5;
   border-radius: 6px;
-  background: #fcfdfb;
+  background: #fafaf7;
   padding: 11px 12px;
   color: var(--ink);
   font: inherit;
@@ -2094,10 +2094,10 @@ button {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #edf6ef;
-  border: 1px solid #d0e4d5;
+  background: #f0efe9;
+  border: 1px solid #deddd5;
   border-radius: 7px;
-  color: #2d715d;
+  color: #343430;
   padding: 14px 18px;
   font-size: 12px;
   line-height: 1.7;
@@ -2144,7 +2144,7 @@ button {
   min-width: 0;
 }
 .work-order-card:hover {
-  border-color: #90b4a0;
+  border-color: #73736c;
 }
 .work-order-card > div {
   min-width: 0;
@@ -2164,7 +2164,7 @@ button {
 }
 .work-order-card small {
   font-size: 12px;
-  color: #69806e;
+  color: #52524c;
 }
 .work-card-status {
   display: flex;
@@ -2177,9 +2177,9 @@ button {
   display: inline-block;
   font-size: 12px;
   font-weight: 600;
-  background: #edf1ed;
-  color: #62705e;
-  border: 1px solid #dbe1d7;
+  background: #f0efe9;
+  color: #52524c;
+  border: 1px solid #deddd5;
   padding: 7px 10px;
   border-radius: 5px;
   white-space: nowrap;
@@ -2191,15 +2191,15 @@ button {
 }
 .status-in_progress,
 .status-assigned {
-  background: #edf4f8;
-  color: #3f6b85;
-  border-color: #d1e0e9;
+  background: #f0efe9;
+  color: #52524c;
+  border-color: #deddd5;
 }
 .status-approved,
 .status-closed {
-  background: #edf6ef;
-  color: #2c7054;
-  border-color: #cde2d2;
+  background: #f0efe9;
+  color: #343430;
+  border-color: #deddd5;
 }
 .work-panel-footer {
   padding: 20px;
@@ -2250,29 +2250,29 @@ button {
   align-items: center;
   gap: 10px;
   font-size: 12px;
-  color: #85917d;
+  color: #73736c;
   text-align: center;
 }
 .work-stages li span {
-  border: 1px solid #d8e1d4;
+  border: 1px solid #deddd5;
   border-radius: 50%;
   width: 28px;
   height: 28px;
   display: grid;
   place-items: center;
-  background: #fafcf8;
+  background: #fafaf7;
 }
 .work-stages li.reached {
-  color: #2f6f58;
+  color: #343430;
 }
 .work-stages li.reached span {
-  background: #e4f0e8;
-  border-color: #b6d2c1;
+  background: #f0efe9;
+  border-color: #b6b6ac;
 }
 .work-stages li[aria-current] span {
-  background: #2d715d;
+  background: #343430;
   color: white;
-  border-color: #2d715d;
+  border-color: #343430;
 }
 .work-detail-grid {
   display: grid;
@@ -2289,7 +2289,7 @@ button {
   grid-template-columns: 1fr 1.4fr;
   gap: 15px;
   padding: 17px 0;
-  border-bottom: 1px solid #e7ede5;
+  border-bottom: 1px solid #f0efe9;
   font-size: 13px;
   line-height: 1.7;
 }
@@ -2355,7 +2355,7 @@ button {
   grid-template-columns: 10px minmax(0, 1fr);
   gap: 20px;
   padding: 22px 0;
-  border-bottom: 1px solid #e5ece4;
+  border-bottom: 1px solid #f0efe9;
 }
 .work-timeline > li:last-child {
   border: 0;
@@ -2363,7 +2363,7 @@ button {
 .timeline-marker {
   width: 9px;
   height: 9px;
-  background: #6c9b82;
+  background: #52524c;
   border-radius: 50%;
   margin-top: 7px;
 }
@@ -2389,7 +2389,7 @@ button {
 }
 .work-timeline li p span {
   display: block;
-  color: #536e5d;
+  color: #52524c;
 }
 .work-timeline dl {
   margin: 14px 0 0;
@@ -2440,7 +2440,7 @@ button {
     min-height: 34px;
   }
   .work-metrics .metric-card small {
-    font-size: 9px;
+    font-size: 12px;
   }
   .work-order-card {
     padding: 19px;
@@ -2500,7 +2500,7 @@ button {
   gap: 12px;
   margin-top: 6px;
   background: #fff;
-  color: #243933;
+  color: #171715;
 }
 .google-status {
   font-size: 12px;
@@ -2567,7 +2567,7 @@ button {
   align-items: center;
   gap: 8px;
   margin-top: 4px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
 }
 .role-selector select {
@@ -2629,7 +2629,7 @@ button {
 .calendar-unread {
   padding: 2px 7px;
   border-radius: 12px;
-  background: #e1ece6;
+  background: #f0efe9;
   font-size: 12px;
 }
 .calendar-month .panel-heading {
@@ -2676,22 +2676,22 @@ button {
   gap: 10px;
 }
 .calendar-grid > button small {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--green);
-  background: #eaf3ee;
+  background: #f0efe9;
   border-radius: 4px;
   padding: 3px 5px;
   width: fit-content;
 }
 .calendar-grid > button.outside-month {
   color: #7b8580;
-  background: #f6f8f5;
+  background: #fafaf7;
 }
 .calendar-grid > button.calendar-today {
   border-color: var(--green);
 }
 .calendar-grid > button[aria-pressed="true"] {
-  background: #e1eee6;
+  background: #f0efe9;
   border-color: var(--green);
   box-shadow: inset 0 0 0 1px var(--green);
 }
@@ -2804,8 +2804,8 @@ button {
   gap: 18px;
 }
 .status-upcoming {
-  color: #285c85;
-  background: #e8f0f8;
+  color: #343430;
+  background: #f0efe9;
 }
 .status-due {
   color: #845d19;
@@ -2816,12 +2816,12 @@ button {
   background: #fceae5;
 }
 .status-completed {
-  color: #21664d;
-  background: #e4f2e9;
+  color: #343430;
+  background: #f0efe9;
 }
 .status-skipped {
-  color: #657472;
-  background: #edf0eb;
+  color: #52524c;
+  background: #f0efe9;
 }
 .calendar-metric-overdue p {
   color: #9c3d32;
@@ -2841,10 +2841,10 @@ button {
   }
   .calendar-grid > button small {
     padding: 2px 4px;
-    font-size: 10px;
+    font-size: 12px;
   }
   .calendar-weekday {
-    font-size: 10px;
+    font-size: 12px;
   }
   .calendar-task-top,
   .calendar-reminder {
@@ -2891,7 +2891,7 @@ button {
 }
 .anomaly-method {
   padding: 15px 18px;
-  background: #f5f8f5;
+  background: #fafaf7;
   border: 1px solid var(--border);
   border-radius: 6px;
   margin: 18px 0;
@@ -2933,7 +2933,7 @@ button {
   margin: 18px 0;
 }
 .anomaly-metrics > div {
-  border-left: 3px solid #bad2c6;
+  border-left: 3px solid #b6b6ac;
   padding: 5px 14px;
 }
 .anomaly-metrics strong {
@@ -2944,7 +2944,7 @@ button {
 }
 .anomaly-metrics span,
 .anomaly-context {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
 }
 .anomaly-cards {
@@ -2971,7 +2971,7 @@ button {
 .anomaly-card-heading p {
   margin: 0;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 .anomaly-facts {
   display: grid;
@@ -2981,7 +2981,7 @@ button {
 }
 .anomaly-facts dt {
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 .anomaly-facts dd {
   margin: 4px 0 0;
@@ -2997,14 +2997,14 @@ button {
   overflow: auto;
 }
 .anomaly-evidence p {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
 }
 .anomaly-evidence td small {
   display: block;
   white-space: nowrap;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 .anomaly-form {
   border-top: 1px solid var(--border);
@@ -3027,7 +3027,7 @@ button {
   margin: 12px 0;
 }
 .anomaly-decision {
-  background: #f2f7f3;
+  background: #f0efe9;
   border-radius: 5px;
   padding: 14px;
   overflow-wrap: anywhere;
@@ -3075,7 +3075,7 @@ button {
     padding: 4px 8px;
   }
   .anomaly-metrics span {
-    font-size: 10px;
+    font-size: 12px;
   }
 }
 
@@ -3097,8 +3097,8 @@ button {
   display: flex;
   gap: 12px;
   padding: 18px 20px;
-  background: #edf4ef;
-  border: 1px solid #d7e5da;
+  background: #f0efe9;
+  border: 1px solid #deddd5;
   border-radius: 8px;
   margin: 24px 0;
 }
@@ -3223,7 +3223,7 @@ button {
   border-radius: 6px;
   padding: 7px 12px;
   font-size: 13px;
-  background: #f8faf7;
+  background: #fafaf7;
 }
 .performance-chips strong {
   margin-left: 8px;
@@ -3248,7 +3248,7 @@ button {
 }
 .performance-table-scroll th {
   text-align: left;
-  background: #f6f8f4;
+  background: #fafaf7;
   font-weight: 600;
   color: var(--muted);
 }
@@ -3405,9 +3405,9 @@ button {
   width: 100%;
   min-width: 0;
   max-width: 100%;
-  border: 1px solid #d5dfd7;
+  border: 1px solid #deddd5;
   border-radius: 6px;
-  background: #fcfdfb;
+  background: #fafaf7;
   padding: 11px 12px;
   color: var(--ink);
   font: inherit;
@@ -3417,7 +3417,7 @@ button {
   resize: vertical;
 }
 .attachment-form input::file-selector-button {
-  border: 1px solid #d5dfd7;
+  border: 1px solid #deddd5;
   border-radius: 4px;
   background: white;
   padding: 5px 9px;
@@ -3475,9 +3475,9 @@ button {
 .report-filters select {
   width: 100%;
   min-width: 0;
-  border: 1px solid #d5dfd7;
+  border: 1px solid #deddd5;
   border-radius: 6px;
-  background: #fcfdfb;
+  background: #fafaf7;
   padding: 11px 12px;
   color: var(--ink);
   font: inherit;
@@ -3553,7 +3553,7 @@ button {
 }
 .report-table-wrap th {
   text-align: left;
-  background: #f2f6f1;
+  background: #f0efe9;
   font-size: 12px;
   font-weight: 600;
 }
@@ -3668,6 +3668,6 @@ button {
   }
   .chat-shell .breadcrumb {
     gap: 6px;
-    font-size: 10px;
+    font-size: 12px;
   }
 }

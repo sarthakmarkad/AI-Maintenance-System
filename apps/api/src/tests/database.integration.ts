@@ -193,7 +193,7 @@ test("keyset pagination and invalid query validation work against persisted reco
   assert.deepEqual(after.body.items, []);
   await get("/api/machines?limit=bad").expect(400);
 });
-test("runtime database login reads but cannot change roles, insert records, or modify audit events", async () => {
+test("runtime database login cannot change roles, machine identity, or protected audit events", async () => {
   assert.equal(
     (
       await runtime.membership.findUniqueOrThrow({
@@ -209,8 +209,9 @@ test("runtime database login reads but cannot change roles, insert records, or m
     }),
   );
   await assert.rejects(
-    runtime.machine.create({
-      data: { orgId, code: "FORBIDDEN", name: "test", manufacturer: "test" },
+    runtime.machine.update({
+      where: { id: machineId },
+      data: { code: "FORBIDDEN" },
     }),
   );
   await assert.rejects(runtime.auditEvent.deleteMany({ where: { orgId } }));

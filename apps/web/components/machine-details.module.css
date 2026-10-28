@@ -1,0 +1,83 @@
+.picture {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  max-width: 100%;
+  background: var(--surface, #f6f5ed);
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+  color: var(--muted-foreground, #64645c);
+}
+.picture img {
+  display: block;
+  width: 100%;
+  max-width: 520px;
+  height: 240px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+.editor {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+.fields {
+  border: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+.fields label {
+  display: grid;
+  gap: 6px;
+}
+.fields input {
+  max-width: 100%;
+  min-width: 0;
+}
+.fields p {
+  font-size: 13px;
+  color: var(--muted-foreground, #64645c);
+  line-height: 1.5;
+}
+.fields button {
+  justify-self: start;
+}
+.fields h3 {
+  margin: 0;
+}
+@media (max-width: 600px) {
+  .picture img {
+    height: 190px;
+  }
+  .fields button {
+    width: 100%;
+  }
+}
+.registryCard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  height: 100%;
+}
+.registryCard h2,
+.registryCard p {
+  margin: 0;
+}
+.registryCard > button {
+  align-self: flex-start;
+}
+.registryCard > div:last-of-type {
+  margin-top: auto;
+}
+.registryNavigation {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

@@ -9,10 +9,10 @@
   color: var(--ink);
   background: white;
   font: inherit;
-  box-shadow: 0 24px 80px #102c2a40;
+  box-shadow: 5px 5px 0 #191917;
 }
 .dialog::backdrop {
-  background: #102c2ab3;
+  background: #171715b3;
 }
 .dialog[open] {
   display: flex;
@@ -46,7 +46,7 @@
   min-width: 0;
   overflow: auto;
   text-align: center;
-  background: #f3f7f4;
+  background: #fafaf7;
   border-radius: 8px;
 }
 .canvas img {

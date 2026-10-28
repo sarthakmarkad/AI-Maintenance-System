@@ -426,3 +426,20 @@ test("strict filters, defaults, live machine revocation and unavailable scheduli
   assert.equal(catching.planned.scheduling.catchingUp, true);
   assert.equal(catching.planned.onTimePercent, null);
 });
+
+test("cancelled orders are retained in cohorts but excluded from current open work", async () => {
+  const o = await order("BREAKDOWN", "REPORTED", at(3));
+  await request(app.getHttpServer())
+    .post(`/api/machines/WH-C/work-orders/${o.id}/actions/cancel`)
+    .set("Authorization", `Bearer ${ids.head}`)
+    .send({ version: o.version, reason: "TEST duplicate work" })
+    .expect(200);
+  const data = (await get().expect(200)).body;
+  assert.ok(
+    data.cohort.statuses.some(
+      (s: any) => s.key === "CANCELLED" && s.count >= 1,
+    ),
+  );
+  assert.ok(!data.current.items.some((x: any) => x.id === o.id));
+  assert.ok(!data.current.statuses.some((x: any) => x.key === "CANCELLED"));
+});

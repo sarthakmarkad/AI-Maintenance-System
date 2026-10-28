@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { api, apiBlob, ApiError, type Machine, type Me } from "@/lib/api";
 import { useAuth } from "./auth-provider";
 import { Button } from "./ui/button";
+import { FormPopup } from "./ui/form-popup";
 import type {
   DocumentLibrary,
   DocumentFile,
@@ -45,6 +46,8 @@ export function DocumentLibraryWorkspace({
     [error, setError] = useState(""),
     [stale, setStale] = useState(false),
     [message, setMessage] = useState("");
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
   const [target, setTarget] = useState<MachineDocument | null>(null),
     [title, setTitle] = useState(""),
     [kind, setKind] = useState("MANUAL"),
@@ -58,12 +61,11 @@ export function DocumentLibraryWorkspace({
       action: "approve" | "withdraw";
     } | null>(null);
   const operation = useRef<AbortController | null>(null),
-    fileInput = useRef<HTMLInputElement>(null),
-    uploadHeading = useRef<HTMLHeadingElement>(null),
-    reviewHeading = useRef<HTMLHeadingElement>(null);
+    fileInput = useRef<HTMLInputElement>(null);
   const request = useRef<{ payload: string; id: string } | null>(null);
   const manager =
-    user.role === "ADMINISTRATOR" || user.role === "MAINTENANCE_HEAD";
+    !machine.archivedAt &&
+    (user.role === "ADMINISTRATOR" || user.role === "MAINTENANCE_HEAD");
   const dirty = JSON.stringify(filters) !== JSON.stringify(applied);
   const blocked = busy || loading || stale;
   function key(payload: unknown) {
@@ -79,6 +81,7 @@ export function DocumentLibraryWorkspace({
       return;
     }
     if (e instanceof ApiError && [403, 404].includes(e.status)) {
+      setUploadOpen(false);
       setLibrary(null);
       setReview(null);
       setOpened(null);
@@ -97,9 +100,6 @@ export function DocumentLibraryWorkspace({
     );
     if (e instanceof ApiError && e.status === 409) setStale(true);
   }
-  useEffect(() => {
-    reviewHeading.current?.focus();
-  }, [review]);
   useEffect(() => () => operation.current?.abort(), []);
   useEffect(() => {
     const abort = new AbortController();
@@ -137,6 +137,7 @@ export function DocumentLibraryWorkspace({
     setAttempt((n) => n + 1);
   }
   function newDraft(document: MachineDocument | null) {
+    setUploadOpen(true);
     setTarget(document);
     setTitle(document?.title ?? "");
     setKind(document?.kind ?? "MANUAL");
@@ -144,7 +145,6 @@ export function DocumentLibraryWorkspace({
     setFile(null);
     if (fileInput.current) fileInput.current.value = "";
     request.current = null;
-    setTimeout(() => uploadHeading.current?.focus(), 0);
   }
   async function upload(e: FormEvent) {
     e.preventDefault();
@@ -189,6 +189,7 @@ export function DocumentLibraryWorkspace({
       );
       if (operation.current.signal.aborted) return;
       newDraft(null);
+      setUploadOpen(false);
       setMessage(
         "Draft saved. It is not approved for reference use. Any current approval remains available.",
       );
@@ -271,7 +272,7 @@ export function DocumentLibraryWorkspace({
     }
   }
   return (
-    <div className={styles.library}>
+    <div className={`${styles.library} form-popup-workspace`}>
       <Link className="back-link" href={`/machines/${machine.code}`}>
         ← Machine overview
       </Link>
@@ -286,6 +287,15 @@ export function DocumentLibraryWorkspace({
             </Link>
           </p>
         </div>
+        {manager && library?.canManage && (
+          <Button
+            type="button"
+            onClick={() => setUploadOpen(true)}
+            aria-haspopup="dialog"
+          >
+            Upload reference
+          </Button>
+        )}
       </div>
       <p className={styles.notice}>
         {manager
@@ -387,7 +397,7 @@ export function DocumentLibraryWorkspace({
                 <h2>No references match</h2>
                 <p>
                   {manager
-                    ? "Upload a real manual or SOP as a draft. No company references are preloaded."
+                    ? "Upload a manual or SOP as a draft for Maintenance head review."
                     : "No approved references are available for these filters. Ask the Maintenance head about the required reference."}
                 </p>
               </div>
@@ -491,6 +501,14 @@ export function DocumentLibraryWorkspace({
                               <Button
                                 disabled={blocked}
                                 onClick={() => {
+                                  setReviewOpen(true);
+                                  const sameReview =
+                                    review?.document.id === d.id &&
+                                    review.file.id === f.id &&
+                                    review.action ===
+                                      (f.status === "DRAFT"
+                                        ? "approve"
+                                        : "withdraw");
                                   setReview({
                                     document: d,
                                     file: f,
@@ -499,8 +517,10 @@ export function DocumentLibraryWorkspace({
                                         ? "approve"
                                         : "withdraw",
                                   });
-                                  setReason("");
-                                  request.current = null;
+                                  if (!sameReview) {
+                                    setReason("");
+                                    request.current = null;
+                                  }
                                 }}
                               >
                                 {f.status === "DRAFT"
@@ -557,138 +577,173 @@ export function DocumentLibraryWorkspace({
         )
       )}
       {review && (
-        <section className={styles.card} aria-label="Head reference review">
-          <h2 ref={reviewHeading} tabIndex={-1}>
-            {review.action === "approve"
+        <FormPopup
+          open={reviewOpen}
+          onOpenChange={setReviewOpen}
+          title={
+            review.action === "approve"
               ? "Approve reference"
-              : "Withdraw approval"}
-          </h2>
-          <p>
-            {review.document.title} · v{review.file.number} ·{" "}
-            {review.file.filename}
-          </p>
-          <p>
-            {review.action === "approve"
-              ? "Download and review the file before approving. Approval will supersede the previous current reference atomically."
-              : "Withdrawal removes the current reference from all reader views and retains its immutable approval history. It does not restore an older version."}
-          </p>
-          <form onSubmit={act} className={styles.form}>
-            <label>
+              : "Withdraw approval"
+          }
+          busy={busy}
+          error={
+            stale
+              ? `${error} Reload the library, then review the latest evidence before acting.`
+              : error
+          }
+          errorLabel="Document request error"
+        >
+          {stale && (
+            <Button type="button" disabled={busy || loading} onClick={reload}>
+              Reload library
+            </Button>
+          )}
+          <section className={styles.card} aria-label="Head reference review">
+            <p>
+              {review.document.title} · v{review.file.number} ·{" "}
+              {review.file.filename}
+            </p>
+            <p>
               {review.action === "approve"
-                ? "Approval review reason"
-                : "Withdrawal reason"}
-              <textarea
-                required
-                minLength={3}
-                maxLength={1000}
-                value={reason}
-                disabled={busy}
-                onChange={(e) => setReason(e.target.value)}
-              />
-            </label>
-            <div className={styles.row}>
-              <Button disabled={blocked || reason.trim().length < 3}>
+                ? "Download and review the file before approving. Approval replaces the current reference and retains its history."
+                : "Withdrawal removes the current reference from all reader views and retains its immutable approval history. It does not restore an older version."}
+            </p>
+            <form onSubmit={act} className={styles.form}>
+              <label>
                 {review.action === "approve"
-                  ? "Confirm approval"
-                  : "Confirm withdrawal"}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={busy}
-                onClick={() => setReview(null)}
-              >
-                Cancel review
-              </Button>
-            </div>
-          </form>
-        </section>
-      )}
-      {manager && library?.canManage && (
-        <section className={styles.card} aria-label="Upload reference draft">
-          <h2 ref={uploadHeading} tabIndex={-1}>
-            {target
-              ? `Upload revision: ${target.title}`
-              : "Upload a new reference draft"}
-          </h2>
-          <p>
-            PDF only · 5 MB per file · up to 100 versions per reference and 200
-            references per machine. Uploading preserves any current approval.
-            Draft files and descriptions cannot be replaced; upload a new
-            revision to correct them.
-          </p>
-          <form className={styles.form} onSubmit={upload}>
-            <label>
-              Reference title
-              <input
-                required
-                minLength={3}
-                maxLength={160}
-                disabled={busy || !!target}
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </label>
-            <label>
-              Reference type
-              <select
-                disabled={busy || !!target}
-                value={kind}
-                onChange={(e) => setKind(e.target.value)}
-              >
-                <option value="MANUAL">Machine manual</option>
-                <option value="SOP">Standard operating procedure</option>
-              </select>
-            </label>
-            <label>
-              Revision description
-              <textarea
-                required
-                minLength={3}
-                maxLength={1000}
-                disabled={busy}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </label>
-            <label>
-              PDF file
-              <input
-                ref={fileInput}
-                type="file"
-                accept="application/pdf,.pdf"
-                disabled={busy}
-                required
-                onChange={(e) => {
-                  setFile(e.target.files?.[0] ?? null);
-                  request.current = null;
-                }}
-              />
-            </label>
-            <div className={styles.row}>
-              <Button
-                disabled={
-                  blocked ||
-                  !file ||
-                  title.trim().length < 3 ||
-                  description.trim().length < 3
-                }
-              >
-                {busy ? "Saving…" : "Save unapproved draft"}
-              </Button>
-              {target && (
+                  ? "Approval review reason"
+                  : "Withdrawal reason"}
+                <textarea
+                  required
+                  minLength={3}
+                  maxLength={1000}
+                  value={reason}
+                  disabled={busy}
+                  onChange={(e) => setReason(e.target.value)}
+                />
+              </label>
+              <div className={styles.row}>
+                <Button disabled={blocked || reason.trim().length < 3}>
+                  {review.action === "approve"
+                    ? "Confirm approval"
+                    : "Confirm withdrawal"}
+                </Button>
                 <Button
                   type="button"
                   variant="outline"
                   disabled={busy}
-                  onClick={() => newDraft(null)}
+                  onClick={() => setReviewOpen(false)}
                 >
-                  Start new reference
+                  Cancel review
                 </Button>
-              )}
-            </div>
-          </form>
-        </section>
+              </div>
+            </form>
+          </section>
+        </FormPopup>
+      )}
+      {manager && library?.canManage && (
+        <FormPopup
+          open={uploadOpen}
+          onOpenChange={setUploadOpen}
+          title={
+            target
+              ? `Upload revision: ${target.title}`
+              : "Upload a new reference draft"
+          }
+          description="Save a private, unapproved PDF for the Maintenance head to review."
+          busy={busy}
+          error={
+            stale
+              ? `${error} Reload the library, then review the latest evidence before acting.`
+              : error
+          }
+          errorLabel="Document request error"
+        >
+          {stale && (
+            <Button type="button" disabled={busy || loading} onClick={reload}>
+              Reload library
+            </Button>
+          )}
+          <section className={styles.card} aria-label="Upload reference draft">
+            <p>
+              PDF only · 5 MB per file · up to 100 versions per reference and
+              200 references per machine. Uploading preserves any current
+              approval. Draft files and descriptions cannot be replaced; upload
+              a new revision to correct them.
+            </p>
+            <form className={styles.form} onSubmit={upload}>
+              <label>
+                Reference title
+                <input
+                  required
+                  minLength={3}
+                  maxLength={160}
+                  disabled={busy || !!target}
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+              </label>
+              <label>
+                Reference type
+                <select
+                  disabled={busy || !!target}
+                  value={kind}
+                  onChange={(e) => setKind(e.target.value)}
+                >
+                  <option value="MANUAL">Machine manual</option>
+                  <option value="SOP">Standard operating procedure</option>
+                </select>
+              </label>
+              <label>
+                Revision description
+                <textarea
+                  required
+                  minLength={3}
+                  maxLength={1000}
+                  disabled={busy}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </label>
+              <label>
+                PDF file
+                <input
+                  ref={fileInput}
+                  type="file"
+                  accept="application/pdf,.pdf"
+                  disabled={busy}
+                  required
+                  onChange={(e) => {
+                    setFile(e.target.files?.[0] ?? null);
+                    request.current = null;
+                  }}
+                />
+              </label>
+              <div className={styles.row}>
+                <Button
+                  disabled={
+                    blocked ||
+                    !file ||
+                    title.trim().length < 3 ||
+                    description.trim().length < 3
+                  }
+                >
+                  {busy ? "Saving…" : "Save unapproved draft"}
+                </Button>
+                {target && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={busy}
+                    onClick={() => newDraft(null)}
+                  >
+                    Start new reference
+                  </Button>
+                )}
+              </div>
+            </form>
+          </section>
+        </FormPopup>
       )}
     </div>
   );

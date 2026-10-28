@@ -155,6 +155,13 @@ function view(o: Model, role: Role) {
   const allowedActions: string[] = [];
   if (
     role === Role.MAINTENANCE_HEAD &&
+    ["REPORTED", "ASSIGNED", "IN_PROGRESS", "AWAITING_REVIEW"].includes(
+      o.status,
+    )
+  )
+    allowedActions.push("cancel");
+  if (
+    role === Role.MAINTENANCE_HEAD &&
     ["REPORTED", "ASSIGNED", "IN_PROGRESS"].includes(o.status)
   )
     allowedActions.push("assign");
@@ -180,6 +187,7 @@ async function mocks(
     status?: Issue["status"];
     empty?: boolean;
     reportRetry?: boolean;
+    reportAuthTimeout?: boolean;
     conflict?: boolean;
     expired?: boolean;
     kind?: "BREAKDOWN" | "INVESTIGATION";
@@ -249,6 +257,17 @@ async function mocks(
     if (path.endsWith("/work-orders") && method === "POST") {
       const body = route.request().postDataJSON();
       reportBodies.push(body);
+      if (options.reportAuthTimeout && !failed) {
+        failed = true;
+        await route.fulfill({
+          status: 503,
+          json: {
+            message:
+              "Authentication service is temporarily unavailable. Your changes have not been submitted. Try again.",
+          },
+        });
+        return;
+      }
       const existed = !!o;
       if (!o) o = { ...initial(), ...body };
       if (options.reportRetry && !failed) {
@@ -276,6 +295,7 @@ async function mocks(
           "AWAITING_REVIEW",
           "APPROVED",
           "CLOSED",
+          "CANCELLED",
         ].map((s) => [s, o?.status === s ? 1 : 0]),
       );
       await route.fulfill({
@@ -324,53 +344,98 @@ async function open(page: Page, detail = true) {
     }),
   ).toBeVisible();
 }
-test("operator retries keep the same report key and reach one persisted report", async ({
+test("head cancels work in a reasoned popup and keeps the retained report visible", async ({
   page,
 }) => {
-  const state = await mocks(page, {
-    role: Role.OPERATOR,
-    empty: true,
-    reportRetry: true,
+  const f = await mocks(page);
+  await open(page);
+  await expect(
+    page.getByRole("list", { name: "Work order stages" }).getByRole("listitem"),
+  ).toHaveCount(6);
+  await page
+    .getByRole("button", { name: "Cancel work order", exact: true })
+    .click();
+  const dialog = page.getByRole("dialog", {
+    name: "Cancel work order",
+    exact: true,
   });
-  await open(page, false);
-  await page
-    .getByRole("button", { name: "Report an issue", exact: true })
-    .click();
-  await page
-    .getByLabel("Issue title", { exact: true })
-    .fill("TEST operator vibration report");
-  await page
-    .getByLabel("Observed symptoms", { exact: true })
-    .fill("TEST observed vibration; synthetic browser fixture");
-  await page
-    .getByLabel("First observed (IST, optional)", { exact: true })
-    .fill("2026-09-01T08:00:01");
-  await page
-    .getByRole("button", { name: "Save issue report", exact: true })
+  await dialog
+    .getByLabel("Reason for cancellation")
+    .fill("TEST duplicate report");
+  await page.screenshot({
+    path: `.local/removal-order-${test.info().project.name}.png`,
+    fullPage: true,
+  });
+  await dialog
+    .getByRole("button", { name: "Confirm cancellation", exact: true })
     .click();
   await expect(
-    page.getByRole("alert").filter({ hasText: "Connection lost after save" }),
+    page.getByText(
+      "This work order was cancelled. Its report and history remain available.",
+    ),
   ).toBeVisible();
-  await expect(page.getByLabel("Issue title", { exact: true })).toHaveValue(
-    "TEST operator vibration report",
-  );
-  await page
-    .getByRole("button", { name: "Save issue report", exact: true })
-    .click();
-  await expect(page).toHaveURL(new RegExp("/work-orders/" + id + "$"));
+  expect(f.order().status).toBe("CANCELLED");
   await expect(
-    page.getByRole("heading", {
-      name: "TEST operator vibration report",
-      exact: true,
-    }),
-  ).toBeVisible();
-  expect(state.reportBodies).toHaveLength(2);
-  expect(state.reportBodies[0].requestId).toBe(state.reportBodies[1].requestId);
-  expect(state.reportBodies[0].observedAt).toBe("2026-09-01T02:30:01.000Z");
-  await expect(
-    page.getByRole("button", { name: "Assign technician", exact: true }),
+    page.getByRole("list", { name: "Work order stages" }),
   ).toHaveCount(0);
+  expect(f.actions).toEqual(["cancel"]);
 });
+for (const authTimeout of [false, true])
+  test(`operator retries ${authTimeout ? "an Auth outage" : "a lost save response"} with the same report key and reaches one persisted report`, async ({
+    page,
+  }) => {
+    const state = await mocks(page, {
+      role: Role.OPERATOR,
+      empty: true,
+      reportRetry: !authTimeout,
+      reportAuthTimeout: authTimeout,
+    });
+    await open(page, false);
+    await page
+      .getByRole("button", { name: "Report an issue", exact: true })
+      .click();
+    await page
+      .getByLabel("Issue title", { exact: true })
+      .fill("TEST operator vibration report");
+    await page
+      .getByLabel("Observed symptoms", { exact: true })
+      .fill("TEST observed vibration; synthetic browser fixture");
+    await page
+      .getByLabel("First observed (IST, optional)", { exact: true })
+      .fill("2026-09-01T08:00:01");
+    await page
+      .getByRole("button", { name: "Save issue report", exact: true })
+      .click();
+    await expect(
+      page.getByRole("alert").filter({
+        hasText: authTimeout
+          ? "Authentication service is temporarily unavailable"
+          : "Connection lost after save",
+      }),
+    ).toBeVisible();
+    if (authTimeout) expect(state.order()).toBeNull();
+    await expect(page.getByLabel("Issue title", { exact: true })).toHaveValue(
+      "TEST operator vibration report",
+    );
+    await page
+      .getByRole("button", { name: "Save issue report", exact: true })
+      .click();
+    await expect(page).toHaveURL(new RegExp("/work-orders/" + id + "$"));
+    await expect(
+      page.getByRole("heading", {
+        name: "TEST operator vibration report",
+        exact: true,
+      }),
+    ).toBeVisible();
+    expect(state.reportBodies).toHaveLength(2);
+    expect(state.reportBodies[0].requestId).toBe(
+      state.reportBodies[1].requestId,
+    );
+    expect(state.reportBodies[0].observedAt).toBe("2026-09-01T02:30:01.000Z");
+    await expect(
+      page.getByRole("button", { name: "Assign technician", exact: true }),
+    ).toHaveCount(0);
+  });
 test("head selects an eligible technician and saves assignment history", async ({
   page,
 }) => {
@@ -521,6 +586,12 @@ test("supervisor closes approved work while administrator has no engineering act
     await expect(other.getByRole("button", { name, exact: true })).toHaveCount(
       0,
     );
+  await expect(
+    other.getByText(
+      "No action is available for your active role or assignment at this stage. Only the assigned Technician can start or submit work.",
+      { exact: true },
+    ),
+  ).toBeVisible();
   await other.close();
 });
 test("stale repair update requires reload and never retries automatically against a newer version", async ({
@@ -542,6 +613,8 @@ test("stale repair update requires reload and never retries automatically agains
   await expect(
     page.getByRole("button", { name: "Confirm start", exact: true }),
   ).toBeDisabled();
+  if (await page.getByRole("dialog").isVisible())
+    await page.getByRole("button", { name: "Close form", exact: true }).click();
   await page
     .getByRole("button", { name: "Reload work order", exact: true })
     .click();
@@ -719,4 +792,139 @@ test("investigation requiring sensor work cannot submit until explicit follow-up
   ).toBeVisible();
   expect(state.order().investigationOutcome).toBe("SENSOR_CHECK_REQUIRED");
   expect(state.actions).toEqual(["submit"]);
+});
+
+test("issue popup keeps its draft, contains keyboard focus and restores the trigger on Escape", async ({
+  page,
+}) => {
+  const state = await mocks(page, { role: Role.OPERATOR, empty: true });
+  await open(page, false);
+  const trigger = page.getByRole("button", {
+    name: "Report an issue",
+    exact: true,
+  });
+  const popup = page.getByRole("dialog", {
+    name: "Report a breakdown or issue",
+    exact: true,
+  });
+  await expect(popup).toHaveCount(0);
+  await trigger.click();
+  await expect(popup).toBeVisible();
+  await expect(popup.getByLabel("Issue title", { exact: true })).toBeFocused();
+  await popup
+    .getByLabel("Issue title", { exact: true })
+    .fill("TEST retained popup draft");
+  await popup
+    .getByLabel("Observed symptoms", { exact: true })
+    .fill("TEST observed symptoms retained on dismissal");
+  for (let i = 0; i < 12; i++) {
+    await page.keyboard.press("Tab");
+    expect(
+      await page.evaluate(() =>
+        Boolean(document.activeElement?.closest("dialog[open]")),
+      ),
+    ).toBe(true);
+  }
+  await page.keyboard.press("Escape");
+  await expect(popup).toHaveCount(0);
+  await expect(trigger).toBeFocused();
+  expect(await page.evaluate(() => document.body.style.overflow)).not.toBe(
+    "hidden",
+  );
+  await trigger.click();
+  await expect(popup.getByLabel("Issue title", { exact: true })).toHaveValue(
+    "TEST retained popup draft",
+  );
+  await expect(
+    popup.getByRole("textbox", { name: "Observed symptoms", exact: true }),
+  ).toHaveValue("TEST observed symptoms retained on dismissal");
+  expect(state.reportBodies).toHaveLength(0);
+  await page.screenshot({
+    path: `test-results/issue-popup-${test.info().project.name}.png`,
+    fullPage: true,
+  });
+});
+
+test("a saving popup cannot be dismissed or double-submitted", async ({
+  page,
+}) => {
+  await mocks(page, { role: Role.OPERATOR, empty: true });
+  let release: () => void = () => {};
+  const waiting = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let saves = 0;
+  await page.route("**/api/machines/WH-C/work-orders", async (route) => {
+    if (route.request().method() !== "POST") return route.fallback();
+    saves++;
+    await waiting;
+    await route.fulfill({ json: view(initial(), Role.OPERATOR) });
+  });
+  await open(page, false);
+  await page
+    .getByRole("button", { name: "Report an issue", exact: true })
+    .click();
+  const popup = page.getByRole("dialog", {
+    name: "Report a breakdown or issue",
+    exact: true,
+  });
+  await popup.getByLabel("Issue title", { exact: true }).fill("TEST slow save");
+  await popup
+    .getByLabel("Observed symptoms", { exact: true })
+    .fill("TEST pending fixture response");
+  await popup
+    .getByRole("button", { name: "Save issue report", exact: true })
+    .click();
+  await expect(
+    popup.getByRole("button", { name: "Close form", exact: true }),
+  ).toBeDisabled();
+  await page.keyboard.press("Escape");
+  await expect(popup).toBeVisible();
+  expect(saves).toBe(1);
+  release();
+  await expect(page).toHaveURL(new RegExp("/work-orders/" + id + "$"));
+  expect(await page.evaluate(() => document.body.style.overflow)).not.toBe(
+    "hidden",
+  );
+});
+
+test("repair popup retains unsaved technician findings and fits a short narrow viewport", async ({
+  page,
+}) => {
+  await mocks(page, { role: Role.TECHNICIAN, status: "IN_PROGRESS" });
+  await page.setViewportSize({ width: 320, height: 480 });
+  await open(page);
+  await page
+    .getByRole("button", { name: "Submit repair", exact: true })
+    .click();
+  const popup = page.getByRole("dialog");
+  await popup
+    .getByLabel("Inspection findings", { exact: true })
+    .fill("TEST retained repair findings");
+  await page.keyboard.press("Escape");
+  await page
+    .getByRole("button", { name: "Submit repair", exact: true })
+    .click();
+  await expect(
+    popup.getByRole("textbox", { name: "Inspection findings", exact: true }),
+  ).toHaveValue("TEST retained repair findings");
+  const bounds = await popup.boundingBox();
+  expect(bounds!.x).toBeGreaterThanOrEqual(0);
+  expect(bounds!.y).toBeGreaterThanOrEqual(0);
+  expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(320);
+  expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(480);
+  await popup
+    .getByRole("button", { name: "Submit for review", exact: true })
+    .scrollIntoViewIfNeeded();
+  await expect(
+    popup.getByRole("button", {
+      name: "Submit for review",
+      exact: true,
+    }),
+  ).toBeInViewport();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
 });

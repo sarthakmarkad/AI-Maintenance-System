@@ -314,8 +314,8 @@ test("operator can export scoped reports through a read-only page", async ({
   await mocks(page, { role: "OPERATOR" });
   await open(page);
   await expect(
-    page.getByText("Your operator view can export records", { exact: false }),
-  ).toBeVisible();
+    page.getByRole("button", { name: "Download PDF", exact: true }),
+  ).toBeEnabled();
   await download(page, "Download PDF");
   await expect(
     page.getByRole("button", { name: "Save issue report" }),

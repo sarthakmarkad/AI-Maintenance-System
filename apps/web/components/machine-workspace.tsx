@@ -1,4 +1,5 @@
 "use client";
+import { TeamWorkspace } from "./team-workspace";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -6,20 +7,20 @@ import {
   Activity,
   ArrowDownToLine,
   ArrowLeft,
-  ArrowRight,
   Box,
   CircleHelp,
   Factory,
-  FileSpreadsheet,
   MapPin,
   RefreshCw,
-  ShieldCheck,
-  Wrench,
 } from "lucide-react";
 import { api, ApiError, type Machine, type Machines, type Me } from "@/lib/api";
 import { useAuth } from "./auth-provider";
+import { MachineEditor, MachinePicture } from "./machine-details";
+import { MachineRegistry, MachineLifecycle } from "./machine-registry";
+import { MachineAccess } from "./machine-access";
 import { Shell } from "./shell";
 import { Button } from "./ui/button";
+import { Skeleton } from "./ui/skeleton";
 import { ProductionWorkspace } from "./production-workspace";
 import { ReadingsWorkspace } from "./readings-workspace";
 import { WorkOrdersWorkspace } from "./work-orders-workspace";
@@ -32,9 +33,10 @@ import { clearRoleSelection } from "@/lib/role-selection";
 type Result =
   | { kind: "loading" }
   | { kind: "error"; message: string; requestId?: string }
-  | { kind: "ready"; user: Me; machines: Machine[] };
+  | { kind: "ready"; user: Me; machines: Machine[]; nextCursor: string | null };
 export function MachineWorkspace({
   code,
+  team = false,
   production = false,
   readings = false,
   workOrders = false,
@@ -46,6 +48,7 @@ export function MachineWorkspace({
   orderId,
 }: {
   code?: string;
+  team?: boolean;
   production?: boolean;
   readings?: boolean;
   workOrders?: boolean;
@@ -83,14 +86,15 @@ export function MachineWorkspace({
             `/machines/${encodeURIComponent(code)}`,
             token,
             controller.signal,
-          ).then((x) => [x])
-        : api<Machines>("/machines", token, controller.signal).then(
-            (x) => x.items,
-          ),
+          ).then((x) => ({ machines: [x], nextCursor: null }))
+        : api<Machines>("/machines", token, controller.signal).then((x) => ({
+            machines: x.items,
+            nextCursor: x.nextCursor,
+          })),
     ])
-      .then(([user, machines]) => {
+      .then(([user, listing]) => {
         if (!controller.signal.aborted)
-          setResult({ kind: "ready", user, machines });
+          setResult({ kind: "ready", user, ...listing });
       })
       .catch(async (error) => {
         if (controller.signal.aborted) return;
@@ -112,10 +116,28 @@ export function MachineWorkspace({
   }, [token, authUserId, loading, expired, expire, code, attempt, router]);
   return (
     <Shell user={result.kind === "ready" ? result.user : undefined} code={code}>
-      {!session || loading || result.kind === "loading" ? (
+      {result.kind === "ready" && code && result.machines[0]?.archivedAt && (
+        <p className="info-strip" role="note">
+          Archived machine · Read only. Historical records remain available.{" "}
+          {result.machines[0].archiveReason}
+        </p>
+      )}
+      {!session ||
+      loading ||
+      result.kind === "loading" ||
+      (result.kind === "ready" && code && result.machines[0]?.code !== code) ? (
         <div className="loading-state" role="status">
-          <div className="loader" />
           <p>Loading your machine records…</p>
+          <div className="workspace-skeleton">
+            <Skeleton className="skeleton-title" />
+            <Skeleton className="skeleton-subtitle" />
+            <div className="skeleton-grid">
+              {[0, 1, 2].map((index) => (
+                <Skeleton className="skeleton-card" key={index} />
+              ))}
+            </div>
+            <Skeleton className="skeleton-panel" />
+          </div>
         </div>
       ) : result.kind === "error" ? (
         <section className="state-card" role="alert">
@@ -138,6 +160,12 @@ export function MachineWorkspace({
             Return to default role
           </Button>
         </section>
+      ) : team ? (
+        <TeamWorkspace
+          key={`${result.user.userId}:${result.user.role}`}
+          user={result.user}
+          token={session.access_token}
+        />
       ) : code && result.machines[0] ? (
         assistant ? (
           <DocumentAssistant
@@ -148,30 +176,35 @@ export function MachineWorkspace({
           />
         ) : documents ? (
           <DocumentLibraryWorkspace
+            key={result.machines[0].id}
             machine={result.machines[0]}
             user={result.user}
             token={session.access_token}
           />
         ) : reports ? (
           <ReportsWorkspace
+            key={result.machines[0].id}
             machine={result.machines[0]}
             user={result.user}
             token={session.access_token}
           />
         ) : performance ? (
           <PerformanceWorkspace
+            key={result.machines[0].id}
             machine={result.machines[0]}
             user={result.user}
             token={session.access_token}
           />
         ) : calendar ? (
           <CalendarWorkspace
+            key={result.machines[0].id}
             machine={result.machines[0]}
             user={result.user}
             token={session.access_token}
           />
         ) : workOrders ? (
           <WorkOrdersWorkspace
+            key={result.machines[0].id}
             machine={result.machines[0]}
             user={result.user}
             token={session.access_token}
@@ -179,12 +212,14 @@ export function MachineWorkspace({
           />
         ) : readings ? (
           <ReadingsWorkspace
+            key={result.machines[0].id}
             machine={result.machines[0]}
             user={result.user}
             token={session.access_token}
           />
         ) : production ? (
           <ProductionWorkspace
+            key={result.machines[0].id}
             machine={result.machines[0]}
             user={result.user}
             token={session!.access_token}
@@ -193,117 +228,33 @@ export function MachineWorkspace({
           <MachineDetail
             machine={result.machines[0]}
             organization={result.user.organization}
+            user={result.user}
+            token={session.access_token}
           />
         )
       ) : (
-        <>
-          <div className="eyebrow">YOUR OPERATIONS, IN FOCUS</div>
-          <div className="page-heading">
-            <div>
-              <h1>Asset registry</h1>
-              <p>The machines your team is authorized to access.</p>
-            </div>
-            <span className="pill">
-              <Box size={14} />
-              {result.machines.length} accessible{" "}
-              {result.machines.length === 1 ? "asset" : "assets"}
-            </span>
-          </div>
-          {result.machines.length === 0 ? (
-            <section className="state-card">
-              <Factory size={34} />
-              <h2>No machines assigned yet</h2>
-              <p>
-                Ask your administrator to grant access to the WH-C pilot
-                machine.
-              </p>
-            </section>
-          ) : (
-            <div className="machine-grid">
-              {result.machines.map((machine) => (
-                <Link
-                  className="asset-card"
-                  key={machine.id}
-                  href={`/machines/${machine.code}`}
-                >
-                  <div className="asset-card-top">
-                    <span className="machine-code">{machine.code}</span>
-                    <ArrowRight size={20} />
-                  </div>
-                  <Factory size={46} strokeWidth={1.2} />
-                  <h2>{machine.name}</h2>
-                  <p>{machine.manufacturer}</p>
-                  <div className="asset-card-bottom">
-                    <span>
-                      <span className="status-dot" />
-                      Registry record
-                    </span>
-                    <span>View machine</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-          <div className="info-strip">
-            <ShieldCheck size={20} />
-            <p>
-              Access follows your organization and assigned machine permissions.
-            </p>
-          </div>
-        </>
+        <MachineRegistry
+          initial={{ items: result.machines, nextCursor: result.nextCursor }}
+          key={`${result.user.userId}:${result.user.role}`}
+          user={result.user}
+          token={session.access_token}
+        />
       )}
     </Shell>
   );
 }
-function LineIllustration() {
-  return (
-    <svg
-      viewBox="0 0 440 260"
-      className="line-illustration"
-      role="img"
-      aria-label="Concept illustration of a blown-film line; not the exact WH-C model"
-    >
-      <defs>
-        <pattern id="grid" width="22" height="22" patternUnits="userSpaceOnUse">
-          <path
-            d="M 22 0 L 0 0 0 22"
-            fill="none"
-            stroke="#cde0d8"
-            strokeWidth=".5"
-          />
-        </pattern>
-      </defs>
-      <rect width="440" height="260" fill="url(#grid)" />
-      <g fill="none" stroke="#2b6658" strokeWidth="2" strokeLinejoin="round">
-        <path d="M85 222H365M160 220V58H280V220M151 58H289M169 58V39H270V58M178 39V27H261V39M165 98H276M165 159H276M185 159L202 70H239L256 159Z" />
-        <path d="M192 166H248V185H192Z" fill="#d4e7df" />
-        <path d="M216 185V201H136V182H98V214H136V202M248 177H302V205H331" />
-        <rect x="309" y="198" width="43" height="22" rx="3" fill="#d4e7df" />
-        <circle cx="330" cy="209" r="6" />
-        <path d="M170 211H269M171 179H184M257 179H270M174 98L194 153M266 98L246 153" />
-        <path
-          strokeDasharray="4 5"
-          stroke="#71a793"
-          d="M220 85V146M296 90H360M96 150H140"
-        />
-      </g>
-      <g fill="#2b6658">
-        <circle cx="360" cy="90" r="3" />
-        <circle cx="96" cy="150" r="3" />
-      </g>
-      <text x="24" y="244" fill="#6d8b7e" fontSize="9" letterSpacing="2">
-        BLOWN-FILM LINE / CONCEPT VIEW
-      </text>
-    </svg>
-  );
-}
 function MachineDetail({
-  machine,
+  machine: initialMachine,
   organization,
+  user,
+  token,
 }: {
   machine: Machine;
   organization: string;
+  user: Me;
+  token: string;
 }) {
+  const [machine, setMachine] = useState(initialMachine);
   return (
     <>
       <Link href="/machines" className="back-link">
@@ -318,7 +269,7 @@ function MachineDetail({
             <span className="heading-divider">/</span>
             <span className="heading-name">{machine.name}</span>
           </h1>
-          <p>{organization} · Pilot machine registry</p>
+          <p>{organization} · Machine registry</p>
         </div>
         <span className="pill">
           <span className="status-dot" />
@@ -327,20 +278,16 @@ function MachineDetail({
       </div>
       <section className="machine-hero">
         <div className="hero-copy">
-          <span className="tag">PILOT ASSET</span>
-          <h2>
-            A clearer picture of
-            <br />
-            your production line.
-          </h2>
+          <span className="tag">REGISTERED MACHINE</span>
+          <h2>{machine.name}</h2>
           <p>
-            Your machine record, production history and synthetic process trends
-            are connected. Track operator reports and maintenance work below.
+            Maintenance work, planned tasks and approved references for{" "}
+            {machine.code}.
           </p>
           <div className="hero-meta">
             <span>
               <Factory size={16} />
-              {machine.manufacturer}
+              {machine.manufacturer || "Manufacturer not recorded"}
             </span>
             <span>
               <MapPin size={16} />
@@ -349,9 +296,33 @@ function MachineDetail({
           </div>
         </div>
         <div className="hero-art">
-          <LineIllustration />
+          <MachinePicture
+            code={machine.code}
+            token={token}
+            revision={machine.version}
+            photo={machine.photo}
+          />
         </div>
       </section>
+      {user.role === "ADMINISTRATOR" && (
+        <div className="machine-access-toolbar">
+          {!machine.archivedAt && (
+            <>
+              <MachineEditor
+                machine={machine}
+                token={token}
+                onSaved={setMachine}
+              />
+              <MachineAccess key={machine.id} machine={machine} token={token} />
+            </>
+          )}
+          <MachineLifecycle
+            machine={machine}
+            token={token}
+            onSaved={() => window.location.reload()}
+          />
+        </div>
+      )}
       <div className="detail-grid">
         <section className="panel">
           <div className="panel-heading">
@@ -365,7 +336,7 @@ function MachineDetail({
             </div>
             <div>
               <dt>Manufacturer</dt>
-              <dd>{machine.manufacturer}</dd>
+              <dd>{machine.manufacturer || "Manufacturer not recorded"}</dd>
             </div>
             <div>
               <dt>Equipment type</dt>
@@ -373,11 +344,11 @@ function MachineDetail({
             </div>
             <div>
               <dt>Exact model</dt>
-              <dd>{machine.model || "Not yet confirmed"}</dd>
+              <dd>{machine.model || "Not recorded"}</dd>
             </div>
             <div>
               <dt>Department</dt>
-              <dd>{machine.department?.name || "Not yet confirmed"}</dd>
+              <dd>{machine.department?.name || "Not recorded"}</dd>
             </div>
             <div>
               <dt>Monitoring status</dt>
@@ -387,90 +358,53 @@ function MachineDetail({
         </section>
         <section className="panel records-panel">
           <div className="panel-heading">
-            <h2>Performance records</h2>
+            <h2>Machine records</h2>
             <Activity size={18} />
           </div>
           <div className="empty-records">
-            <div className="empty-icon">
-              <FileSpreadsheet size={28} strokeWidth={1.4} />
+            <div className="record-actions">
+              <Button asChild>
+                <Link href={`/machines/${machine.code}/work-orders`}>
+                  Open work orders
+                </Link>
+              </Button>
+              <>
+                <Button asChild variant="outline">
+                  <Link href={`/machines/${machine.code}/production`}>
+                    <ArrowDownToLine size={14} />
+                    Open production records
+                  </Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link href={`/machines/${machine.code}/readings`}>
+                    <Activity size={14} />
+                    Open process trends
+                  </Link>
+                </Button>
+              </>
+              <Button asChild variant="outline">
+                <Link href={`/machines/${machine.code}/calendar`}>
+                  Maintenance calendar
+                </Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href={`/machines/${machine.code}/documents`}>
+                  Manuals & SOPs
+                </Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href={`/machines/${machine.code}/performance`}>
+                  Maintenance performance
+                </Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href={`/machines/${machine.code}/reports`}>
+                  Maintenance reports
+                </Link>
+              </Button>
             </div>
-            <h3>Production records, with source context</h3>
-            <p>
-              Preview a production workbook, review flagged date blocks and see
-              totals from saved records. Explore synthetic hourly process trends
-              separately.
-            </p>
-            <Button asChild>
-              <Link href={`/machines/${machine.code}/production`}>
-                <ArrowDownToLine size={14} />
-                Open production records
-              </Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href={`/machines/${machine.code}/readings`}>
-                <Activity size={14} />
-                Open process trends
-              </Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href={`/machines/${machine.code}/performance`}>
-                Maintenance performance
-              </Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href={`/machines/${machine.code}/reports`}>
-                Maintenance reports
-              </Link>
-            </Button>
           </div>
         </section>
-      </div>
-      <section className="workflow-panel">
-        <div>
-          <span className="eyebrow">PEOPLE KEEP THE PROCESS MOVING</span>
-          <h2>A clear maintenance handoff</h2>
-          <p>
-            Report, assign, repair, review and close with a traceable history.
-          </p>
-        </div>
-        <Button asChild variant="outline">
-          <Link href={`/machines/${machine.code}/work-orders`}>
-            Open work orders
-            <ArrowRight size={14} />
-          </Link>
-        </Button>
-        <div className="workflow-steps">
-          <div>
-            <span>01</span>
-            <strong>Report</strong>
-            <small>Operator</small>
-          </div>
-          <ArrowRight size={16} />
-          <div>
-            <span>02</span>
-            <strong>Investigate & repair</strong>
-            <small>Assigned technician</small>
-          </div>
-          <ArrowRight size={16} />
-          <div>
-            <span>03</span>
-            <strong>Review</strong>
-            <small>Maintenance head</small>
-          </div>
-          <ArrowRight size={16} />
-          <div>
-            <span>04</span>
-            <strong>Close</strong>
-            <small>Supervisor or head</small>
-          </div>
-        </div>
-      </section>
-      <div className="info-strip">
-        <Wrench size={19} />
-        <p>
-          WH-C is the newer Windmöller & Hölscher pilot line. The exact model is
-          unconfirmed. WH-B remains reference-only.
-        </p>
       </div>
     </>
   );

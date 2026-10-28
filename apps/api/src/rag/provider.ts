@@ -190,9 +190,16 @@ export class DocumentAiProvider implements RagAi {
     instructions: string,
     input: unknown,
     format: unknown,
-    budget = (format as any).properties?.supported ? 1536 : 2048,
+    budget?: number,
     timeout = 45000,
   ) {
+    const deepseek =
+      settings(this.config).answerModel === "deepseek/deepseek-v4.1-flash";
+    // Reasoning shares the output allowance. DeepSeek's support checks can
+    // exhaust the smaller GLM allowance before emitting the final JSON.
+    const outputBudget =
+      budget ??
+      (deepseek ? 4096 : (format as any).properties?.supported ? 1536 : 2048);
     if (settings(this.config).provider === "commandcode") {
       const result = await this.request(
         "chat/completions",
@@ -203,7 +210,8 @@ export class DocumentAiProvider implements RagAi {
               role: "system",
               content:
                 instructions +
-                " Keep reasoning brief. Return only the requested JSON; keep answers concise and preserve essential qualifications.",
+                " Keep reasoning brief. Return only the requested JSON; keep answers concise and preserve essential qualifications. The response object must match this JSON Schema exactly, including every required field and no extra fields:\n" +
+                JSON.stringify(format),
             },
             { role: "user", content: JSON.stringify(input) },
           ],
@@ -215,8 +223,9 @@ export class DocumentAiProvider implements RagAi {
               schema: format,
             },
           },
-          max_tokens: budget,
+          max_tokens: outputBudget,
           temperature: 0,
+          ...(deepseek ? { reasoning_effort: "low" } : {}),
         },
         timeout,
       );
@@ -236,7 +245,7 @@ export class DocumentAiProvider implements RagAi {
         model: settings(this.config).answerModel,
         store: false,
         reasoning: { effort: "low" },
-        max_output_tokens: budget,
+        max_output_tokens: outputBudget,
         instructions,
         input: JSON.stringify(input),
         text: {

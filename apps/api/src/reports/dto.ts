@@ -1,5 +1,6 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 export class ReportCountsDto {
+  @ApiPropertyOptional() cancelled?: number;
   @ApiProperty() open!: number;
   @ApiProperty() closed!: number;
   @ApiProperty() skipped!: number;

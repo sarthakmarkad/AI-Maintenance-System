@@ -82,6 +82,43 @@ const tasks = (planId: string) =>
     orderBy: { sequence: "asc" },
   });
 const jobs = (now = new Date()) => service.runJobs(now, { orgId, machineId });
+test("cancelled planned work remains linked and stops actionable reminders without claiming completion", async () => {
+  const plan = await create({ frequency: "WEEKLY" });
+  const task = (await tasks(plan.id))[0];
+  const released = (
+    await post(`/occurrences/${task.id}/release`)
+      .send({ version: task.version, technicianId: ids.tech })
+      .expect(200)
+  ).body;
+  const current = (
+    await request(app.getHttpServer())
+      .get(wb + "/" + released.orderId)
+      .set("Authorization", `Bearer ${ids.head}`)
+      .expect(200)
+  ).body;
+  const cancelled = (
+    await work(current.id, "cancel", "head", {
+      version: current.version,
+      reason: "TEST duplicate scheduled task",
+    }).expect(200)
+  ).body;
+  assert.equal(cancelled.status, "CANCELLED");
+  assert.equal(cancelled.performedAt, null);
+  await jobs();
+  const calendar = (await get(windowQuery() + "&status=CANCELLED").expect(200))
+    .body;
+  assert.ok(
+    calendar.items.some(
+      (x: any) => x.id === task.id && x.status === "CANCELLED",
+    ),
+  );
+  const reminders = (await get("/reminders").expect(200)).body;
+  assert.ok(!reminders.items.some((x: any) => x.occurrenceId === task.id));
+  assert.equal(
+    await db.workOrder.count({ where: { occurrenceId: task.id } }),
+    1,
+  );
+});
 before(async () => {
   const org = await db.organization.create({
     data: {

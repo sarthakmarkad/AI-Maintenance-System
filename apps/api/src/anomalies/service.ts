@@ -248,7 +248,11 @@ export class AnomaliesService {
     );
     return this.db.$transaction(async (tx) => {
       // Recheck current role/scope after the separate worker finishes.
-      const { user: live, scope } = await this.access.context(tx, user, code);
+      const {
+        user: live,
+        scope,
+        machine,
+      } = await this.access.context(tx, user, code);
       const reviews = await tx.anomalyReview.findMany({
         where: { ...scope, key: { in: result.flags.map((f) => f.key) } },
         include: {
@@ -303,7 +307,7 @@ export class AnomaliesService {
         from: snapshot.from,
         to: snapshot.to,
         evaluatedAt: new Date().toISOString(),
-        canReview: live.role === "MAINTENANCE_HEAD",
+        canReview: !machine.archivedAt && live.role === "MAINTENANCE_HEAD",
         observations,
         eligible: result.eligible,
         insufficientHistory: observations - result.eligible.SUDDEN_CHANGE,
@@ -325,7 +329,11 @@ export class AnomaliesService {
   ) {
     return this.db.$transaction(
       async (tx) => {
-        const { user: live, scope } = await this.access.context(tx, user, code);
+        const {
+          user: live,
+          scope,
+          machine,
+        } = await this.access.context(tx, user, code);
         if (live.role !== "MAINTENANCE_HEAD")
           throw new ForbiddenException(
             "Only the Maintenance head can review statistical flags.",
@@ -440,7 +448,11 @@ export class AnomaliesService {
   ) {
     return this.db.$transaction(
       async (tx) => {
-        const { user: live, scope } = await this.access.context(tx, user, code);
+        const {
+          user: live,
+          scope,
+          machine,
+        } = await this.access.context(tx, user, code);
         if (live.role !== "MAINTENANCE_HEAD")
           throw new ForbiddenException(
             "Only the Maintenance head can open investigations.",
@@ -494,7 +506,11 @@ export class AnomaliesService {
   }
   async history(user: Principal, code: string, after?: string) {
     return this.db.$transaction(async (tx) => {
-      const { user: live, scope } = await this.access.context(tx, user, code);
+      const {
+        user: live,
+        scope,
+        machine,
+      } = await this.access.context(tx, user, code);
       const cursor = after
         ? await tx.anomalyReview.findFirst({ where: { ...scope, id: after } })
         : null;
@@ -520,7 +536,8 @@ export class AnomaliesService {
         },
       });
       return {
-        canOpenInvestigation: live.role === "MAINTENANCE_HEAD",
+        canOpenInvestigation:
+          !machine.archivedAt && live.role === "MAINTENANCE_HEAD",
         items: rows.slice(0, 25).map((r) => ({
           ...this.receipt(r, r.reviewer.user.displayName),
           evidence: r.evidence,

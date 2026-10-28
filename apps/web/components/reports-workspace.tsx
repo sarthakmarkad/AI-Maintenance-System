@@ -181,9 +181,7 @@ export function ReportsWorkspace({
         </div>
       </div>
       <p className="reports-role-note">
-        Your {user.role.toLowerCase().replaceAll("_", " ")} view can export
-        records within its existing machine access. Downloads do not change or
-        approve maintenance work.
+        Downloads reflect saved records and do not approve maintenance work.
       </p>
       <form
         className="panel report-filters"
@@ -346,6 +344,7 @@ export function ReportsWorkspace({
             </div>
             <div className="report-preview-body">
               <p className="report-counts">
+                Cancelled: <strong>{report.counts.cancelled ?? 0}</strong> ·
                 Open: <strong>{report.counts.open}</strong> · Closed:{" "}
                 <strong>{report.counts.closed}</strong>
                 {report.report === "planned-maintenance" && (

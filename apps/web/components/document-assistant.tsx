@@ -25,6 +25,7 @@ import type { components } from "@maintenance/api-client";
 import { api, apiBlob, ApiError, type Machine, type Me } from "@/lib/api";
 import { useAuth } from "./auth-provider";
 import { ChatReply, formatInlineSteps } from "./chat-reply";
+import { FormPopup } from "./ui/form-popup";
 import { errorNames } from "./document-chat-errors";
 import styles from "./document-assistant.module.css";
 type Status = components["schemas"]["DocumentAiStatusDto"];
@@ -67,6 +68,11 @@ export function DocumentAssistant({
     chatId = params.get("chat"),
     { expire } = useAuth();
   const [overlay, setOverlay] = useState(false);
+  const [removeChat, setRemoveChat] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
+  const [removeError, setRemoveError] = useState("");
   const panelNode = useRef<HTMLElement>(null),
     historyNode = useRef<HTMLElement>(null),
     returnFocus = useRef<HTMLElement | null>(null);
@@ -97,7 +103,7 @@ export function DocumentAssistant({
     sending = useRef(false),
     draftRevision = useRef(0),
     copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const allowed = !!status?.configured;
+  const allowed = !!status?.configured && !machine.archivedAt;
   async function failure(e: unknown) {
     if (e instanceof ApiError && e.status === 401) {
       setTurns([]);
@@ -531,16 +537,27 @@ export function DocumentAssistant({
         <span className={styles.sectionLabel}>RECENT</span>
         <div className={styles.chatList}>
           {chats.items.map((c) => (
-            <button
-              key={c.id}
-              title={c.title}
-              aria-current={c.id === chatId ? "page" : undefined}
-              disabled={busy}
-              onClick={() => openChat(c.id)}
-            >
-              <MessageSquare size={14} />
-              <span>{c.title}</span>
-            </button>
+            <div key={c.id} className={styles.chatRow}>
+              <button
+                title={c.title}
+                aria-current={c.id === chatId ? "page" : undefined}
+                disabled={busy}
+                onClick={() => openChat(c.id)}
+              >
+                <MessageSquare size={14} />
+                <span>{c.title}</span>
+              </button>
+              <button
+                disabled={busy}
+                aria-label={`Remove conversation: ${c.title}`}
+                onClick={() => {
+                  setRemoveError("");
+                  setRemoveChat(c);
+                }}
+              >
+                <X size={14} />
+              </button>
+            </div>
           ))}
           {!chats.items.length && !loading && (
             <p>Your conversations will appear here.</p>
@@ -1108,6 +1125,71 @@ export function DocumentAssistant({
           </aside>
         </>
       )}
+      <FormPopup
+        open={!!removeChat}
+        onOpenChange={(open) => {
+          if (!open) setRemoveChat(null);
+        }}
+        title="Remove conversation"
+        busy={busy}
+        error={removeError}
+      >
+        <p>
+          Remove “{removeChat?.title}” from your saved conversations? Its
+          retained history will no longer be available in the chat interface.
+        </p>
+        <button
+          className={styles.newChat}
+          disabled={busy}
+          onClick={async () => {
+            if (!removeChat) return;
+            setBusy(true);
+            setRemoveError("");
+            try {
+              await api(
+                base + `/chats/${removeChat.id}/archive`,
+                token,
+                undefined,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: "{}",
+                },
+              );
+              setChats((previous) => ({
+                ...previous,
+                items: previous.items.filter((c) => c.id !== removeChat.id),
+                nextCursor: null,
+              }));
+              if (chatId === removeChat.id) newChat();
+              setRemoveChat(null);
+              try {
+                setChats(await api<Chats>(base + "/chats", token));
+              } catch (e) {
+                if (e instanceof ApiError && [401, 403, 404].includes(e.status))
+                  await failure(e);
+                else
+                  setNotice(
+                    "Conversation removed. The list could not refresh; reopen this page to reload it.",
+                  );
+              }
+            } catch (e) {
+              await failure(e);
+              if (e instanceof ApiError && [401, 403, 404].includes(e.status))
+                setRemoveChat(null);
+              setRemoveError(
+                e instanceof Error
+                  ? e.message
+                  : "Could not remove conversation.",
+              );
+            } finally {
+              setBusy(false);
+            }
+          }}
+        >
+          Confirm removal
+        </button>
+      </FormPopup>
     </section>
   );
 }

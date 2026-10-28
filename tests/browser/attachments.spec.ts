@@ -164,6 +164,14 @@ async function fixture(
   return { o, requests, headers };
 }
 async function select(page: Page, name = "inspection.png", buffer = png) {
+  if (
+    !(await page
+      .getByRole("dialog", { name: "Add supporting evidence", exact: true })
+      .isVisible())
+  )
+    await page
+      .getByRole("button", { name: "Add supporting evidence", exact: true })
+      .click();
   await page.getByLabel("Choose a photo or document").setInputFiles({
     name,
     mimeType: name.endsWith(".pdf") ? "application/pdf" : "image/png",
@@ -278,6 +286,12 @@ test("stale upload blocks further actions until explicit reload", async ({
     page.getByRole("button", { name: "Save attachment", exact: true }),
   ).toBeDisabled();
   expect(f.requests).toHaveLength(1);
+  if (
+    await page
+      .getByRole("dialog", { name: "Add supporting evidence", exact: true })
+      .isVisible()
+  )
+    await page.getByRole("button", { name: "Close form", exact: true }).click();
   await page
     .getByRole("button", { name: "Reload work order", exact: true })
     .click();
@@ -498,8 +512,12 @@ test("photo preview retries a failed request and preserves an unrelated evidence
 }) => {
   const state = await fixture(page, { existing: true });
   await page
+    .getByRole("button", { name: "Add supporting evidence", exact: true })
+    .click();
+  await page
     .getByLabel("What does this attachment show?")
     .fill("TEST preserve my unsaved evidence description");
+  await page.getByRole("button", { name: "Close form", exact: true }).click();
   const bytes = await samplePhoto(page);
   let calls = 0,
     failing = true;
@@ -522,6 +540,9 @@ test("photo preview retries a failed request and preserves an unrelated evidence
   await expect(dialog.getByRole("img")).toBeVisible();
   expect(calls).toBeGreaterThan(beforeRetry);
   await dialog.getByRole("button", { name: "Close photo preview" }).click();
+  await page
+    .getByRole("button", { name: "Add supporting evidence", exact: true })
+    .click();
   await expect(page.getByLabel("What does this attachment show?")).toHaveValue(
     "TEST preserve my unsaved evidence description",
   );

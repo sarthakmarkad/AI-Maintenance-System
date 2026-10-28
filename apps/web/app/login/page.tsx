@@ -1,9 +1,11 @@
 "use client";
 import { Suspense, useEffect, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowRight, Factory, ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft, ArrowRight, ScanLine, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/components/auth-provider";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { getSupabase } from "@/lib/supabase";
 import { publicConfig } from "@/lib/config";
 import { beginGoogleSignIn, googleSignInAvailable } from "@/lib/google-auth";
@@ -84,16 +86,16 @@ function Login() {
   return (
     <main className="login-page">
       <section className="login-story">
-        <div className="brand">
+        <Link href="/" className="brand" aria-label="Supreme home">
           <span className="brand-mark">
-            <Factory size={26} />
+            <ScanLine size={26} />
           </span>
           <span>
             SUPREME<small>Maintenance intelligence</small>
           </span>
-        </div>
+        </Link>
         <div className="login-intro">
-          <div className="eyebrow">WH-C / PILOT WORKSPACE</div>
+          <div className="eyebrow">YOUR MACHINE WORKSPACES</div>
           <h1>
             Better context.
             <br />
@@ -109,7 +111,7 @@ function Login() {
           <span className="story-footnote">
             Built for Supreme Industries
             <br />
-            Windmöller & Hölscher · Blown-film line
+            Your equipment · Your maintenance team
           </span>
         </div>
         <span className="login-bottom">
@@ -118,6 +120,9 @@ function Login() {
       </section>
       <section className="login-form-panel">
         <div className="login-form-wrap">
+          <Link className="login-home" href="/">
+            <ArrowLeft size={14} /> Back to website
+          </Link>
           <span className="tag">SECURE TEAM ACCESS</span>
           <h2>Welcome back.</h2>
           <p className="login-description">
@@ -125,11 +130,10 @@ function Login() {
           </p>
           {!configured && (
             <div className="config-notice" role="status">
-              <strong>Supabase setup is required</strong>
+              <strong>Sign-in is not configured</strong>
               <p>
-                Add the project URL and public publishable key to the frontend
-                configuration to enable sign in. Your administrator must also
-                provision an application membership.
+                Contact your administrator to configure sign-in and confirm your
+                workspace access.
               </p>
             </div>
           )}
@@ -175,7 +179,7 @@ function Login() {
             {google === "loading"
               ? "Checking sign-in options…"
               : google === "disabled"
-                ? "Google sign-in is being set up. Use email and password below."
+                ? "Google sign-in is unavailable. Use email and password below."
                 : google === "unavailable"
                   ? "Could not check Google sign-in. Email sign-in is still available."
                   : "Use the Google account approved for your workspace."}
@@ -194,7 +198,7 @@ function Login() {
           </div>
           <form onSubmit={submit}>
             <label htmlFor="email">Work email</label>
-            <input
+            <Input
               id="email"
               name="email"
               type="email"
@@ -204,7 +208,7 @@ function Login() {
               disabled={!configured || busy}
             />
             <label htmlFor="password">Password</label>
-            <input
+            <Input
               id="password"
               name="password"
               type="password"
@@ -222,17 +226,20 @@ function Login() {
               <ArrowRight size={17} />
             </Button>
           </form>
+          <Link href="/forgot-password">Forgot your password?</Link>
           <div className="login-security">
             <ShieldCheck size={17} />
             <span>Access is managed by your organization.</span>
           </div>
           <p className="login-help">
-            Need access or a password reset?
+            Need workspace access?
             <br />
             Contact your application administrator.
           </p>
         </div>
-        <small className="login-version">WH-C pilot · Team access</small>
+        <small className="login-version">
+          Machine maintenance · Team access
+        </small>
       </section>
     </main>
   );

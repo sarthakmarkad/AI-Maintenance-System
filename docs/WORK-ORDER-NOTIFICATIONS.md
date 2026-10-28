@@ -17,6 +17,8 @@ Only the newest workflow event on an order can be actionable. ATTACH events pres
 
 Calendar Upcoming/Due/Overdue reminders and their receipts remain separate. Statistical detection and saving an investigation review alone create no work-order notification. The explicit human release event does. No email, SMS, push subscription, external delivery worker, invented schedule or operational seed notification is added. These are pilot implementation choices, not reconstructed SRS requirements.
 
+Extension on 27 October: optional email delivery is now implemented separately in [EXTERNAL-NOTIFICATIONS.md](EXTERNAL-NOTIFICATIONS.md), using the same committed actionable handoffs. Each eligible active role opts in to its confirmed email, with a new-event cutoff, private durable outbox and bounded retries. Provider configuration is required before live sending; in-app reads remain independent. AI RCA generation itself produces no workflow handoff or external alert.
+
 ## Historical behavior and retained evidence
 
 The durable notification source is the existing immutable WorkOrderEvent, which already commits in the same transaction as the work order and protected workflow audit. There is no additional event emission hook or delivery queue to fail independently. Failed report/assignment/release/submission/return transactions cannot leave phantom alerts. The existing unique order/version event constraint and release/request retry guarantees apply to notification identities too.
@@ -57,3 +59,8 @@ Migration and narrow grants are applied locally. Private before/after fingerprin
 ## New-breakdown intake correction — 24 October 2026
 
 Operator REPORT events now notify eligible active Maintenance heads while a BREAKDOWN remains REPORTED. This closes the missing initial operator-to-head handoff. Existing still-unassigned reports become eligible from their retained original events, without rewriting or recreating them. ATTACH-only evidence changes preserve the notification, explicit role-specific read receipts keep their original semantics, and successful assignment removes the head intake item while creating the technician handoff. Head submission-review notifications remain unchanged. Migration `202610240016_reported_work_order_notifications` extends the existing receipt eligibility trigger without editing the already-applied migration 014 or any stored report/history.
+
+
+## Multi-machine scope — 28 October 2026
+
+The generic maintenance workspace now supports Administrator-registered organization machines under the existing trusted role/machine grants. WH-C remains the validated workbook/process-data pilot; WH-B stays reference-only. Work-order handoffs, email links and newly captured AI RCA machine identity use the selected machine; approved documents and RAG retrieval retain machine-ID isolation. Existing immutable records/payloads are retained unchanged. See [MACHINE-REGISTRY.md](MACHINE-REGISTRY.md).

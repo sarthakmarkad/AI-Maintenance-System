@@ -207,7 +207,21 @@ test("head opens an investigation from a flag; the order links the review and st
   assert.equal(order.events[0].action, "INVESTIGATE");
   const detail = (await getOrder(orderId).expect(200)).body;
   assert.equal(detail.kind, "INVESTIGATION");
-  assert.deepEqual(detail.allowedActions, ["assign"]);
+  assert.deepEqual(detail.allowedActions, ["cancel", "assign"]);
+  const cancelled = (
+    await act(
+      orderId,
+      "cancel",
+      { version: detail.version, reason: "TEST duplicate investigation" },
+      "head",
+    ).expect(200)
+  ).body;
+  assert.equal(cancelled.status, "CANCELLED");
+  assert.equal(cancelled.anomalyReviewId, res.body.id);
+  assert.equal(cancelled.performedAt, null);
+  await act(orderId, "start", { version: cancelled.version }, "tech").expect(
+    409,
+  );
 });
 test("only the Maintenance head can open an investigation", async () => {
   const flag = await flagFor();

@@ -28,13 +28,17 @@ const user: Principal = {
 };
 const machine: MachineRecord = {
   id: "machine1",
+  version: 1,
   code: "WH-C",
   name: "Blown-film line",
   manufacturer: "Windmöller & Hölscher",
   model: null,
   operationalStatus: "NOT_MONITORED",
+  archivedAt: null,
+  archiveReason: null,
   department: null,
   location: null,
+  photo: null,
   createdAt: new Date(),
   updatedAt: new Date(),
 };

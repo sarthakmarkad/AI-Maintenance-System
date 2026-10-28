@@ -179,7 +179,10 @@ test("CommandCode configuration prefers its own key and never falls back to Open
     COMMANDCODE_API_KEY: "TEST-commandcode-key",
   };
   assert.equal(settings(base).provider, "commandcode");
-  assert.equal(settings(base).answerModel, "z-ai/glm-5.3-flash");
+  assert.equal(settings(base).answerModel, "deepseek/deepseek-v4.1-flash");
+  const legacy = settings({ ...base, COMMANDCODE_MODEL: "z-ai/glm-5.3-flash" });
+  assert.equal(legacy.answerModel, "z-ai/glm-5.3-flash");
+  assert.equal(legacy.profile, settings(base).profile);
   assert(settings(base).profile.includes("768-pad1536"));
   assert.equal(
     settings({
@@ -239,7 +242,7 @@ test("local embeddings pin the model, use retrieval prefixes and never send clou
     global.fetch = old;
   }
 });
-test("GLM uses CommandCode strict schemas and ZDR; incomplete JSON cannot become an answer", async () => {
+test("DeepSeek uses CommandCode strict schemas and ZDR; incomplete JSON cannot become an answer", async () => {
   const old = global.fetch,
     requests: any[] = [];
   global.fetch = (async (url, init) => {
@@ -274,11 +277,18 @@ test("GLM uses CommandCode strict schemas and ZDR; incomplete JSON cannot become
       requests[0].url,
       "https://api.commandcode.ai/provider/v1/chat/completions",
     );
-    assert.equal(requests[0].body.model, "z-ai/glm-5.3-flash");
+    assert.equal(requests[0].body.model, "deepseek/deepseek-v4.1-flash");
     assert.equal(requests[0].body.response_format.json_schema.strict, true);
+    assert(
+      requests[0].body.messages[0].content.endsWith(
+        JSON.stringify(requests[0].body.response_format.json_schema.schema),
+      ),
+      "The system prompt must supply the actual response schema as well as the API format hint",
+    );
     assert.equal(requests[0].init.headers["x-cmd-zdr"], "1");
     assert(!requests[0].body.tools);
     assert(!requests[0].body.thinking);
+    assert.equal(requests[0].body.reasoning_effort, "low");
     assert.equal(requests[0].body.max_tokens, 3072);
     await ai.answer("Summarize all instructions in the SOP", []);
     assert.equal(requests.at(-1).body.max_tokens, 6144);
@@ -289,7 +299,18 @@ test("GLM uses CommandCode strict schemas and ZDR; incomplete JSON cannot become
       }),
       /AI_INVALID_RESPONSE/,
     );
-    assert.equal(requests.at(-1).body.max_tokens, 1536);
+    assert.equal(requests.at(-1).body.max_tokens, 4096);
+    const legacy = new OpenAiProvider({
+      NODE_ENV: "test",
+      HOST: "127.0.0.1",
+      PORT: 4000,
+      WEB_ORIGIN: "http://localhost:3000",
+      COMMANDCODE_API_KEY: "TEST-commandcode-secret",
+      COMMANDCODE_MODEL: "z-ai/glm-5.3-flash",
+    });
+    await legacy.answer("TEST question", []);
+    assert.equal(requests.at(-1).body.model, "z-ai/glm-5.3-flash");
+    assert(!requests.at(-1).body.reasoning_effort);
     global.fetch = (async () =>
       new Response(
         JSON.stringify({
@@ -305,6 +326,18 @@ test("GLM uses CommandCode strict schemas and ZDR; incomplete JSON cannot become
       ai.answer("TEST question", []),
       /AI_INCOMPLETE_RESPONSE/,
     );
+    global.fetch = (async () =>
+      new Response(
+        JSON.stringify({
+          choices: [
+            {
+              finish_reason: "stop",
+              message: { content: '{"type":"json_object","statements":[]}' },
+            },
+          ],
+        }),
+      )) as typeof fetch;
+    await assert.rejects(ai.answer("TEST question", []), /AI_INVALID_RESPONSE/);
   } finally {
     global.fetch = old;
   }

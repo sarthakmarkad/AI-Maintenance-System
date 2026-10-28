@@ -69,7 +69,7 @@ export class CalendarController {
   @ApiQuery({
     name: "status",
     required: false,
-    enum: ["UPCOMING", "DUE", "OVERDUE", "COMPLETED", "SKIPPED"],
+    enum: ["UPCOMING", "DUE", "OVERDUE", "COMPLETED", "SKIPPED", "CANCELLED"],
   })
   @ApiQuery({ name: "after", required: false })
   @ApiOkResponse({ type: CalendarDto })

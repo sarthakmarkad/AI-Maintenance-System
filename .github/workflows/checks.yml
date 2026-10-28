@@ -40,4 +40,6 @@ jobs:
       - run: npm run build
       - run: npm exec playwright -- install --with-deps chromium
       - run: npm run test:web
+      - name: Real API and isolated database browser journeys
+        run: npm run test:system
       - run: npm audit --audit-level=high

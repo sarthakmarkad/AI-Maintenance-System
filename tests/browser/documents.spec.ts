@@ -407,6 +407,7 @@ test("revoked document access clears cached references and management drafts unt
       json: { message: "TEST document access revoked" },
     }),
   );
+  await page.getByRole("button", { name: "Close form", exact: true }).click();
   await page.getByRole("button", { name: "Download approved PDF" }).click();
   await expect(
     page.getByRole("alert", { name: "Document request error" }),
@@ -423,4 +424,33 @@ test("revoked document access clears cached references and management drafts unt
     page.getByRole("heading", { name: "TEST machine manual", exact: true }),
   ).toBeVisible();
   await expect(page.getByLabel("Revision description")).toHaveValue("");
+});
+
+test("reference upload popup retains the selected private file and revision description on close", async ({
+  page,
+}) => {
+  const state = await fixture(page, "ADMINISTRATOR");
+  await revision(page);
+  const popup = page.getByRole("dialog", {
+    name: "Upload revision: TEST machine manual",
+    exact: true,
+  });
+  await expect(popup).toBeVisible();
+  await popup.getByRole("button", { name: "Close form", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Upload reference", exact: true })
+    .click();
+  await expect(popup.getByLabel("Revision description")).toHaveValue(
+    "TEST revised instructions",
+  );
+  expect(
+    await popup
+      .getByLabel("PDF file", { exact: true })
+      .evaluate((node) => (node as HTMLInputElement).files?.[0]?.name),
+  ).toBe("revision.pdf");
+  expect(state.requests).toHaveLength(0);
+  await page.screenshot({
+    path: `test-results/reference-popup-${test.info().project.name}.png`,
+    fullPage: true,
+  });
 });

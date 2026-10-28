@@ -34,7 +34,9 @@ const schema = z
     SUPABASE_PUBLISHABLE_KEY: optional(z.string().min(10)),
     DOCUMENT_AI_PROVIDER: z.enum(["commandcode", "openai"]).optional(),
     COMMANDCODE_API_KEY: optional(z.string().trim().min(20)),
-    COMMANDCODE_MODEL: z.literal("z-ai/glm-5.3-flash").optional(),
+    COMMANDCODE_MODEL: z
+      .enum(["deepseek/deepseek-v4.1-flash", "z-ai/glm-5.3-flash"])
+      .optional(),
     COMMANDCODE_BASE_URL: z
       .literal("https://api.commandcode.ai/provider/v1")
       .optional(),
@@ -45,6 +47,13 @@ const schema = z
       .optional(),
     OPENAI_ANSWER_MODEL: optional(z.string().regex(/^[a-zA-Z0-9._-]{1,100}$/)),
     DOCUMENT_AI_ENABLED: z.enum(["true", "false"]).optional(),
+    RCA_AI_ENABLED: z.enum(["true", "false"]).optional(),
+    EXTERNAL_NOTIFICATIONS_ENABLED: z.enum(["true", "false"]).optional(),
+    NOTIFICATION_EMAIL_PROVIDER: z.literal("resend").optional(),
+    RESEND_API_KEY: optional(z.string().trim().min(20)),
+    NOTIFICATION_EMAIL_FROM: optional(z.email()),
+    TEAM_PASSWORD_EMAIL_READY: z.enum(["true", "false"]).optional(),
+    TEAM_INVITATION_SECRET: optional(z.string().regex(/^[a-f0-9]{64}$/)),
     ENABLE_DEMO_AUTH: z.enum(["false"]).optional(),
   })
   .superRefine((v, ctx) => {

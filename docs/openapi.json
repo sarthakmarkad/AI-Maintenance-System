@@ -1,6 +1,403 @@
 {
   "openapi": "3.0.0",
   "paths": {
+    "/api/team/members": {
+      "get": {
+        "operationId": "TeamController_members",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffListDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Team"
+        ]
+      }
+    },
+    "/api/team/invitations": {
+      "get": {
+        "operationId": "TeamController_invitations",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamInvitationsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Team"
+        ]
+      },
+      "post": {
+        "operationId": "TeamController_invite",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InviteStaffDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamReceiptDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Team"
+        ]
+      }
+    },
+    "/api/team/members/{id}": {
+      "put": {
+        "operationId": "TeamController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStaffDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamReceiptDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Team"
+        ]
+      }
+    },
+    "/api/team/invitations/{id}/revoke": {
+      "post": {
+        "operationId": "TeamController_revoke",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TeamActionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamReceiptDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Team"
+        ]
+      }
+    },
+    "/api/team/invitations/{id}/link": {
+      "post": {
+        "operationId": "TeamController_link",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamReceiptDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Team"
+        ]
+      }
+    },
+    "/api/team/invitations/{id}/email": {
+      "post": {
+        "operationId": "TeamController_send",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TeamActionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamReceiptDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Team"
+        ]
+      }
+    },
+    "/api/team/onboarding/options": {
+      "get": {
+        "operationId": "TeamOnboardingController_options",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Staff onboarding"
+        ]
+      }
+    },
+    "/api/team/onboarding/preview": {
+      "post": {
+        "operationId": "TeamOnboardingController_preview",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TeamInvitationTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamInvitationDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Staff onboarding"
+        ]
+      }
+    },
+    "/api/team/onboarding/available": {
+      "post": {
+        "operationId": "TeamOnboardingController_available",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamInvitationsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Staff onboarding"
+        ]
+      }
+    },
+    "/api/team/onboarding/accept": {
+      "post": {
+        "operationId": "TeamOnboardingController_accept",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptTeamInvitationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamAcceptanceDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Staff onboarding"
+        ]
+      }
+    },
     "/api/health/live": {
       "get": {
         "operationId": "HealthController_live",
@@ -114,6 +511,28 @@
         "operationId": "MachinesController_list",
         "parameters": [
           {
+            "name": "archived",
+            "required": false,
+            "in": "query",
+            "description": "Select active (default) or archived machines.",
+            "schema": {
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Search machine code or name within current access.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "after",
             "required": false,
             "in": "query",
@@ -175,6 +594,90 @@
             }
           },
           "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Machines"
+        ]
+      },
+      "post": {
+        "operationId": "MachineRegistrationController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterMachineDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MachineDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
             "description": "",
             "content": {
               "application/json": {
@@ -278,6 +781,880 @@
         ],
         "tags": [
           "Machines"
+        ]
+      }
+    },
+    "/api/machines/{code}/access": {
+      "get": {
+        "operationId": "MachineRegistrationController_roster",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "after",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MachineAccessRosterDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Machines"
+        ]
+      },
+      "put": {
+        "operationId": "MachineRegistrationController_access",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMachineAccessDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MachineAccessReceiptDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Machines"
+        ]
+      }
+    },
+    "/api/machines/{code}/details": {
+      "get": {
+        "operationId": "MachineRegistrationController_details",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MachineDetailsDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Machines"
+        ]
+      },
+      "put": {
+        "operationId": "MachineRegistrationController_updateDetails",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMachineDetailsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MachineAccessReceiptDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Machines"
+        ]
+      }
+    },
+    "/api/machines/{code}/lifecycle": {
+      "post": {
+        "operationId": "MachineRegistrationController_lifecycle",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MachineLifecycleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MachineAccessReceiptDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Machines"
+        ]
+      }
+    },
+    "/api/machines/{code}/photo": {
+      "post": {
+        "operationId": "MachineRegistrationController_uploadPhoto",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file",
+                  "requestId",
+                  "version"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "requestId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MachineAccessReceiptDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Machines"
+        ]
+      }
+    },
+    "/api/machines/{code}/photo/remove": {
+      "post": {
+        "operationId": "MachineRegistrationController_removePhoto",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeMachinePhotoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MachineAccessReceiptDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Machines"
+        ]
+      }
+    },
+    "/api/machines/{code}/photo/{id}": {
+      "get": {
+        "operationId": "MachineRegistrationController_photo",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Machines"
+        ]
+      }
+    },
+    "/api/machines/{code}/production/template": {
+      "get": {
+        "operationId": "ProductionController_template",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          },
+          {
+            "name": "month",
+            "required": false,
+            "in": "query",
+            "description": "YYYY-MM; defaults to the current IST month.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Production"
         ]
       }
     },
@@ -856,6 +2233,93 @@
         ],
         "tags": [
           "Production"
+        ]
+      }
+    },
+    "/api/machines/{code}/readings/template": {
+      "get": {
+        "operationId": "ReadingsController_template",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Synthetic process readings"
         ]
       }
     },
@@ -1442,7 +2906,8 @@
                 "IN_PROGRESS",
                 "AWAITING_REVIEW",
                 "APPROVED",
-                "CLOSED"
+                "CLOSED",
+                "CANCELLED"
               ],
               "type": "string"
             }
@@ -1877,7 +3342,8 @@
                 "submit",
                 "approve",
                 "return",
-                "close"
+                "close",
+                "cancel"
               ],
               "type": "string"
             }
@@ -2004,7 +3470,8 @@
                 "DUE",
                 "OVERDUE",
                 "COMPLETED",
-                "SKIPPED"
+                "SKIPPED",
+                "CANCELLED"
               ],
               "type": "string"
             }
@@ -5438,6 +6905,65 @@
         ]
       }
     },
+    "/api/machines/{code}/assistant/chats/{id}/archive": {
+      "post": {
+        "operationId": "DocumentAiController_archive",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "removed": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Document assistant"
+        ]
+      }
+    },
     "/api/machines/{code}/assistant/chat": {
       "post": {
         "operationId": "DocumentAiController_message",
@@ -5601,6 +7127,311 @@
           "Document assistant"
         ]
       }
+    },
+    "/api/machines/{code}/work-orders/{id}/rca-drafts": {
+      "post": {
+        "operationId": "RcaController_generate",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateRcaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RcaReceiptDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "AI RCA drafting"
+        ]
+      },
+      "get": {
+        "operationId": "RcaController_list",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "before",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RcaHistoryDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "AI RCA drafting"
+        ]
+      }
+    },
+    "/api/machines/{code}/external-notifications": {
+      "get": {
+        "operationId": "ExternalNotificationsController_settings",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalNotificationSettingsDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "External work-order notifications"
+        ]
+      }
+    },
+    "/api/machines/{code}/external-notifications/preference": {
+      "put": {
+        "operationId": "ExternalNotificationsController_save",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "WH-C",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalNotificationPreferenceInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalNotificationSettingsDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "External work-order notifications"
+        ]
+      }
     }
   },
   "info": {
@@ -5620,6 +7451,412 @@
       }
     },
     "schemas": {
+      "StaffMachineDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "archivedAt": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "archivedAt"
+        ]
+      },
+      "StaffMemberDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "OPERATOR",
+              "TECHNICIAN",
+              "MAINTENANCE_HEAD",
+              "SUPERVISOR",
+              "MANAGEMENT",
+              "ADMINISTRATOR"
+            ]
+          },
+          "additionalRoles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "OPERATOR",
+                "TECHNICIAN",
+                "MAINTENANCE_HEAD",
+                "SUPERVISOR",
+                "MANAGEMENT",
+                "ADMINISTRATOR"
+              ]
+            }
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "number"
+          },
+          "machines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StaffMachineDto"
+            }
+          },
+          "openWorkOrders": {
+            "type": "number"
+          },
+          "activePlans": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "displayName",
+          "email",
+          "role",
+          "additionalRoles",
+          "active",
+          "version",
+          "machines",
+          "openWorkOrders",
+          "activePlans"
+        ]
+      },
+      "StaffListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StaffMemberDto"
+            }
+          },
+          "page": {
+            "type": "number"
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "total"
+        ]
+      },
+      "TeamInvitationDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "OPERATOR",
+              "TECHNICIAN",
+              "MAINTENANCE_HEAD",
+              "SUPERVISOR",
+              "MANAGEMENT",
+              "ADMINISTRATOR"
+            ]
+          },
+          "organization": {
+            "type": "string"
+          },
+          "machines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StaffMachineDto"
+            }
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "type": "number"
+          },
+          "expiresAt": {
+            "type": "string"
+          },
+          "deliveryStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "deliveryCode": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "displayName",
+          "role",
+          "organization",
+          "machines",
+          "status",
+          "version",
+          "expiresAt",
+          "deliveryStatus",
+          "deliveryCode"
+        ]
+      },
+      "TeamInvitationsDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamInvitationDto"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "invitationsConfigured": {
+            "type": "boolean"
+          },
+          "emailConfigured": {
+            "type": "boolean"
+          },
+          "passwordEmailConfigured": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "invitationsConfigured",
+          "emailConfigured",
+          "passwordEmailConfigured"
+        ]
+      },
+      "InviteStaffDto": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "OPERATOR",
+              "TECHNICIAN",
+              "MAINTENANCE_HEAD",
+              "SUPERVISOR",
+              "MANAGEMENT",
+              "ADMINISTRATOR"
+            ]
+          },
+          "machineIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "requestId",
+          "email",
+          "displayName",
+          "role",
+          "machineIds"
+        ]
+      },
+      "TeamReceiptDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "version": {
+            "type": "number"
+          },
+          "alreadyApplied": {
+            "type": "boolean"
+          },
+          "invitationUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "deliveryStatus": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "alreadyApplied"
+        ]
+      },
+      "UpdateStaffDto": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "number"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "OPERATOR",
+              "TECHNICIAN",
+              "MAINTENANCE_HEAD",
+              "SUPERVISOR",
+              "MANAGEMENT",
+              "ADMINISTRATOR"
+            ]
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "machineIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "expectedMachineIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "reason": {
+            "type": "string"
+          },
+          "replaceAdditionalRoles": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "requestId",
+          "version",
+          "displayName",
+          "role",
+          "active",
+          "machineIds",
+          "expectedMachineIds",
+          "reason",
+          "replaceAdditionalRoles"
+        ]
+      },
+      "TeamActionDto": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "requestId",
+          "version"
+        ]
+      },
+      "TeamInvitationTokenDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "AcceptTeamInvitationDto": {
+        "type": "object",
+        "properties": {
+          "invitationId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "invitationId"
+        ]
+      },
+      "TeamAcceptanceDto": {
+        "type": "object",
+        "properties": {
+          "membershipId": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "OPERATOR",
+              "TECHNICIAN",
+              "MAINTENANCE_HEAD",
+              "SUPERVISOR",
+              "MANAGEMENT",
+              "ADMINISTRATOR"
+            ]
+          },
+          "alreadyApplied": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "membershipId",
+          "role",
+          "alreadyApplied"
+        ]
+      },
       "HealthDto": {
         "type": "object",
         "properties": {
@@ -5746,9 +7983,38 @@
           "name"
         ]
       },
+      "MachinePhotoSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "width": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "width",
+          "height"
+        ]
+      },
       "MachineDto": {
         "type": "object",
         "properties": {
+          "archivedAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "archiveReason": {
+            "type": "string",
+            "nullable": true
+          },
           "id": {
             "type": "string",
             "format": "uuid"
@@ -5761,7 +8027,11 @@
             "type": "string"
           },
           "manufacturer": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "number"
           },
           "model": {
             "type": "string",
@@ -5790,6 +8060,15 @@
               }
             ]
           },
+          "photo": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MachinePhotoSummaryDto"
+              }
+            ]
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -5804,6 +8083,7 @@
           "code",
           "name",
           "manufacturer",
+          "version",
           "model",
           "operationalStatus",
           "department",
@@ -5829,6 +8109,340 @@
         "required": [
           "items",
           "nextCursor"
+        ]
+      },
+      "RegisterMachineDto": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "example": "COMP-01"
+          },
+          "name": {
+            "type": "string"
+          },
+          "manufacturer": {
+            "type": "string",
+            "nullable": true
+          },
+          "model": {
+            "type": "string",
+            "nullable": true
+          },
+          "department": {
+            "type": "string",
+            "nullable": true
+          },
+          "location": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "requestId",
+          "code",
+          "name"
+        ]
+      },
+      "MachineAccessPersonDto": {
+        "type": "object",
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "OPERATOR",
+                "TECHNICIAN",
+                "MAINTENANCE_HEAD",
+                "SUPERVISOR",
+                "MANAGEMENT",
+                "ADMINISTRATOR"
+              ]
+            }
+          },
+          "granted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "membershipId",
+          "displayName",
+          "active",
+          "roles",
+          "granted"
+        ]
+      },
+      "MachineAccessRosterDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "number"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MachineAccessPersonDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "version",
+          "items",
+          "nextCursor"
+        ]
+      },
+      "MachineAccessChangeDto": {
+        "type": "object",
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "granted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "membershipId",
+          "granted"
+        ]
+      },
+      "UpdateMachineAccessDto": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "number"
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MachineAccessChangeDto"
+            }
+          }
+        },
+        "required": [
+          "requestId",
+          "version",
+          "changes"
+        ]
+      },
+      "MachineAccessReceiptDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "number"
+          },
+          "alreadySaved": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "version",
+          "alreadySaved"
+        ]
+      },
+      "MachinePhotoSourceDto": {
+        "type": "object",
+        "properties": {
+          "filename": {
+            "type": "string"
+          },
+          "mediaType": {
+            "type": "string"
+          },
+          "byteSize": {
+            "type": "number"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "width": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "filename",
+          "mediaType",
+          "byteSize",
+          "sha256",
+          "width",
+          "height"
+        ]
+      },
+      "MachinePhotoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "byteSize": {
+            "type": "number"
+          },
+          "width": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          },
+          "uploadedBy": {
+            "type": "string"
+          },
+          "uploaderName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/MachinePhotoSourceDto"
+          }
+        },
+        "required": [
+          "id",
+          "sha256",
+          "byteSize",
+          "width",
+          "height",
+          "uploadedBy",
+          "uploaderName",
+          "createdAt",
+          "source"
+        ]
+      },
+      "MachineDetailsDto": {
+        "type": "object",
+        "properties": {
+          "machine": {
+            "$ref": "#/components/schemas/MachineDto"
+          },
+          "photo": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MachinePhotoDto"
+              }
+            ]
+          },
+          "canManage": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "machine",
+          "photo",
+          "canManage"
+        ]
+      },
+      "UpdateMachineDetailsDto": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "manufacturer": {
+            "type": "string",
+            "nullable": true
+          },
+          "model": {
+            "type": "string",
+            "nullable": true
+          },
+          "department": {
+            "type": "string",
+            "nullable": true
+          },
+          "location": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "requestId",
+          "version",
+          "name",
+          "manufacturer",
+          "model",
+          "department",
+          "location"
+        ]
+      },
+      "MachineLifecycleDto": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "number"
+          },
+          "archived": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "requestId",
+          "version",
+          "archived",
+          "reason"
+        ]
+      },
+      "ChangeMachinePhotoDto": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "number",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "requestId",
+          "version"
         ]
       },
       "SheetInfoDto": {
@@ -6956,7 +9570,8 @@
               "IN_PROGRESS",
               "AWAITING_REVIEW",
               "APPROVED",
-              "CLOSED"
+              "CLOSED",
+              "CANCELLED"
             ]
           },
           "createdAt": {
@@ -7161,6 +9776,7 @@
               "APPROVE",
               "RETURN",
               "CLOSE",
+              "CANCEL",
               "ATTACH"
             ]
           },
@@ -7172,7 +9788,8 @@
               "IN_PROGRESS",
               "AWAITING_REVIEW",
               "APPROVED",
-              "CLOSED"
+              "CLOSED",
+              "CANCELLED"
             ],
             "nullable": true
           },
@@ -7184,7 +9801,8 @@
               "IN_PROGRESS",
               "AWAITING_REVIEW",
               "APPROVED",
-              "CLOSED"
+              "CLOSED",
+              "CANCELLED"
             ]
           },
           "actor": {
@@ -7262,7 +9880,8 @@
               "IN_PROGRESS",
               "AWAITING_REVIEW",
               "APPROVED",
-              "CLOSED"
+              "CLOSED",
+              "CANCELLED"
             ]
           },
           "version": {
@@ -7325,7 +9944,8 @@
                 "submit",
                 "approve",
                 "return",
-                "close"
+                "close",
+                "cancel"
               ]
             }
           },
@@ -7519,7 +10139,8 @@
               "IN_PROGRESS",
               "AWAITING_REVIEW",
               "APPROVED",
-              "CLOSED"
+              "CLOSED",
+              "CANCELLED"
             ]
           },
           "version": {
@@ -7582,7 +10203,8 @@
                 "submit",
                 "approve",
                 "return",
-                "close"
+                "close",
+                "cancel"
               ]
             }
           }
@@ -7690,7 +10312,8 @@
               "IN_PROGRESS",
               "AWAITING_REVIEW",
               "APPROVED",
-              "CLOSED"
+              "CLOSED",
+              "CANCELLED"
             ]
           },
           "version": {
@@ -7753,7 +10376,8 @@
                 "submit",
                 "approve",
                 "return",
-                "close"
+                "close",
+                "cancel"
               ]
             }
           },
@@ -8037,7 +10661,8 @@
               "DUE",
               "OVERDUE",
               "COMPLETED",
-              "SKIPPED"
+              "SKIPPED",
+              "CANCELLED"
             ]
           },
           "skippedAt": {
@@ -8583,7 +11208,8 @@
               "IN_PROGRESS",
               "AWAITING_REVIEW",
               "APPROVED",
-              "CLOSED"
+              "CLOSED",
+              "CANCELLED"
             ],
             "nullable": true
           },
@@ -8896,7 +11522,8 @@
               "IN_PROGRESS",
               "AWAITING_REVIEW",
               "APPROVED",
-              "CLOSED"
+              "CLOSED",
+              "CANCELLED"
             ],
             "nullable": true
           },
@@ -9011,7 +11638,8 @@
               "IN_PROGRESS",
               "AWAITING_REVIEW",
               "APPROVED",
-              "CLOSED"
+              "CLOSED",
+              "CANCELLED"
             ]
           },
           "reportedAt": {
@@ -9097,6 +11725,9 @@
       "PerformancePlannedDto": {
         "type": "object",
         "properties": {
+          "cancelled": {
+            "type": "number"
+          },
           "applicable": {
             "type": "boolean"
           },
@@ -9274,6 +11905,9 @@
       "ReportCountsDto": {
         "type": "object",
         "properties": {
+          "cancelled": {
+            "type": "number"
+          },
           "open": {
             "type": "number"
           },
@@ -10168,6 +12802,589 @@
         },
         "required": [
           "queued"
+        ]
+      },
+      "RcaHumanFieldsDto": {
+        "type": "object",
+        "properties": {
+          "findings": {
+            "type": "string",
+            "maxLength": 4000,
+            "description": "Current unsubmitted human inspection text, or empty. Not independent verification."
+          },
+          "rootCause": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "correctiveAction": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "preventiveAction": {
+            "type": "string",
+            "maxLength": 4000
+          }
+        },
+        "required": [
+          "findings",
+          "rootCause",
+          "correctiveAction",
+          "preventiveAction"
+        ]
+      },
+      "GenerateRcaDto": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Stable key for exact retries of this payload; never automatically repeats a provider call."
+          },
+          "version": {
+            "type": "number",
+            "minimum": 1
+          },
+          "human": {
+            "$ref": "#/components/schemas/RcaHumanFieldsDto"
+          }
+        },
+        "required": [
+          "requestId",
+          "version",
+          "human"
+        ]
+      },
+      "RcaSourceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "attribution": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "ORIGINAL_REPORT",
+              "RETAINED_HISTORY",
+              "CURRENT_HUMAN_INPUT"
+            ]
+          },
+          "eventId": {
+            "type": "string",
+            "nullable": true
+          },
+          "eventVersion": {
+            "type": "number",
+            "nullable": true
+          },
+          "recordedAt": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "attribution",
+          "text",
+          "origin",
+          "eventId",
+          "eventVersion",
+          "recordedAt"
+        ]
+      },
+      "RcaAdvisoryDto": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "sourceIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "text",
+          "sourceIds"
+        ]
+      },
+      "RcaDraftDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "LIMITED_EVIDENCE",
+              "INSUFFICIENT_EVIDENCE"
+            ]
+          },
+          "factSourceIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "facts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RcaSourceDto"
+            }
+          },
+          "hypotheses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RcaAdvisoryDto"
+            }
+          },
+          "missingChecks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RcaAdvisoryDto"
+            }
+          },
+          "correctiveProposals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RcaAdvisoryDto"
+            }
+          },
+          "preventiveProposals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RcaAdvisoryDto"
+            }
+          },
+          "proposed": {
+            "$ref": "#/components/schemas/RcaHumanFieldsDto"
+          },
+          "limitations": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "factSourceIds",
+          "facts",
+          "hypotheses",
+          "missingChecks",
+          "correctiveProposals",
+          "preventiveProposals",
+          "proposed",
+          "limitations"
+        ]
+      },
+      "RcaReportEvidenceDto": {
+        "type": "object",
+        "properties": {
+          "priority": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "reportedBy": {
+            "type": "string"
+          },
+          "reportedAt": {
+            "type": "string"
+          },
+          "observedAt": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "priority",
+          "impact",
+          "reportedBy",
+          "reportedAt",
+          "observedAt"
+        ]
+      },
+      "RcaHistoryEvidenceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "version": {
+            "type": "number"
+          },
+          "action": {
+            "type": "string"
+          },
+          "actorId": {
+            "type": "string"
+          },
+          "actorRole": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "action",
+          "actorId",
+          "actorRole",
+          "at"
+        ]
+      },
+      "RcaSnapshotDto": {
+        "type": "object",
+        "properties": {
+          "policy": {
+            "type": "string"
+          },
+          "orderId": {
+            "type": "string"
+          },
+          "version": {
+            "type": "number"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "machineCode": {
+            "type": "string"
+          },
+          "capturedAt": {
+            "type": "string"
+          },
+          "report": {
+            "$ref": "#/components/schemas/RcaReportEvidenceDto"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RcaHistoryEvidenceDto"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RcaSourceDto"
+            }
+          },
+          "coverage": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "policy",
+          "orderId",
+          "version",
+          "kind",
+          "machineCode",
+          "capturedAt",
+          "report",
+          "history",
+          "sources",
+          "coverage"
+        ]
+      },
+      "RcaReceiptDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "orderId": {
+            "type": "string"
+          },
+          "version": {
+            "type": "number"
+          },
+          "sourceHash": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "policy": {
+            "type": "string"
+          },
+          "requestedBy": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "completedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "GENERATED",
+              "FAILED",
+              "STALE",
+              "PENDING"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "draft": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RcaDraftDto"
+              }
+            ]
+          },
+          "snapshot": {
+            "$ref": "#/components/schemas/RcaSnapshotDto"
+          },
+          "stale": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "requestId",
+          "orderId",
+          "version",
+          "sourceHash",
+          "model",
+          "policy",
+          "requestedBy",
+          "createdAt",
+          "completedAt",
+          "status",
+          "reason",
+          "draft",
+          "snapshot",
+          "stale"
+        ]
+      },
+      "RcaHistoryDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RcaReceiptDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ]
+      },
+      "ExternalNotificationPreferenceDto": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "number"
+          },
+          "destination": {
+            "type": "string",
+            "nullable": true,
+            "description": "Only the signed-in recipient's verified destination."
+          },
+          "enabledAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "verifiedAt": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "enabled",
+          "version",
+          "destination",
+          "enabledAt",
+          "verifiedAt"
+        ]
+      },
+      "ExternalNotificationAttemptDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "attempt": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "at": {
+            "type": "string"
+          },
+          "late": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "attempt",
+          "status",
+          "code",
+          "at",
+          "late"
+        ]
+      },
+      "ExternalNotificationDeliveryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string"
+          },
+          "eventAt": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "SENDING",
+              "SENT",
+              "FAILED",
+              "SUPPRESSED"
+            ]
+          },
+          "attemptCount": {
+            "type": "number"
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "nextAttemptAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "attempts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalNotificationAttemptDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "eventId",
+          "orderId",
+          "action",
+          "eventAt",
+          "status",
+          "attemptCount",
+          "code",
+          "createdAt",
+          "updatedAt",
+          "nextAttemptAt",
+          "attempts"
+        ]
+      },
+      "ExternalNotificationSettingsDto": {
+        "type": "object",
+        "properties": {
+          "supported": {
+            "type": "boolean"
+          },
+          "configured": {
+            "type": "boolean"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "OPERATOR",
+              "TECHNICIAN",
+              "MAINTENANCE_HEAD",
+              "SUPERVISOR",
+              "MANAGEMENT",
+              "ADMINISTRATOR"
+            ]
+          },
+          "preference": {
+            "$ref": "#/components/schemas/ExternalNotificationPreferenceDto"
+          },
+          "deliveries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalNotificationDeliveryDto"
+            }
+          }
+        },
+        "required": [
+          "supported",
+          "configured",
+          "role",
+          "preference",
+          "deliveries"
+        ]
+      },
+      "ExternalNotificationPreferenceInputDto": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Last loaded preference version; zero before enrollment."
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Retain on an identical retry."
+          }
+        },
+        "required": [
+          "enabled",
+          "version",
+          "requestId"
         ]
       }
     }

@@ -58,6 +58,10 @@ export const openOccurrence = {
   skippedAt: null,
   OR: [
     { workOrder: { is: null } },
-    { workOrder: { is: { status: { not: "CLOSED" as const } } } },
+    {
+      workOrder: {
+        is: { status: { notIn: ["CLOSED" as const, "CANCELLED" as const] } },
+      },
+    },
   ],
 };

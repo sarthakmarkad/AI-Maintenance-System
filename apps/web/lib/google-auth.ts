@@ -43,16 +43,26 @@ let exchange:
 async function exchangeCode(code: string, flowId?: string) {
   const client = getSupabase();
   if (!client) throw new Error("Sign-in setup is required.");
-  const { data, error } = await client.auth.exchangeCodeForSession(
-    code,
-    flowId ? { flowId } : undefined,
-  );
-  if (error || !data.session)
-    throw new Error(
-      "This sign-in link expired or could not be verified. Start sign-in again in this browser.",
+  let recovery = false;
+  const {
+    data: { subscription },
+  } = client.auth.onAuthStateChange((event) => {
+    if (event === "PASSWORD_RECOVERY") recovery = true;
+  });
+  try {
+    const { data, error } = await client.auth.exchangeCodeForSession(
+      code,
+      flowId ? { flowId } : undefined,
     );
-  setRoleIdentity(data.session.user.id);
-  return data.session;
+    if (error || !data.session)
+      throw new Error(
+        "This sign-in link expired or could not be verified. Start sign-in again in this browser.",
+      );
+    setRoleIdentity(data.session.user.id);
+    return { ...data.session, redirectType: recovery ? "recovery" : null };
+  } finally {
+    subscription.unsubscribe();
+  }
 }
 export function exchangeGoogleCodeOnce(code: string, flowId?: string) {
   if (!exchange || exchange.code !== code || exchange.flowId !== flowId)

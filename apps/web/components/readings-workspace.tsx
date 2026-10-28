@@ -31,6 +31,8 @@ import {
   type AnomalyMarker,
 } from "@/lib/api";
 import { Button } from "./ui/button";
+import { ExcelTemplateButton } from "./excel-template-button";
+import { FormPopup } from "./ui/form-popup";
 import { AnomaliesWorkspace } from "./anomalies-workspace";
 import { useAuth } from "./auth-provider";
 const number = (v: number | null) =>
@@ -64,9 +66,9 @@ export function ReadingsWorkspace({
   const router = useRouter(),
     { expire } = useAuth();
   const base = `/machines/${encodeURIComponent(machine.code)}/readings`;
-  const importer = ["ADMINISTRATOR", "MAINTENANCE_HEAD", "SUPERVISOR"].includes(
-    user.role,
-  );
+  const importer =
+    !machine.archivedAt &&
+    ["ADMINISTRATOR", "MAINTENANCE_HEAD", "SUPERVISOR"].includes(user.role);
   const [data, setData] = useState<ReadingTrends | null>(null),
     [loading, setLoading] = useState(true),
     [error, setError] = useState("");
@@ -173,11 +175,6 @@ export function ReadingsWorkspace({
     setAck(false);
     try {
       setPreview(await api<ReadingPreview>(`${base}/previews/${id}`, token));
-      requestAnimationFrame(() =>
-        document
-          .getElementById("reading-import")
-          ?.scrollIntoView({ block: "start" }),
-      );
     } catch (e) {
       await failure(e, true);
     } finally {
@@ -206,12 +203,11 @@ export function ReadingsWorkspace({
             {machine.code} / SYNTHETIC PROCESS READINGS
           </div>
           <h1>Process trends</h1>
-          <p>Hourly observations, source context and retrospective review.</p>
         </div>
         {importer && (
-          <Button onClick={() => setOpen((v) => !v)}>
+          <Button onClick={() => setOpen(true)}>
             <Upload size={16} />
-            {open ? "Hide reading import" : "Import synthetic readings"}
+            Import synthetic readings
           </Button>
         )}
       </div>
@@ -262,173 +258,192 @@ export function ReadingsWorkspace({
           Choose up to 31 days. Each date includes its full local day.
         </small>
       </form>
-      {open && importer && (
-        <section
-          id="reading-import"
-          className="panel reading-import"
-          aria-label="Synthetic reading import"
+      {importer && (
+        <FormPopup
+          open={open}
+          onOpenChange={setOpen}
+          title="Import hourly observations"
+          description="Synthetic demonstration only. Preview, review and save eligible hourly observations."
+          busy={busy}
+          wide
         >
-          <div className="panel-heading">
-            <div>
-              <span className="eyebrow">PREVIEW, REVIEW AND SAVE</span>
-              <h2>Import hourly observations</h2>
-            </div>
-            <Upload size={18} />
-          </div>
-          <div className="reading-import-body">
-            <p>
-              Use the supplied WH-C workbook with Guide and Hourly_Readings
-              sheets. The original file stays unchanged. The application retains
-              parsed source cells and discards workbook bytes.
-            </p>
-            <label htmlFor="reading-file">
-              Synthetic readings workbook (.xlsx, up to 8 MB)
-            </label>
-            <input
-              id="reading-file"
-              type="file"
-              accept=".xlsx"
-              disabled={busy}
-              onChange={(e) => {
-                setFile(e.target.files?.[0] ?? null);
-                setPreview(null);
-                setAck(false);
-                setImportError("");
-                setSuccess("");
-              }}
-            />
-            <Button onClick={() => void makePreview()} disabled={!file || busy}>
-              Preview reading workbook
-            </Button>
-            {busy && <p role="status">Processing readings…</p>}
-            {importError && (
-              <div className="inline-error" role="alert">
-                {importError}
-                <p>
-                  For conflicts or an expired preview, preview the workbook
-                  again before importing.
-                </p>
-              </div>
-            )}
-            {success && (
-              <p className="reading-success" role="status">
-                <CheckCircle2 size={18} />
-                {success}
+          <section
+            id="reading-import"
+            className="panel reading-import"
+            aria-label="Synthetic reading import"
+          >
+            <div className="reading-import-body">
+              <p>
+                Use a workbook for {machine.code} with Guide and Hourly_Readings
+                sheets. Source cells are retained; keep the original workbook
+                for your records. The workbook file is not retained.
               </p>
-            )}
-            {preview && (
-              <div className="reading-preview">
-                <h3>
-                  {preview.status === "COMMITTED"
-                    ? "Saved reading source"
-                    : "Reading validation preview"}
-                </h3>
-                <p>
-                  <strong>{preview.filename}</strong> · {preview.sheet} ·
-                  SYNTHETIC
+              <p>
+                The standard template contains hot temperature (°C), cold
+                temperature (°C) and pressure (bar). Its readings and review
+                bands are synthetic demonstrations, not verified operating
+                limits. Other parameters require a different mapping.
+              </p>
+              <ExcelTemplateButton
+                path={`/machines/${machine.code}/readings/template`}
+                filename={`${machine.code}-synthetic-process-template.xlsx`}
+                token={token}
+              />
+              <label htmlFor="reading-file">
+                Synthetic readings workbook (.xlsx, up to 8 MB)
+              </label>
+              <input
+                id="reading-file"
+                type="file"
+                accept=".xlsx"
+                disabled={busy}
+                onChange={(e) => {
+                  setFile(e.target.files?.[0] ?? null);
+                  setPreview(null);
+                  setAck(false);
+                  setImportError("");
+                  setSuccess("");
+                }}
+              />
+              <Button
+                onClick={() => void makePreview()}
+                disabled={!file || busy}
+              >
+                Preview reading workbook
+              </Button>
+              {busy && <p role="status">Processing readings…</p>}
+              {importError && (
+                <div className="inline-error" role="alert">
+                  {importError}
+                  <p>
+                    For conflicts or an expired preview, preview the workbook
+                    again before importing.
+                  </p>
+                </div>
+              )}
+              {success && (
+                <p className="reading-success" role="status">
+                  <CheckCircle2 size={18} />
+                  {success}
                 </p>
-                <small>
-                  SHA-256 {preview.workbookHash.slice(0, 16)} ·{" "}
-                  {preview.parserVersion}
-                </small>
-                <ul className="reading-notes">
-                  {preview.warnings.map((w) => (
-                    <li key={w}>{w}</li>
-                  ))}
-                </ul>
-                <div className="reading-preview-counts">
-                  <strong>{preview.rows.length} source rows</strong>
-                  <span>{eligible} valid new observations</span>
-                  <span>{excluded} excluded rows</span>
-                </div>
-                <div
-                  className="table-scroll reading-preview-table"
-                  tabIndex={0}
-                  aria-label="Source reading validation rows"
-                >
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Source row / ID</th>
-                        <th>Measured (IST)</th>
-                        <th>Hot °C assumed</th>
-                        <th>Cold °C assumed</th>
-                        <th>Pressure bar</th>
-                        <th>Validation / source</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {preview.rows.map((r) => (
-                        <tr key={r.sourceRow}>
-                          <td>
-                            {r.sourceRow}
-                            <small>{r.sourceId}</small>
-                          </td>
-                          <td>
-                            {r.localMeasuredAt?.replace("T", " ") ??
-                              "Needs review"}
-                          </td>
-                          <td>{number(r.hotTempC)}</td>
-                          <td>{number(r.coldTempC)}</td>
-                          <td>{number(r.pressureBar)}</td>
-                          <td>
-                            {r.problems.length ? (
-                              <ul>
-                                {r.problems.map((p) => (
-                                  <li key={p}>{p}</li>
-                                ))}
-                              </ul>
-                            ) : preview.status === "COMMITTED" ? (
-                              "Saved"
-                            ) : (
-                              "Ready"
-                            )}
-                            <details>
-                              <summary>Raw source cells</summary>
-                              <pre>{JSON.stringify(r.rawCells, null, 2)}</pre>
-                            </details>
-                          </td>
+              )}
+              {preview && (
+                <div className="reading-preview">
+                  <h3>
+                    {preview.status === "COMMITTED"
+                      ? "Saved reading source"
+                      : "Reading validation preview"}
+                  </h3>
+                  <p>
+                    <strong>{preview.filename}</strong> · {preview.sheet} ·
+                    SYNTHETIC
+                  </p>
+                  <details>
+                    <summary>Source details</summary>
+                    <small>
+                      SHA-256 {preview.workbookHash.slice(0, 16)} ·{" "}
+                      {preview.parserVersion}
+                    </small>
+                  </details>
+                  <ul className="reading-notes">
+                    {preview.warnings.map((w) => (
+                      <li key={w}>{w}</li>
+                    ))}
+                  </ul>
+                  <div className="reading-preview-counts">
+                    <strong>{preview.rows.length} source rows</strong>
+                    <span>{eligible} valid new observations</span>
+                    <span>{excluded} excluded rows</span>
+                  </div>
+                  <div
+                    className="table-scroll reading-preview-table"
+                    tabIndex={0}
+                    aria-label="Source reading validation rows"
+                  >
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Source row / ID</th>
+                          <th>Measured (IST)</th>
+                          <th>Hot °C assumed</th>
+                          <th>Cold °C assumed</th>
+                          <th>Pressure bar</th>
+                          <th>Validation / source</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {preview.rows.map((r) => (
+                          <tr key={r.sourceRow}>
+                            <td>
+                              {r.sourceRow}
+                              <small>{r.sourceId}</small>
+                            </td>
+                            <td>
+                              {r.localMeasuredAt?.replace("T", " ") ??
+                                "Needs review"}
+                            </td>
+                            <td>{number(r.hotTempC)}</td>
+                            <td>{number(r.coldTempC)}</td>
+                            <td>{number(r.pressureBar)}</td>
+                            <td>
+                              {r.problems.length ? (
+                                <ul>
+                                  {r.problems.map((p) => (
+                                    <li key={p}>{p}</li>
+                                  ))}
+                                </ul>
+                              ) : preview.status === "COMMITTED" ? (
+                                "Saved"
+                              ) : (
+                                "Ready"
+                              )}
+                              <details>
+                                <summary>Raw source cells</summary>
+                                <pre>{JSON.stringify(r.rawCells, null, 2)}</pre>
+                              </details>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  {preview.status !== "COMMITTED" && (
+                    <>
+                      <label className="reading-ack">
+                        <input
+                          type="checkbox"
+                          checked={ack}
+                          disabled={busy}
+                          onChange={(e) => setAck(e.target.checked)}
+                        />
+                        I reviewed the exclusions and understand these are
+                        synthetic hourly readings with invented review bands.
+                      </label>
+                      <Button
+                        disabled={
+                          !ack ||
+                          !eligible ||
+                          busy ||
+                          Date.parse(preview.expiresAt) < Date.now()
+                        }
+                        onClick={() => void commit()}
+                      >
+                        Import {eligible} valid observations
+                      </Button>
+                      <p>
+                        <small>
+                          Preview expires {time(preview.expiresAt)}. Dashboard
+                          values change only after import. Every excluded row
+                          remains unsaved.
+                        </small>
+                      </p>
+                    </>
+                  )}
                 </div>
-                {preview.status !== "COMMITTED" && (
-                  <>
-                    <label className="reading-ack">
-                      <input
-                        type="checkbox"
-                        checked={ack}
-                        disabled={busy}
-                        onChange={(e) => setAck(e.target.checked)}
-                      />
-                      I reviewed the exclusions and understand these are
-                      synthetic hourly readings with invented review bands.
-                    </label>
-                    <Button
-                      disabled={
-                        !ack ||
-                        !eligible ||
-                        busy ||
-                        Date.parse(preview.expiresAt) < Date.now()
-                      }
-                      onClick={() => void commit()}
-                    >
-                      Import {eligible} valid observations
-                    </Button>
-                    <p>
-                      <small>
-                        Preview expires {time(preview.expiresAt)}. Dashboard
-                        values change only after import. Every excluded row
-                        remains unsaved.
-                      </small>
-                    </p>
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-        </section>
+              )}
+            </div>
+          </section>
+        </FormPopup>
       )}
       {error && (
         <section className="state-card" role="alert">
@@ -548,7 +563,7 @@ export function ReadingsWorkspace({
                           <CartesianGrid
                             strokeDasharray="3 5"
                             vertical={false}
-                            stroke="#dfe8e2"
+                            stroke="#deddd5"
                           />
                           <XAxis
                             dataKey="measuredAt"
@@ -576,26 +591,26 @@ export function ReadingsWorkspace({
                           <ReferenceArea
                             y1={p.low}
                             y2={p.high}
-                            fill="#e8dfc3"
+                            fill="#f5ff80"
                             fillOpacity={0.35}
                           />
                           <ReferenceLine
                             y={p.low}
-                            stroke="#a98d4c"
+                            stroke="#73736c"
                             strokeDasharray="4 4"
                           />
                           <ReferenceLine
                             y={p.high}
-                            stroke="#a98d4c"
+                            stroke="#73736c"
                             strokeDasharray="4 4"
                           />
                           <Line
                             type="linear"
                             dataKey={p.key}
                             name={p.name}
-                            stroke="#2d715d"
+                            stroke="#242424"
                             strokeWidth={2}
-                            dot={{ r: 1.5, fill: "#2d715d" }}
+                            dot={{ r: 1.5, fill: "#242424" }}
                             activeDot={{ r: 4 }}
                             connectNulls={false}
                             isAnimationActive={false}
@@ -606,7 +621,7 @@ export function ReadingsWorkspace({
                             stroke="none"
                             dot={{
                               r: 4,
-                              fill: "#b45b38",
+                              fill: "#ff5b29",
                               stroke: "#ffffff",
                               strokeWidth: 1,
                             }}

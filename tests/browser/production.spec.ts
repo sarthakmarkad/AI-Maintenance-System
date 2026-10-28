@@ -1,4 +1,4 @@
-// Client interaction tests use generated synthetic XLSX and intercepted API responses.
+// Invented fixtures model company imports through intercepted Auth/API responses only.
 // Actual parsing/transactions/authorization are exercised by backend/database suites.
 import { test, expect, type Page } from "@playwright/test";
 import { setup, signIn } from "./helpers";
@@ -11,15 +11,15 @@ import {
 let buffer: Buffer, parsed: ParsedSheet;
 const id = "2ed7477f-26bc-493f-8cc0-4e931f41aa99";
 test.beforeAll(async () => {
-  buffer = await productionFixture();
+  buffer = await productionFixture({ authentic: true });
   parsed = parseSheet(
-    await loadWorkbook(buffer, "synthetic-production.xlsx"),
+    await loadWorkbook(buffer, "TEST-production.xlsx"),
     "SEP-2026",
-    "SYNTHETIC",
+    "AUTHENTIC",
   );
 });
 function dashboard(saved: boolean, source: string) {
-  const hasData = saved && source === "SYNTHETIC";
+  const hasData = saved && source === "AUTHENTIC";
   return {
     source,
     from: "2026-09-01",
@@ -43,9 +43,9 @@ function dashboard(saved: boolean, source: string) {
       ? [
           {
             id,
-            filename: "synthetic-production.xlsx",
+            filename: "TEST-production.xlsx",
             sheet: "SEP-2026",
-            source: "SYNTHETIC",
+            source: "AUTHENTIC",
             committedAt: new Date().toISOString(),
             importedDays: 2,
           },
@@ -71,6 +71,7 @@ async function mockProduction(
       return;
     }
     if (path.endsWith("/dashboard")) {
+      expect(url.searchParams.get("source")).toBe("AUTHENTIC");
       await route.fulfill({
         json: dashboard(saved, url.searchParams.get("source") || "AUTHENTIC"),
       });
@@ -80,7 +81,7 @@ async function mockProduction(
       await route.fulfill({
         status: 201,
         json: {
-          filename: "synthetic-production.xlsx",
+          filename: "TEST-production.xlsx",
           workbookHash: parsed.workbookHash,
           sheets: [
             {
@@ -88,7 +89,7 @@ async function mockProduction(
               month: "2026-09",
               supported: true,
               reason: null,
-              heading: "WH-C M/C - SYNTHETIC",
+              heading: "WH-C M/C",
             },
             {
               name: "SEP-2026 EPL",
@@ -133,6 +134,10 @@ async function mockProduction(
       });
       return;
     }
+    if (path.endsWith("/previews") && route.request().method() === "POST")
+      expect(route.request().postData()).toContain(
+        'name="source"\r\n\r\nAUTHENTIC',
+      );
     const snapshot = structuredClone(parsed);
     if (saved || options.commitConflict)
       for (const day of snapshot.days)
@@ -161,12 +166,11 @@ async function openProduction(page: Page) {
   ).toBeVisible();
 }
 async function stageWorkbook(page: Page) {
-  await page.getByLabel("Dataset", { exact: true }).selectOption("SYNTHETIC");
   await page
     .getByRole("button", { name: "Import workbook", exact: true })
     .click();
   await page.locator("#production-file").setInputFiles({
-    name: "synthetic-production.xlsx",
+    name: "TEST-production.xlsx",
     mimeType:
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     buffer,
@@ -178,7 +182,7 @@ async function stageWorkbook(page: Page) {
     page.getByRole("heading", { name: "Validation preview" }),
   ).toBeVisible();
 }
-test("synthetic workbook preview excludes bad dates, commits selected days and restores saved totals", async ({
+test("company workbook preview excludes bad dates, commits selected days and restores saved totals without a dataset selector", async ({
   page,
 }) => {
   await mockProduction(page);
@@ -195,6 +199,13 @@ test("synthetic workbook preview excludes bad dates, commits selected days and r
   await expect(
     page.getByRole("heading", { name: "Validation preview" }),
   ).toBeVisible();
+  const sourceDetails = page
+    .locator("details")
+    .filter({ has: page.locator("summary", { hasText: /^Source details$/ }) });
+  await expect(sourceDetails.locator("small")).toBeHidden();
+  await sourceDetails.locator("summary").click();
+  await expect(sourceDetails).toContainText("Source hash");
+  await expect(sourceDetails).toContainText("production-");
   await expect(
     page.getByLabel("Import source row 12", { exact: true }),
   ).toBeDisabled();
@@ -213,10 +224,10 @@ test("synthetic workbook preview excludes bad dates, commits selected days and r
   await expect(
     page.getByRole("status").filter({ hasText: "2 days saved" }),
   ).toBeVisible();
+  await page.getByRole("button", { name: "Close form", exact: true }).click();
   await expect(page.locator(".metric-card").first()).toContainText("280");
   await expect(page.locator(".metric-card").nth(1)).toContainText("12");
   await page.reload();
-  await page.getByLabel("Dataset", { exact: true }).selectOption("SYNTHETIC");
   await expect(page.locator(".metric-card").first()).toContainText("280");
   await expect(
     page.getByRole("heading", { name: "Daily production & scrap" }),
@@ -230,10 +241,9 @@ test("synthetic workbook preview excludes bad dates, commits selected days and r
     path: `test-results/production-${test.info().project.name}.png`,
     fullPage: true,
   });
-  await page.getByLabel("Dataset", { exact: true }).selectOption("AUTHENTIC");
   await expect(
-    page.getByRole("heading", { name: "No saved production for this period" }),
-  ).toBeVisible();
+    page.getByRole("combobox", { name: "Dataset", exact: true }),
+  ).toHaveCount(0);
 });
 test("operators can view persisted production but cannot see import controls", async ({
   page,

@@ -32,7 +32,9 @@ import {
 } from "@/lib/api";
 import { useAuth } from "./auth-provider";
 import { Button } from "./ui/button";
-type Source = "AUTHENTIC" | "SYNTHETIC";
+import { ExcelTemplateButton } from "./excel-template-button";
+import { FormPopup } from "./ui/form-popup";
+const productionSource = "AUTHENTIC";
 const number = (value: number) =>
   new Intl.NumberFormat("en-IN", { maximumFractionDigits: 3 }).format(value);
 const monthWindow = (month: string) => ({
@@ -52,12 +54,9 @@ export function ProductionWorkspace({
 }) {
   const router = useRouter();
   const { expire } = useAuth();
-  const canImport = [
-    "ADMINISTRATOR",
-    "MAINTENANCE_HEAD",
-    "SUPERVISOR",
-  ].includes(user.role);
-  const [source, setSource] = useState<Source>("AUTHENTIC");
+  const canImport =
+    !machine.archivedAt &&
+    ["ADMINISTRATOR", "MAINTENANCE_HEAD", "SUPERVISOR"].includes(user.role);
   const [dashboard, setDashboard] = useState<ProductionDashboard | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -67,6 +66,9 @@ export function ProductionWorkspace({
   const [draft, setDraft] = useState({ from: "", to: "" });
   const [revision, setRevision] = useState(0);
   const [importOpen, setImportOpen] = useState(false);
+  const [templateMonth, setTemplateMonth] = useState(() =>
+    new Date(Date.now() + 330 * 60000).toISOString().slice(0, 7),
+  );
   const [file, setFile] = useState<File | null>(null);
   const [workbook, setWorkbook] = useState<WorkbookInfo | null>(null);
   const [sheet, setSheet] = useState("");
@@ -96,7 +98,10 @@ export function ProductionWorkspace({
     const controller = new AbortController();
     setLoading(true);
     setError("");
-    const query = new URLSearchParams({ source, ...(window || {}) });
+    const query = new URLSearchParams({
+      source: productionSource,
+      ...(window || {}),
+    });
     api<ProductionDashboard>(
       `${base}/dashboard?${query}`,
       token,
@@ -114,19 +119,13 @@ export function ProductionWorkspace({
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [base, source, token, window, revision, handleError]);
+  }, [base, token, window, revision, handleError]);
   function resetPreview() {
     setPreview(null);
     setSelected([]);
     setAck(false);
     setCommitted(null);
     setImportError("");
-  }
-  function changeSource(next: Source) {
-    setSource(next);
-    setWindow(null);
-    setDashboard(null);
-    resetPreview();
   }
   async function inspect() {
     if (!file) return;
@@ -169,7 +168,7 @@ export function ProductionWorkspace({
       const body = new FormData();
       body.set("file", file);
       body.set("sheet", sheet);
-      body.set("source", source);
+      body.set("source", productionSource);
       const data = await api<ProductionPreview>(
         `${base}/previews`,
         token,
@@ -269,28 +268,15 @@ export function ProductionWorkspace({
         <div>
           <div className="eyebrow">{machine.code} / HISTORICAL PRODUCTION</div>
           <h1>Production records</h1>
-          <p>Saved job quantities and scrap, with a traceable source.</p>
         </div>
         {canImport && (
-          <Button onClick={() => setImportOpen((value) => !value)}>
+          <Button onClick={() => setImportOpen(true)}>
             <ArrowUpFromLine size={15} />
-            {importOpen ? "Hide import review" : "Import workbook"}
+            Import workbook
           </Button>
         )}
       </div>
       <section className="production-toolbar" aria-label="Production filters">
-        <label>
-          Dataset
-          <select
-            aria-label="Dataset"
-            value={source}
-            disabled={!!busy}
-            onChange={(event) => changeSource(event.target.value as Source)}
-          >
-            <option value="AUTHENTIC">Authentic company production</option>
-            <option value="SYNTHETIC">Synthetic demonstration</option>
-          </select>
-        </label>
         <form
           onSubmit={(event) => {
             event.preventDefault();
@@ -326,388 +312,424 @@ export function ProductionWorkspace({
           </Button>
         </form>
       </section>
-      <p
-        className={`dataset-note ${source === "SYNTHETIC" ? "synthetic-note" : ""}`}
-      >
-        {source === "SYNTHETIC"
-          ? "SYNTHETIC DEMONSTRATION — separate test records; these do not describe company production."
-          : "Authentic production — source declared at import. Totals include saved, validated days only."}
-      </p>
-      {importOpen && canImport && (
-        <section className="import-panel panel" aria-label="Production import">
-          <div className="panel-heading">
-            <div>
-              <div className="eyebrow">PREVIEW → REVIEW → SAVE</div>
-              <h2>Import production Excel</h2>
-            </div>
-            <FileSpreadsheet size={21} />
-          </div>
-          <div className="import-body">
-            <p className="import-intro">
-              Choose one monthly WH-C sheet. Original files stay unchanged. The
-              application saves source rows and validation notes, and does not
-              retain the workbook file.
-            </p>
-            <div className="upload-controls">
-              <label className="file-field" htmlFor="production-file">
-                Production workbook (.xlsx, up to 8 MB)
+      <p className="dataset-note">Totals include saved, validated days only.</p>
+      {canImport && (
+        <FormPopup
+          open={importOpen}
+          onOpenChange={setImportOpen}
+          title="Import production Excel"
+          description="Review the preview before importing selected days."
+          busy={!!busy}
+          wide
+        >
+          <section
+            className="import-panel panel"
+            aria-label="Production import"
+          >
+            <div className="import-body">
+              <p className="import-intro">
+                Choose one monthly sheet for {machine.code}. Source rows and
+                validation notes are retained; keep the original workbook for
+                your records. The workbook file is not retained.
+              </p>
+              <p>
+                Use the standard nine-column template for kg production, or the
+                existing validated monthly layout with this machine’s heading.
+                Keep daily controls separate from job rows.
+              </p>
+              {machine.code === "WHB" && (
+                <p className="import-intro">
+                  WHB also accepts the reviewed “W &amp; H B M/C” monthly
+                  workbook: scrap in G–AC, daily controls in E/AD, downtime in
+                  AG–AS and remarks in AT. Select a month and review its
+                  excluded dates before saving.
+                </p>
+              )}
+              <label>
+                Template month
                 <input
-                  id="production-file"
-                  type="file"
-                  accept=".xlsx"
-                  disabled={!!busy}
-                  onChange={(event) => {
-                    setFile(event.target.files?.[0] || null);
-                    setWorkbook(null);
-                    setSheet("");
-                    resetPreview();
-                  }}
+                  type="month"
+                  value={templateMonth}
+                  min="2000-01"
+                  max="2100-12"
+                  onChange={(e) => setTemplateMonth(e.target.value)}
                 />
               </label>
-              <Button
-                variant="outline"
-                disabled={!file || !!busy}
-                onClick={inspect}
-              >
-                Read worksheets
-              </Button>
-            </div>
-            {workbook && (
-              <div className="sheet-controls">
-                <label>
-                  Worksheet
-                  <select
-                    aria-label="Worksheet"
-                    value={sheet}
+              <ExcelTemplateButton
+                path={`/machines/${machine.code}/production/template?month=${encodeURIComponent(templateMonth)}`}
+                filename={`${machine.code}-production-${templateMonth}-template.xlsx`}
+                token={token}
+              />
+              <div className="upload-controls">
+                <label className="file-field" htmlFor="production-file">
+                  Production workbook (.xlsx, up to 8 MB)
+                  <input
+                    id="production-file"
+                    type="file"
+                    accept=".xlsx"
                     disabled={!!busy}
                     onChange={(event) => {
-                      setSheet(event.target.value);
+                      setFile(event.target.files?.[0] || null);
+                      setWorkbook(null);
+                      setSheet("");
                       resetPreview();
                     }}
-                  >
-                    <option value="">Choose a supported monthly sheet</option>
-                    {workbook.sheets.map((item) => (
-                      <option
-                        key={item.name}
-                        value={item.name}
-                        disabled={!item.supported}
-                      >
-                        {item.name}
-                        {!item.supported ? " — review required" : ""}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </label>
-                <Button onClick={makePreview} disabled={!sheet || !!busy}>
-                  Preview selected sheet
+                <Button
+                  variant="outline"
+                  disabled={!file || !!busy}
+                  onClick={inspect}
+                >
+                  Read worksheets
                 </Button>
-                <details className="sheet-notes">
-                  <summary>
-                    Sheet eligibility ({workbook.sheets.length} sheets)
-                  </summary>
-                  <ul>
-                    {workbook.sheets.map((item) => (
-                      <li key={item.name}>
-                        <strong>{item.name}</strong>:{" "}
-                        {item.supported
-                          ? "Recognized full monthly WH-C layout."
-                          : item.reason}
-                      </li>
-                    ))}
-                  </ul>
-                </details>
               </div>
-            )}
-            {busy && (
-              <p role="status" className="operation-status">
-                {busy}
-              </p>
-            )}
-            {importError && (
-              <div role="alert" className="inline-error">
-                {importError}
-                {preview && preview.status === "PREVIEW" && (
-                  <Button
-                    variant="ghost"
-                    onClick={refreshPreview}
-                    disabled={!!busy}
-                  >
-                    <RefreshCw size={13} />
-                    Refresh preview
+              {workbook && (
+                <div className="sheet-controls">
+                  <label>
+                    Worksheet
+                    <select
+                      aria-label="Worksheet"
+                      value={sheet}
+                      disabled={!!busy}
+                      onChange={(event) => {
+                        setSheet(event.target.value);
+                        resetPreview();
+                      }}
+                    >
+                      <option value="">Choose a supported monthly sheet</option>
+                      {workbook.sheets.map((item) => (
+                        <option
+                          key={item.name}
+                          value={item.name}
+                          disabled={!item.supported}
+                        >
+                          {item.name}
+                          {!item.supported ? " — review required" : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <Button onClick={makePreview} disabled={!sheet || !!busy}>
+                    Preview selected sheet
                   </Button>
-                )}
-              </div>
-            )}
-            {committed && (
-              <div role="status" className="import-success">
-                <CheckCircle2 size={19} />
-                <span>
-                  {committed.alreadyCommitted
-                    ? "This selection was already saved. No duplicates were added."
-                    : `${committed.importedDays} days saved · ${committed.jobRows} job rows · ${number(committed.productionKg)} kg production.`}{" "}
-                  Dashboard totals now come from saved records.
-                </span>
-              </div>
-            )}
-            {preview && (
-              <div className="production-preview">
-                <div className="preview-heading">
-                  <div>
-                    <h3>
-                      {preview.status === "COMMITTED"
-                        ? "Saved import source"
-                        : "Validation preview"}
-                    </h3>
-                    <p>
-                      {preview.filename} · {preview.sheet} ·{" "}
-                      {preview.source === "SYNTHETIC"
-                        ? "SYNTHETIC"
-                        : "AUTHENTIC"}
-                    </p>
-                    <small>
-                      Source hash {preview.workbookHash.slice(0, 16)} ·{" "}
-                      {preview.parserVersion}
-                    </small>
-                  </div>
-                  <span className="pill">
-                    {preview.days.length} date blocks
+                  <details className="sheet-notes">
+                    <summary>
+                      Sheet eligibility ({workbook.sheets.length} sheets)
+                    </summary>
+                    <ul>
+                      {workbook.sheets.map((item) => (
+                        <li key={item.name}>
+                          <strong>{item.name}</strong>:{" "}
+                          {item.supported
+                            ? "Recognized monthly production layout."
+                            : item.reason}
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                </div>
+              )}
+              {busy && (
+                <p role="status" className="operation-status">
+                  {busy}
+                </p>
+              )}
+              {importError && (
+                <div role="alert" className="inline-error">
+                  {importError}
+                  {preview && preview.status === "PREVIEW" && (
+                    <Button
+                      variant="ghost"
+                      onClick={refreshPreview}
+                      disabled={!!busy}
+                    >
+                      <RefreshCw size={13} />
+                      Refresh preview
+                    </Button>
+                  )}
+                </div>
+              )}
+              {committed && (
+                <div role="status" className="import-success">
+                  <CheckCircle2 size={19} />
+                  <span>
+                    {committed.alreadyCommitted
+                      ? "This selection was already saved. No duplicates were added."
+                      : `${committed.importedDays} days saved · ${committed.jobRows} job rows · ${number(committed.productionKg)} kg production.`}{" "}
+                    Dashboard totals now come from saved records.
                   </span>
                 </div>
-                <div className="validation-notes">
-                  <ul>
-                    {preview.warnings.map((note) => (
-                      <li key={note}>{note}</li>
-                    ))}
-                  </ul>
-                  {excluded > 0 && (
-                    <p className="validation-error">
-                      <strong>
-                        {excluded} date{" "}
-                        {excluded === 1 ? "block needs" : "blocks need"} review.
-                      </strong>{" "}
-                      These blocks are excluded; their dates and quantities are
-                      not corrected automatically.
-                    </p>
-                  )}
-                  {preview.days.some((day) => day.alreadyImported) && (
-                    <p>
-                      Already imported dates are excluded to prevent duplicate
-                      totals.
-                    </p>
-                  )}
-                </div>
-                <div className="day-review-list">
-                  {preview.days.map((day) => {
-                    const imported =
-                      preview.status === "COMMITTED" &&
-                      preview.committedDayKeys.includes(day.key);
-                    return (
-                      <article
-                        className={`day-review ${!day.eligible && !imported ? "needs-review" : ""}`}
-                        key={day.key}
-                      >
-                        <div className="day-review-top">
-                          <label className="day-choice">
-                            <input
-                              type="checkbox"
-                              aria-label={`Import ${day.date || `source row ${day.sourceStartRow}`}`}
-                              checked={selected.includes(day.key)}
-                              disabled={
-                                !day.eligible ||
-                                preview.status === "COMMITTED" ||
-                                !!busy
-                              }
-                              onChange={(event) =>
-                                setSelected((current) =>
-                                  event.target.checked
-                                    ? [...current, day.key]
-                                    : current.filter((key) => key !== day.key),
-                                )
-                              }
-                            />
-                            <span>
-                              <strong>{day.date || "Date needs review"}</strong>
-                              <small>
-                                {preview.sheet} · rows {day.sourceStartRow}–
-                                {day.sourceEndRow}
-                                {!day.date
-                                  ? ` · original date: ${day.rawDate || "(blank)"}`
-                                  : ""}
-                              </small>
-                            </span>
-                          </label>
-                          <span
-                            className={`review-status ${day.eligible ? "valid" : ""}`}
-                          >
-                            {imported
-                              ? "Imported"
-                              : day.alreadyImported
-                                ? "Already imported"
-                                : !day.eligible
-                                  ? "Review required"
-                                  : preview.status === "COMMITTED"
-                                    ? "Not selected"
-                                    : "Ready"}
-                          </span>
-                        </div>
-                        <div className="day-quantities">
-                          <span>
-                            Job production{" "}
-                            <strong>{number(day.productionKg)} kg</strong>
-                          </span>
-                          <span>
-                            Daily control{" "}
-                            <strong>
-                              {day.controlProductionKg === null
-                                ? "Missing"
-                                : number(day.controlProductionKg) + " kg"}
-                            </strong>
-                          </span>
-                          <span>
-                            Category scrap{" "}
-                            <strong>{number(day.scrapKg)} kg</strong>
-                          </span>
-                          <span>
-                            Daily scrap control{" "}
-                            <strong>
-                              {day.controlScrapKg === null
-                                ? "Missing"
-                                : number(day.controlScrapKg) + " kg"}
-                            </strong>
-                          </span>
-                        </div>
-                        {day.problems.length > 0 && (
-                          <ul className="row-problems">
-                            {day.problems.map((problem, index) => (
-                              <li
-                                key={index}
-                                className={
-                                  problem.severity === "ERROR"
-                                    ? "validation-error"
-                                    : ""
-                                }
-                              >
-                                <strong>{problem.cell}</strong> ·{" "}
-                                {problem.message}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                        <details className="source-rows">
-                          <summary>Source rows ({day.rows.length})</summary>
-                          <div className="table-scroll">
-                            <table>
-                              <thead>
-                                <tr>
-                                  <th>Row / shift</th>
-                                  <th>Original job description</th>
-                                  <th>Production kg</th>
-                                  <th>Scrap kg</th>
-                                  <th>Remarks</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {day.rows.map((row) => (
-                                  <tr key={row.sourceRow}>
-                                    <td>
-                                      {row.sourceRow} / {row.shift || "Unknown"}
-                                      {row.kind === "ACTIVITY" && (
-                                        <small>Activity only</small>
-                                      )}
-                                    </td>
-                                    <td>
-                                      {row.description ||
-                                        "No job description recorded"}
-                                    </td>
-                                    <td>
-                                      {row.productionKg === null
-                                        ? "—"
-                                        : number(row.productionKg)}
-                                    </td>
-                                    <td>
-                                      {number(
-                                        Object.values(row.scrap).reduce(
-                                          (a, b) => a + b,
-                                          0,
-                                        ),
-                                      )}
-                                    </td>
-                                    <td>{row.remarks || "—"}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                          <details className="raw-source">
-                            <summary>
-                              Original cell values and formula caches
-                            </summary>
-                            <pre>
-                              {JSON.stringify(
-                                day.rows.map((row) => ({
-                                  row: row.sourceRow,
-                                  cells: row.rawCells,
-                                  downtime: row.downtime,
-                                  downtimeUnit: "UNCONFIRMED",
-                                })),
-                                null,
-                                2,
-                              )}
-                            </pre>
-                          </details>
-                        </details>
-                      </article>
-                    );
-                  })}
-                </div>
-                {preview.status === "PREVIEW" && (
-                  <div className="commit-review">
-                    <p>
-                      <strong>Preview totals, not saved:</strong>{" "}
-                      {selected.length} selected days ·{" "}
-                      {number(
-                        selectedDays.reduce(
-                          (n, day) => n + day.productionKg,
-                          0,
-                        ),
-                      )}{" "}
-                      kg production ·{" "}
-                      {number(
-                        selectedDays.reduce((n, day) => n + day.scrapKg, 0),
-                      )}{" "}
-                      kg scrap
-                    </p>
-                    <label className="acknowledgement">
-                      <input
-                        type="checkbox"
-                        checked={ack}
-                        disabled={!!busy}
-                        onChange={(event) => setAck(event.target.checked)}
-                      />
-                      I reviewed the source, excluded blocks and cached-formula
-                      notes.
-                    </label>
-                    <Button
-                      disabled={!selected.length || !ack || !!busy}
-                      onClick={commit}
-                    >
-                      Import {selected.length} valid{" "}
-                      {selected.length === 1 ? "day" : "days"}
-                    </Button>
-                    <small>
-                      Preview expires{" "}
-                      {new Date(preview.expiresAt).toLocaleString("en-IN", {
-                        timeZone: "Asia/Kolkata",
-                      })}{" "}
-                      IST. Nothing is saved to dashboard totals until you
-                      import.
-                    </small>
+              )}
+              {preview && (
+                <div className="production-preview">
+                  <div className="preview-heading">
+                    <div>
+                      <h3>
+                        {preview.status === "COMMITTED"
+                          ? "Saved import source"
+                          : "Validation preview"}
+                      </h3>
+                      <p>
+                        {preview.filename} · {preview.sheet} ·{" "}
+                        {preview.source === "SYNTHETIC"
+                          ? "SYNTHETIC"
+                          : "Company production"}
+                      </p>
+                      <details>
+                        <summary>Source details</summary>
+                        <small>
+                          Source hash {preview.workbookHash.slice(0, 16)} ·{" "}
+                          {preview.parserVersion}
+                        </small>
+                      </details>
+                    </div>
+                    <span className="pill">
+                      {preview.days.length} date blocks
+                    </span>
                   </div>
-                )}
-              </div>
-            )}
-          </div>
-        </section>
+                  <div className="validation-notes">
+                    <ul>
+                      {preview.warnings.map((note) => (
+                        <li key={note}>{note}</li>
+                      ))}
+                    </ul>
+                    {excluded > 0 && (
+                      <p className="validation-error">
+                        <strong>
+                          {excluded} date{" "}
+                          {excluded === 1 ? "block needs" : "blocks need"}{" "}
+                          review.
+                        </strong>{" "}
+                        These blocks are excluded; their dates and quantities
+                        are not corrected automatically.
+                      </p>
+                    )}
+                    {preview.days.some((day) => day.alreadyImported) && (
+                      <p>
+                        Already imported dates are excluded to prevent duplicate
+                        totals.
+                      </p>
+                    )}
+                  </div>
+                  <div className="day-review-list">
+                    {preview.days.map((day) => {
+                      const imported =
+                        preview.status === "COMMITTED" &&
+                        preview.committedDayKeys.includes(day.key);
+                      return (
+                        <article
+                          className={`day-review ${!day.eligible && !imported ? "needs-review" : ""}`}
+                          key={day.key}
+                        >
+                          <div className="day-review-top">
+                            <label className="day-choice">
+                              <input
+                                type="checkbox"
+                                aria-label={`Import ${day.date || `source row ${day.sourceStartRow}`}`}
+                                checked={selected.includes(day.key)}
+                                disabled={
+                                  !day.eligible ||
+                                  preview.status === "COMMITTED" ||
+                                  !!busy
+                                }
+                                onChange={(event) =>
+                                  setSelected((current) =>
+                                    event.target.checked
+                                      ? [...current, day.key]
+                                      : current.filter(
+                                          (key) => key !== day.key,
+                                        ),
+                                  )
+                                }
+                              />
+                              <span>
+                                <strong>
+                                  {day.date || "Date needs review"}
+                                </strong>
+                                <small>
+                                  {preview.sheet} · rows {day.sourceStartRow}–
+                                  {day.sourceEndRow}
+                                  {!day.date
+                                    ? ` · original date: ${day.rawDate || "(blank)"}`
+                                    : ""}
+                                </small>
+                              </span>
+                            </label>
+                            <span
+                              className={`review-status ${day.eligible ? "valid" : ""}`}
+                            >
+                              {imported
+                                ? "Imported"
+                                : day.alreadyImported
+                                  ? "Already imported"
+                                  : !day.eligible
+                                    ? "Review required"
+                                    : preview.status === "COMMITTED"
+                                      ? "Not selected"
+                                      : "Ready"}
+                            </span>
+                          </div>
+                          <div className="day-quantities">
+                            <span>
+                              Job production{" "}
+                              <strong>{number(day.productionKg)} kg</strong>
+                            </span>
+                            <span>
+                              Daily control{" "}
+                              <strong>
+                                {day.controlProductionKg === null
+                                  ? "Missing"
+                                  : number(day.controlProductionKg) + " kg"}
+                              </strong>
+                            </span>
+                            <span>
+                              Category scrap{" "}
+                              <strong>{number(day.scrapKg)} kg</strong>
+                            </span>
+                            <span>
+                              Daily scrap control{" "}
+                              <strong>
+                                {day.controlScrapKg === null
+                                  ? "Missing"
+                                  : number(day.controlScrapKg) + " kg"}
+                              </strong>
+                            </span>
+                          </div>
+                          {day.problems.length > 0 && (
+                            <ul className="row-problems">
+                              {day.problems.map((problem, index) => (
+                                <li
+                                  key={index}
+                                  className={
+                                    problem.severity === "ERROR"
+                                      ? "validation-error"
+                                      : ""
+                                  }
+                                >
+                                  <strong>{problem.cell}</strong> ·{" "}
+                                  {problem.message}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                          <details className="source-rows">
+                            <summary>Source rows ({day.rows.length})</summary>
+                            <div className="table-scroll">
+                              <table>
+                                <thead>
+                                  <tr>
+                                    <th>Row / shift</th>
+                                    <th>Original job description</th>
+                                    <th>Production kg</th>
+                                    <th>Scrap kg</th>
+                                    <th>Remarks</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {day.rows.map((row) => (
+                                    <tr key={row.sourceRow}>
+                                      <td>
+                                        {row.sourceRow} /{" "}
+                                        {row.shift || "Unknown"}
+                                        {row.kind === "ACTIVITY" && (
+                                          <small>Activity only</small>
+                                        )}
+                                      </td>
+                                      <td>
+                                        {row.description ||
+                                          "No job description recorded"}
+                                      </td>
+                                      <td>
+                                        {row.productionKg === null
+                                          ? "—"
+                                          : number(row.productionKg)}
+                                      </td>
+                                      <td>
+                                        {number(
+                                          Object.values(row.scrap).reduce(
+                                            (a, b) => a + b,
+                                            0,
+                                          ),
+                                        )}
+                                      </td>
+                                      <td>{row.remarks || "—"}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                            <details className="raw-source">
+                              <summary>
+                                Original cell values and formula caches
+                              </summary>
+                              <pre>
+                                {JSON.stringify(
+                                  day.rows.map((row) => ({
+                                    row: row.sourceRow,
+                                    cells: row.rawCells,
+                                    downtime: row.downtime,
+                                    downtimeUnit: "UNCONFIRMED",
+                                  })),
+                                  null,
+                                  2,
+                                )}
+                              </pre>
+                            </details>
+                          </details>
+                        </article>
+                      );
+                    })}
+                  </div>
+                  {preview.status === "PREVIEW" && (
+                    <div className="commit-review">
+                      <p>
+                        <strong>Preview totals, not saved:</strong>{" "}
+                        {selected.length} selected days ·{" "}
+                        {number(
+                          selectedDays.reduce(
+                            (n, day) => n + day.productionKg,
+                            0,
+                          ),
+                        )}{" "}
+                        kg production ·{" "}
+                        {number(
+                          selectedDays.reduce((n, day) => n + day.scrapKg, 0),
+                        )}{" "}
+                        kg scrap
+                      </p>
+                      <label className="acknowledgement">
+                        <input
+                          type="checkbox"
+                          checked={ack}
+                          disabled={!!busy}
+                          onChange={(event) => setAck(event.target.checked)}
+                        />
+                        I reviewed the source, excluded blocks and
+                        cached-formula notes.
+                      </label>
+                      <Button
+                        disabled={!selected.length || !ack || !!busy}
+                        onClick={commit}
+                      >
+                        Import {selected.length} valid{" "}
+                        {selected.length === 1 ? "day" : "days"}
+                      </Button>
+                      <small>
+                        Preview expires{" "}
+                        {new Date(preview.expiresAt).toLocaleString("en-IN", {
+                          timeZone: "Asia/Kolkata",
+                        })}{" "}
+                        IST. Nothing is saved to dashboard totals until you
+                        import.
+                      </small>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </section>
+        </FormPopup>
       )}
       {loading ? (
         <div className="loading-state production-loading" role="status">
@@ -768,7 +790,7 @@ export function ProductionWorkspace({
                         {dashboard.from} to {dashboard.to} ·{" "}
                         {dashboard.source === "SYNTHETIC"
                           ? "Synthetic demonstration"
-                          : "Authentic production"}
+                          : "Company production"}
                       </p>
                     </div>
                     <span className="pill">
@@ -788,7 +810,7 @@ export function ProductionWorkspace({
                         <CartesianGrid
                           strokeDasharray="3 4"
                           vertical={false}
-                          stroke="#e5ebe2"
+                          stroke="#deddd5"
                         />
                         <XAxis
                           dataKey="date"
@@ -813,20 +835,20 @@ export function ProductionWorkspace({
                           contentStyle={{
                             borderRadius: 8,
                             fontSize: 12,
-                            borderColor: "#dce5d8",
+                            borderColor: "#deddd5",
                           }}
                         />
                         <Legend wrapperStyle={{ fontSize: 11 }} />
                         <Bar
                           dataKey="productionKg"
                           name="Production"
-                          fill="#2e765a"
+                          fill="#242424"
                           radius={[3, 3, 0, 0]}
                         />
                         <Bar
                           dataKey="scrapKg"
                           name="Scrap"
-                          fill="#bda36f"
+                          fill="#ff5b29"
                           radius={[3, 3, 0, 0]}
                         />
                       </ComposedChart>
@@ -891,7 +913,8 @@ export function ProductionWorkspace({
                           <td>
                             <strong>{item.filename}</strong>
                             <small>
-                              {item.sheet} · {item.source}
+                              {item.sheet}
+                              {item.source === "SYNTHETIC" && " · SYNTHETIC"}
                             </small>
                           </td>
                           <td>

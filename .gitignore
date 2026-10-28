@@ -1,6 +1,7 @@
 node_modules/
 .next/
 .next-test/
+.next-rca-test/
 dist/
 coverage/
 playwright-report/

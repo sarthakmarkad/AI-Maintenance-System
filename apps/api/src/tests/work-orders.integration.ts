@@ -70,6 +70,34 @@ const repair = (o: any, rootCause = "TEST inspection finding") => ({
 async function reported() {
   return (await post().send(body()).expect(201)).body;
 }
+test("head cancels a mistaken breakdown with a reason and retained evidence", async () => {
+  const order = await reported();
+  await action(order, "cancel", "admin", { reason: "Duplicate report" }).expect(
+    403,
+  );
+  await action(order, "cancel", "head", { reason: "x" }).expect(400);
+  const cancelled = (
+    await action(order, "cancel", "head", {
+      reason: "Duplicate report",
+    }).expect(200)
+  ).body;
+  assert.equal(cancelled.status, "CANCELLED");
+  assert.equal(cancelled.events[0].action, "CANCEL");
+  assert.equal(cancelled.events[0].detail.reason, "Duplicate report");
+  assert.equal(cancelled.closedAt, null);
+  await action(order, "cancel", "head", { reason: "Duplicate report" }).expect(
+    409,
+  );
+  await action(cancelled, "assign", "head", { technicianId: ids.tech }).expect(
+    409,
+  );
+  assert.equal(
+    await db.auditEvent.count({
+      where: { orgId, entityId: order.id, action: "WORK_ORDER_CANCEL" },
+    }),
+    1,
+  );
+});
 before(async () => {
   const org = await db.organization.create({
     data: {

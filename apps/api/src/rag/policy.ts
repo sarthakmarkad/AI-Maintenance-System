@@ -39,7 +39,7 @@ export function settings(config: Config) {
       config.DOCUMENT_AI_ENABLED !== "false",
     embeddingModel,
     answerModel: local
-      ? (config.COMMANDCODE_MODEL ?? "z-ai/glm-5.3-flash")
+      ? (config.COMMANDCODE_MODEL ?? "deepseek/deepseek-v4.1-flash")
       : (config.OPENAI_ANSWER_MODEL ?? "gpt-5.4-mini-2026-03-17"),
     profile,
   };

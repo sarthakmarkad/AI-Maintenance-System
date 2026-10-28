@@ -34,6 +34,53 @@ const head = principal(Role.MAINTENANCE_HEAD),
 const now = new Date("2026-09-01T04:00:00Z");
 const status = (n: number) => (e: unknown) =>
   (e as { status: number }).status === n;
+test("cancellation keeps evidence, requires a head reason and never cancels approved or terminal work", () => {
+  for (const kind of ["BREAKDOWN", "PLANNED", "INVESTIGATION"] as const) {
+    const issue: Issue = {
+      ...base,
+      kind,
+      status: "IN_PROGRESS",
+      findings: "Retained findings",
+      correctiveAction: "Retained work",
+    };
+    const cancelled = transition(issue, head, "cancel", {
+      version: 1,
+      reason: "Duplicate work record",
+    });
+    assert.equal(cancelled.status, "CANCELLED");
+    assert.equal(cancelled.findings, issue.findings);
+    assert.equal(cancelled.closedAt, null);
+    assert.throws(
+      () =>
+        transition(cancelled, head, "cancel", {
+          version: 2,
+          reason: "Duplicate work record",
+        }),
+      status(409),
+    );
+  }
+  assert.throws(
+    () =>
+      transition(base, principal(Role.ADMINISTRATOR), "cancel", {
+        version: 1,
+        reason: "Duplicate work record",
+      }),
+    status(403),
+  );
+  assert.throws(
+    () => transition(base, head, "cancel", { version: 1, reason: "x" }),
+    status(400),
+  );
+  for (const stage of ["APPROVED", "CLOSED", "CANCELLED"] as const)
+    assert.throws(
+      () =>
+        transition({ ...base, status: stage }, head, "cancel", {
+          version: 1,
+          reason: "Duplicate work record",
+        }),
+      status(409),
+    );
+});
 test("assigned technician, maintenance head and supervisor complete the distinct responsibilities", () => {
   let issue = transition(
     base,

@@ -1,0 +1,133 @@
+.panel {
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--ink);
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+.heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 17px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.eyebrow,
+.duration {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+}
+.duration {
+  background: #f5ff80;
+  color: #28251e;
+  padding: 5px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.screen {
+  aspect-ratio: 16 / 9;
+  background: #f4f0e6;
+}
+.video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.caption {
+  padding: 20px;
+  border-top: 1px solid var(--border);
+}
+.titleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.titleRow h2 {
+  margin: 0;
+  font-size: clamp(17px, 1.65vw, 22px);
+  font-weight: 550;
+  letter-spacing: -0.035em;
+}
+.play {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid var(--ink);
+  border-radius: 6px;
+  background: #f5ff80;
+  color: #28251e;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.play:hover {
+  background: #eaf46d;
+}
+.play:focus-visible,
+.transcript summary:focus-visible,
+.transcript a:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+.caption > p {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.6;
+}
+.caption .status:empty {
+  display: none;
+}
+.caption .status {
+  font-size: 12px;
+  color: var(--ink);
+}
+.transcript {
+  margin-top: 13px;
+  font-size: 12px;
+  line-height: 1.65;
+}
+.transcript summary {
+  cursor: pointer;
+  width: fit-content;
+  text-underline-offset: 3px;
+}
+.transcript summary:hover {
+  text-decoration: underline;
+}
+.transcript ol {
+  padding-left: 20px;
+  margin: 12px 0;
+}
+.transcript li {
+  margin: 8px 0;
+}
+.transcript a {
+  text-decoration: underline;
+}
+@media (max-width: 600px) {
+  .heading {
+    padding: 14px 16px;
+  }
+  .caption {
+    padding: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .panel,
+  .panel * {
+    animation: none;
+    transition: none;
+  }
+}

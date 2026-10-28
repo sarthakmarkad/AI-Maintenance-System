@@ -16,6 +16,7 @@ import {
 } from "@/lib/api";
 import { useAuth } from "./auth-provider";
 import { Button } from "./ui/button";
+import { FormPopup } from "./ui/form-popup";
 const labels: Record<string, string> = {
   SUDDEN_CHANGE: "Sudden change",
   SUSTAINED_SHIFT: "Sustained shift",
@@ -187,111 +188,127 @@ function InvestigationHandoff({
     return (
       <p>Awaiting the Maintenance head to open and assign an investigation.</p>
     );
-  if (!open)
-    return (
-      <Button variant="outline" onClick={() => setOpen(true)}>
+  return (
+    <>
+      <Button
+        variant="outline"
+        onClick={() => setOpen(true)}
+        aria-haspopup="dialog"
+      >
         Open investigation
       </Button>
-    );
-  return (
-    <form
-      aria-label="Open investigation"
-      className="anomaly-form"
-      onSubmit={async (e) => {
-        e.preventDefault();
-        if (busy || conflict || !roster.some((t) => t.userId === technicianId))
-          return;
-        setBusy(true);
-        setError("");
-        try {
-          onSaved(
-            await api<AnomalyReceipt>(
-              `/machines/${encodeURIComponent(code)}/readings/anomalies/reviews/${review.id}/investigation`,
-              token,
-              undefined,
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ technicianId }),
-              },
-            ),
-          );
-        } catch (e) {
-          if (e instanceof ApiError && e.status === 409) setConflict(true);
-          await onFailure(e, setError);
-        } finally {
-          setBusy(false);
-        }
-      }}
-    >
-      <label>
-        Assign technician
-        <select
-          aria-label="Investigation technician"
-          required
-          value={technicianId}
-          disabled={loading || busy || conflict}
-          onChange={(e) => setTechnician(e.target.value)}
+      <FormPopup
+        open={open}
+        onOpenChange={setOpen}
+        title="Assign investigation"
+        description="Explicitly open investigation work from this retained synthetic review. It does not confirm a breakdown."
+        busy={busy}
+      >
+        <form
+          aria-label="Open investigation"
+          className="anomaly-form"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            if (
+              busy ||
+              conflict ||
+              !roster.some((t) => t.userId === technicianId)
+            )
+              return;
+            setBusy(true);
+            setError("");
+            try {
+              onSaved(
+                await api<AnomalyReceipt>(
+                  `/machines/${encodeURIComponent(code)}/readings/anomalies/reviews/${review.id}/investigation`,
+                  token,
+                  undefined,
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ technicianId }),
+                  },
+                ),
+              );
+            } catch (e) {
+              if (e instanceof ApiError && e.status === 409) setConflict(true);
+              await onFailure(e, setError);
+            } finally {
+              setBusy(false);
+            }
+          }}
         >
-          <option value="">Choose a technician</option>
-          {roster.map((t) => (
-            <option key={t.userId} value={t.userId}>
-              {t.displayName}
-            </option>
-          ))}
-        </select>
-      </label>
-      {loading ? (
-        <p>Loading eligible technicians…</p>
-      ) : !error && !roster.length ? (
-        <p>
-          No eligible technicians with machine access. Contact your
-          administrator.
-        </p>
-      ) : null}
-      <p>
-        Explicitly open assigned investigation work from this retained review.
-        This does not confirm a breakdown. The assignee must use their
-        Technician role view to start and submit.
-      </p>
-      {error && <p role="alert">{error}</p>}
-      {error && !conflict && (
-        <Button
-          type="button"
-          variant="outline"
-          disabled={busy}
-          onClick={() => setAttempt((v) => v + 1)}
-        >
-          Retry technician directory
-        </Button>
-      )}
-      {conflict && (
-        <p>
-          Reload the analysis or review history to see the existing
-          investigation.
-        </p>
-      )}
-      <div className="anomaly-actions">
-        <Button
-          disabled={
-            loading ||
-            busy ||
-            conflict ||
-            !roster.some((t) => t.userId === technicianId)
-          }
-        >
-          {busy ? "Opening investigation…" : "Confirm investigation assignment"}
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          disabled={busy}
-          onClick={() => setOpen(false)}
-        >
-          Cancel assignment
-        </Button>
-      </div>
-    </form>
+          <label>
+            Assign technician
+            <select
+              aria-label="Investigation technician"
+              required
+              value={technicianId}
+              disabled={loading || busy || conflict}
+              onChange={(e) => setTechnician(e.target.value)}
+            >
+              <option value="">Choose a technician</option>
+              {roster.map((t) => (
+                <option key={t.userId} value={t.userId}>
+                  {t.displayName}
+                </option>
+              ))}
+            </select>
+          </label>
+          {loading ? (
+            <p>Loading eligible technicians…</p>
+          ) : !error && !roster.length ? (
+            <p>
+              No eligible technicians with machine access. Contact your
+              administrator.
+            </p>
+          ) : null}
+          <p>
+            The assignee must use their granted Technician role to start and
+            submit the investigation.
+          </p>
+          {error && <p role="alert">{error}</p>}
+          {error && !conflict && (
+            <Button
+              type="button"
+              variant="outline"
+              disabled={busy}
+              onClick={() => setAttempt((v) => v + 1)}
+            >
+              Retry technician directory
+            </Button>
+          )}
+          {conflict && (
+            <p>
+              Reload the analysis or review history to see the existing
+              investigation.
+            </p>
+          )}
+          <div className="anomaly-actions">
+            <Button
+              disabled={
+                loading ||
+                busy ||
+                conflict ||
+                !roster.some((t) => t.userId === technicianId)
+              }
+            >
+              {busy
+                ? "Opening investigation…"
+                : "Confirm investigation assignment"}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={busy}
+              onClick={() => setOpen(false)}
+            >
+              Cancel assignment
+            </Button>
+          </div>
+        </form>
+      </FormPopup>
+    </>
   );
 }
 export function AnomaliesWorkspace({
@@ -318,6 +335,7 @@ export function AnomaliesWorkspace({
     [kind, setKind] = useState(""),
     [status, setStatus] = useState(""),
     [after, setAfter] = useState("");
+  const [reviewOpen, setReviewOpen] = useState(false);
   const [selected, setSelected] = useState<AnomalyFlag | null>(null),
     [reason, setReason] = useState(""),
     [decision, setDecision] = useState("INVESTIGATE"),
@@ -683,10 +701,13 @@ export function AnomaliesWorkspace({
                               variant="outline"
                               disabled={busy || loading || conflict}
                               onClick={() => {
-                                setSelected(flag);
-                                setReason("");
-                                setDecision("INVESTIGATE");
-                                setActionError("");
+                                if (selected?.key !== flag.key) {
+                                  setSelected(flag);
+                                  setReason("");
+                                  setDecision("INVESTIGATE");
+                                  setActionError("");
+                                }
+                                setReviewOpen(true);
                               }}
                             >
                               Review {labels[flag.kind].toLowerCase()}
@@ -694,71 +715,83 @@ export function AnomaliesWorkspace({
                           )
                         )}
                         {selected?.key === flag.key && (
-                          <form
-                            className="anomaly-form"
-                            aria-label="Review statistical flag"
-                            onSubmit={(e) => {
-                              e.preventDefault();
-                              void save();
-                            }}
+                          <FormPopup
+                            open={reviewOpen}
+                            onOpenChange={setReviewOpen}
+                            title="Review statistical flag"
+                            description={`Synthetic observations · ${flag.parameter} · ${labels[flag.kind]}`}
+                            busy={busy}
                           >
-                            <h4>Record your review</h4>
-                            <label>
-                              Decision
-                              <select
-                                aria-label="Review decision"
-                                value={decision}
-                                disabled={busy || conflict}
-                                onChange={(e) => setDecision(e.target.value)}
-                              >
-                                <option value="INVESTIGATE">
-                                  Needs investigation
-                                </option>
-                                <option value="DISMISSED">
-                                  Dismiss with reason
-                                </option>
-                              </select>
-                            </label>
-                            <label>
-                              Review reason
-                              <textarea
-                                aria-label="Review reason"
-                                required
-                                minLength={3}
-                                maxLength={2000}
-                                value={reason}
-                                disabled={busy || conflict}
-                                onChange={(e) => setReason(e.target.value)}
-                              />
-                            </label>
-                            <p>
-                              This decision and the exact supporting readings
-                              are retained. Save the review first, then
-                              explicitly open and assign an investigation. No
-                              breakdown is created.
-                            </p>
-                            {actionError && <p role="alert">{actionError}</p>}
-                            <div className="anomaly-actions">
-                              <Button
-                                disabled={
-                                  busy ||
-                                  loading ||
-                                  conflict ||
-                                  reason.trim().length < 3
-                                }
-                              >
-                                {busy ? "Saving review…" : "Save review"}
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                disabled={busy}
-                                onClick={() => setSelected(null)}
-                              >
-                                Cancel review
-                              </Button>
-                            </div>
-                          </form>
+                            <details>
+                              <summary>Review flag evidence</summary>
+                              <Evidence flag={flag} />
+                            </details>
+                            <form
+                              className="anomaly-form"
+                              aria-label="Review statistical flag"
+                              onSubmit={(e) => {
+                                e.preventDefault();
+                                void save();
+                              }}
+                            >
+                              <h4>Record your review</h4>
+                              <label>
+                                Decision
+                                <select
+                                  aria-label="Review decision"
+                                  value={decision}
+                                  disabled={busy || conflict}
+                                  onChange={(e) => setDecision(e.target.value)}
+                                >
+                                  <option value="INVESTIGATE">
+                                    Needs investigation
+                                  </option>
+                                  <option value="DISMISSED">
+                                    Dismiss with reason
+                                  </option>
+                                </select>
+                              </label>
+                              <label>
+                                Review reason
+                                <textarea
+                                  aria-label="Review reason"
+                                  required
+                                  minLength={3}
+                                  maxLength={2000}
+                                  value={reason}
+                                  disabled={busy || conflict}
+                                  onChange={(e) => setReason(e.target.value)}
+                                />
+                              </label>
+                              <p>
+                                This decision and the exact supporting readings
+                                are retained. Save the review first, then
+                                explicitly open and assign an investigation. No
+                                breakdown is created.
+                              </p>
+                              {actionError && <p role="alert">{actionError}</p>}
+                              <div className="anomaly-actions">
+                                <Button
+                                  disabled={
+                                    busy ||
+                                    loading ||
+                                    conflict ||
+                                    reason.trim().length < 3
+                                  }
+                                >
+                                  {busy ? "Saving review…" : "Save review"}
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  disabled={busy}
+                                  onClick={() => setReviewOpen(false)}
+                                >
+                                  Cancel review
+                                </Button>
+                              </div>
+                            </form>
+                          </FormPopup>
                         )}
                       </article>
                     ))}

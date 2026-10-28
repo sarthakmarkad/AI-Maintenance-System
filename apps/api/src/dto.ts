@@ -23,11 +23,22 @@ export class MeDto {
 export class NamedDto {
   @ApiProperty() name!: string;
 }
+export class MachinePhotoSummaryDto {
+  @ApiProperty({ format: "uuid" }) id!: string;
+  @ApiProperty() width!: number;
+  @ApiProperty() height!: number;
+}
 export class MachineDto {
+  @ApiPropertyOptional({ type: String, nullable: true, format: "date-time" })
+  archivedAt?: Date | null;
+  @ApiPropertyOptional({ type: String, nullable: true }) archiveReason?:
+    | string
+    | null;
   @ApiProperty({ format: "uuid" }) id!: string;
   @ApiProperty({ example: "WH-C" }) code!: string;
   @ApiProperty() name!: string;
-  @ApiProperty() manufacturer!: string;
+  @ApiProperty({ type: String, nullable: true }) manufacturer!: string | null;
+  @ApiProperty() version!: number;
   @ApiProperty({ type: String, nullable: true }) model!: string | null;
   @ApiProperty({
     example: "NOT_MONITORED",
@@ -36,6 +47,8 @@ export class MachineDto {
   operationalStatus!: string;
   @ApiProperty({ type: NamedDto, nullable: true }) department!: NamedDto | null;
   @ApiProperty({ type: NamedDto, nullable: true }) location!: NamedDto | null;
+  @ApiPropertyOptional({ type: MachinePhotoSummaryDto, nullable: true })
+  photo?: MachinePhotoSummaryDto | null;
   @ApiProperty({ type: String, format: "date-time" }) createdAt!: Date;
   @ApiProperty({ type: String, format: "date-time" }) updatedAt!: Date;
 }

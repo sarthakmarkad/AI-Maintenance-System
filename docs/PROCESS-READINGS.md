@@ -1,14 +1,14 @@
 # Synthetic process readings — milestone 3
 
-The WH-C Process trends page imports the supplied hourly workbook through preview, review and atomic commit. It is a retrospective software demonstration. Original workbook bytes are processed in memory and discarded; parsed source cells and provenance remain in private PostgreSQL. Production records remain separate.
+Every registered machine’s Process trends page imports a matching standard hourly workbook through preview, review and atomic commit. It is a retrospective software demonstration. Original workbook bytes are processed in memory and discarded; parsed source cells and provenance remain in private PostgreSQL. Production records remain separate.
 
 ## Source contract
 
 - Exact Guide and Hourly_Readings sheets; headers identify reading ID, machine, local time, demo shift, hot/cold temperature, pressure, synthetic provenance and three original formula flags.
-- Guide must identify WH-C, SYNTHETIC, Asia/Kolkata and the supplied invented bands (hot 180–220, cold 40–50, pressure 80–120). Temperature units are assumed °C; pressure is labelled bar. No sensor location, engineering safe limit or normal operating band is established.
+- Guide must identify the selected machine, SYNTHETIC, Asia/Kolkata and the supplied invented bands (hot 180–220, cold 40–50, pressure 80–120). Temperature units are assumed °C; pressure is labelled bar. No sensor location, engineering safe limit or normal operating band is established.
 - A small namespace-aware saxes reader handles both default and prefixed OOXML namespaces. It rejects DTD/custom entities and does not evaluate formulas, links or macros. It shares the production archive guard: compressed 8 MB, expanded 64 MB, 3,000 members, unsafe/duplicate/encrypted/external-link/macro entries blocked. Parsed XML limits depth, element count, rows, columns and cell length.
 - Maximum 1,000 observations over 31 days; source rows 2–1,100, columns A–K. Blank rows are skipped. Unknown layouts, changed guide assumptions or damaged workbooks fail as a whole.
-- Each observation needs a valid source ID, WH-C, SYNTHETIC, a real whole-hour local timestamp, the corresponding invented demo shift and three finite numeric values with at most three decimals. Generic magnitude bounds protect storage; they are not industrial limits. Booleans, error cells, ambiguous strings and absent formula caches are rejected. Cached numeric measurement formulas are accepted without recalculation and preserved as source cells.
+- Each observation needs a valid source ID, the selected machine, SYNTHETIC, a real whole-hour local timestamp, the corresponding invented demo shift and three finite numeric values with at most three decimals. Generic magnitude bounds protect storage; they are not industrial limits. Booleans, error cells, ambiguous strings and absent formula caches are rejected. Cached numeric measurement formulas are accepted without recalculation and preserved as source cells.
 - Numeric Excel serials honor the 1900/1904 date system. Strict local ISO text is also supported. Wall-clock time is explicitly interpreted in Asia/Kolkata, then stored as UTC timestamptz. Actual shifts are not inferred: only this workbook's invented A 00–08, B 08–16 and C 16–24 assumption is checked.
 - Invalid rows and every in-file duplicate ID/time are excluded visibly. No date/value is guessed or corrected. Existing ID OR timestamp conflicts are excluded, including renamed workbooks. The import commits all eligible new rows after acknowledgement; individual row editing and corrections are deferred.
 
@@ -52,3 +52,10 @@ The supplied original was independently checked against raw worksheet XML: 336 o
 ## Statistical extension (M6)
 
 The separate Python worker now evaluates sudden changes, sustained shifts and gradual drift against earlier saved synthetic values. It preserves causal windows and gaps, supplies evidence and chart markers, and supports head-only retained review decisions. The original invented-band review above remains unchanged and separately labelled. No authentic production values, workbook labels, automatic breakdowns or industrial fault claims enter this analysis. See STATISTICAL-PATTERNS.md for the versioned policy, Python setup, roles and verification limits.
+
+
+## Standard templates for every registered machine — 28 October 2026
+
+Production and Process trends now remain visible for new machines. The reading import popup downloads an empty `.xlsx` with that machine's code in Guide B5 and exact Hourly_Readings headers. Every imported row must repeat the same machine code. A Guide for another machine is rejected; wrong-machine rows are excluded visibly. Measurement IDs/timestamps remain unique within their machine/source scope, so the same source ID may exist independently on another machine.
+
+The owner selected standard templates for now: the process profile remains **synthetic hot temperature °C, cold temperature °C and pressure bar**, with the original explicitly invented demo bands and shifts. Downloading a template creates no observations or previews. The template is not an arbitrary sensor-schema importer or authorization to label real plant readings synthetic. Other parameters/units, authentic process measurements and engineering limits require an explicitly reviewed contract. Existing WH-C raw source evidence, policy versions, times and review semantics remain unchanged. Operational persistence is now hosted in private Supabase PostgreSQL, as described in SUPABASE-MIGRATION.md. See STANDARD-EXCEL-TEMPLATES.md for the user workflow.

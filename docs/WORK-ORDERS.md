@@ -18,7 +18,7 @@ All six application roles can read within their organization and machine scope. 
 
 Head-only assignment, six state labels, four mandatory repair text fields, explicit restoration at submission and terminal closure are provisional pilot choices inherited from the draft and accepted for this implementation. They are not reconstructed authoritative SRS requirements. Reporting does not require a known root cause. Reported impact is a human observation, not a verified downtime classification.
 
-Reassignment is allowed from ASSIGNED or IN_PROGRESS, including work returned after review. It requires a different eligible technician and a reason. It resets the current repair/start/submission/restoration fields and returns to ASSIGNED. Earlier repair submissions, assignments and return reasons remain in immutable history. A submitted repair must be returned before reassignment. Reopening, cancellation, deletion and arbitrary state editing are not implemented.
+Reassignment is allowed from ASSIGNED or IN_PROGRESS, including work returned after review. It requires a different eligible technician and a reason. It resets the current repair/start/submission/restoration fields and returns to ASSIGNED. Earlier repair submissions, assignments and return reasons remain in immutable history. A submitted repair must be returned before reassignment. The Maintenance head can cancel any work kind before approval with a reason and retained evidence; see RECORD-REMOVAL.md. Reopening, permanent deletion and arbitrary state editing are not implemented.
 
 ## Evidence and time
 
@@ -30,7 +30,7 @@ Each accepted action appends a numbered event with the actor's name/role snapsho
 
 ## Retries, concurrency and database protections
 
-- Reports use a UUID request key scoped to organization and reporter plus a fingerprint of normalized content. Identical concurrent retries produce one report/event/audit record. Changed details with a reused key return 409. The form preserves the key and draft after a failed request; a new report form receives a new key.
+- Reports use a UUID request key scoped to organization and reporter plus a fingerprint of normalized content. Identical concurrent retries produce one report/event/audit record. Changed details with a reused key return 409. The form preserves the key and draft after a failed request. Closing and reopening the popup retains that same draft/key; leaving the page or completing a successful report starts a fresh form/key.
 - Every action carries the last observed integer version. A scoped database compare-and-update increments it exactly once. A competing update returns 409; the UI blocks further actions until explicit reload and never retries automatically against a newer version.
 - Work-order update, immutable history and protected audit append share one transaction. An audit/history failure rolls back operational changes too.
 - Composite foreign keys constrain the machine, reporter, technician, reviewer, closer and event actor to the same organization. State/time checks and a transition trigger provide database-level consistency protections.
@@ -59,6 +59,8 @@ Lists use newest report time and UUID as a stable keyset, with counts across all
 The migration and restricted runtime grants are applied to local operational and isolated test databases. Actual Administrator reads were verified in Codex's built-in browser using hosted Auth and the real API. No fake incidents or role changes were added to operational data. Full workflow authorization, concurrency, rollback, long-history paging and SQL protections are verified against the separate test database; desktop/mobile action forms use intercepted test fixtures. The same existing hosted identity now has six explicitly granted pilot views at the user’s request; this does not establish independent-person approval separation. Separate staff identities still need live acceptance.
 
 Private work-order attachments are implemented as described in ATTACHMENTS.md. Original workbook storage, KPI definitions and AI diagnosis/RCA drafting remain future work. Planned maintenance and in-app reminders are implemented as described in CALENDAR.md. Supabase-hosted operational database migration and deployment are still pending. Nothing is published.
+
+Current extension (27 October): operational persistence has moved to Supabase and optional AI-assisted RCA drafting is implemented for an assigned technician's in-progress BREAKDOWN. It retains advisory evidence separately, requires explicit review/apply/edit, never sets restoration or submits/approves automatically, and leaves planned/investigation completion unchanged. The Maintenance head reviews the submitted human report through the same approve/return actions. See [AI-RCA-DRAFTING.md](AI-RCA-DRAFTING.md) and current VERIFICATION.md; the earlier future-work/local-persistence statements above are historical. Application deployment and independent staff acceptance remain separate.
 
 ## Planned work extension (M5)
 
@@ -96,3 +98,18 @@ Work-order detail offers a version-checked report download with current human fi
 ## Work-order handoff notifications (M10)
 
 Active Technician views receive actionable assignments/releases and returned-work notifications for their own current assignments. Active Maintenance head views receive new/unassigned operator breakdown reports and submitted-work notifications. The source is immutable committed work-order history for all three kinds, including planned/investigation release; failed transactions create no alert. Read receipts are explicit, append-only and separate per verified identity and active role. Notifications do not change order versions, engineering authority or calendar reminders. See WORK-ORDER-NOTIFICATIONS.md for actionability, historical events and live-access rules.
+
+
+## Popup entry forms (28 October 2026)
+
+Report and workflow action buttons open modal forms. Findings, reasons, notes and selected evidence files survive closing and reopening on the same page; no save occurs on dismissal. A pending write blocks dismissal. Errors stay in the popup, and a stale version still requires explicit reload before another action. The version-keyed action form resets after a successful transition or explicit reload, preserving the existing concurrency boundary. See [FORM-POPUPS.md](FORM-POPUPS.md).
+
+
+## Multi-machine scope — 28 October 2026
+
+The generic maintenance workspace now supports Administrator-registered organization machines under the existing trusted role/machine grants. WH-C remains the validated workbook/process-data pilot; WH-B stays reference-only. Work-order handoffs, email links and newly captured AI RCA machine identity use the selected machine; approved documents and RAG retrieval retain machine-ID isolation. Existing immutable records/payloads are retained unchanged. See [MACHINE-REGISTRY.md](MACHINE-REGISTRY.md).
+
+
+## History-preserving cancellation — 28 October 2026
+
+CANCELLED is a terminal outcome for head-cancelled REPORTED, ASSIGNED, IN_PROGRESS or AWAITING_REVIEW work. All original evidence and links remain, without invented restoration, completion, approval or closure. Cancellation is excluded from actionable notifications, open backlogs and open report filters; it is identified in retained totals and history. See RECORD-REMOVAL.md.

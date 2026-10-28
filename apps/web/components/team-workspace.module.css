@@ -1,0 +1,146 @@
+.actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.grid {
+  display: grid;
+  gap: 18px;
+}
+.card {
+  padding: 22px;
+}
+.card h2 {
+  font-size: 20px;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 0;
+  border-top: 1px solid var(--border);
+  align-items: flex-start;
+}
+.row h3 {
+  font-size: 16px;
+  margin: 0 0 6px;
+}
+.row p {
+  margin: 5px 0;
+  overflow-wrap: anywhere;
+}
+.muted {
+  color: var(--muted);
+  font-size: 13px;
+}
+.filters {
+  display: flex;
+  gap: 10px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+.filters label {
+  display: grid;
+  gap: 8px;
+  min-width: 220px;
+}
+.form {
+  display: grid;
+  gap: 18px;
+}
+.form > label {
+  display: grid;
+  gap: 8px;
+}
+.form input:not([type="checkbox"]),
+.form select,
+.form textarea,
+.filters input {
+  font: inherit;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card, #fff);
+  padding: 12px;
+  min-width: 0;
+  width: 100%;
+}
+.form textarea {
+  min-height: 95px;
+}
+.picker {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+  max-height: 300px;
+  overflow: auto;
+}
+.picker label {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.picker input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.check {
+  display: flex !important;
+  gap: 10px !important;
+  align-items: start;
+}
+.check input {
+  margin-top: 4px;
+}
+.link {
+  overflow-wrap: anywhere;
+  min-height: 120px !important;
+  font-size: 13px !important;
+}
+.pager {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: flex-end;
+  padding-top: 14px;
+}
+.status {
+  display: inline-block;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 12px;
+}
+.notice {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--paper, #f7f7f0);
+}
+@media (max-width: 760px) {
+  .row {
+    flex-direction: column;
+  }
+  .card {
+    padding: 16px;
+  }
+  .filters label {
+    min-width: 0;
+    width: 100%;
+  }
+  .actions {
+    width: 100%;
+  }
+  .actions > button {
+    flex: 1;
+  }
+  .pager {
+    justify-content: space-between;
+  }
+  .row .actions button {
+    min-width: 110px;
+  }
+}

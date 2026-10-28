@@ -77,6 +77,21 @@ export class DocumentAiController {
       validated(turnPageSchema, query).before,
     );
   }
+  @Post("chats/:id/archive")
+  @HttpCode(200)
+  @ApiBody({ schema: { type: "object", additionalProperties: false } })
+  @ApiOkResponse({
+    schema: { type: "object", properties: { removed: { type: "boolean" } } },
+  })
+  archive(
+    @CurrentUser() user: Principal,
+    @Param("code") code: string,
+    @Param("id") id: string,
+    @Body() body: unknown,
+  ) {
+    validated(z.object({}).strict(), body);
+    return this.chat.archive(user, code, validated(z.string().uuid(), id));
+  }
   @Post("chat")
   @HttpCode(200)
   @ApiOkResponse({ type: DocumentChatReceiptDto })

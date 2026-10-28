@@ -1,5 +1,6 @@
 import "dotenv/config";
-import { PrismaClient, Role } from "@prisma/client";
+import { Role } from "@prisma/client";
+import { postgresClient } from "../apps/api/src/postgres";
 import { z } from "zod";
 const [id, role, name, ...codes] = process.argv.slice(2);
 const parsed = z
@@ -15,9 +16,7 @@ if (!parsed.success || !process.env.DIRECT_URL)
     'Usage: npm run db:provision -- <Supabase-user-UUID> <ROLE> "Display name" [WH-C]. Requires DIRECT_URL.',
   );
 const input = parsed.data;
-const db = new PrismaClient({
-  datasources: { db: { url: process.env.DIRECT_URL } },
-});
+const db = postgresClient(process.env.DIRECT_URL);
 async function main() {
   await db.$transaction(async (tx) => {
     const org = await tx.organization.findUniqueOrThrow({

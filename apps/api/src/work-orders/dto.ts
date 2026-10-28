@@ -27,6 +27,7 @@ export class WorkOrderEventDto {
       "APPROVE",
       "RETURN",
       "CLOSE",
+      "CANCEL",
       "ATTACH",
     ],
   })
@@ -66,7 +67,7 @@ export class WorkOrderSummaryDto {
   closedAt!: string | null;
   @ApiProperty({
     type: [String],
-    enum: ["assign", "start", "submit", "approve", "return", "close"],
+    enum: ["assign", "start", "submit", "approve", "return", "close", "cancel"],
   })
   allowedActions!: string[];
 }

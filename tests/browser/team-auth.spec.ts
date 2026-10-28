@@ -172,7 +172,7 @@ test("disabled or unavailable Google sign-in keeps email login usable", async ({
   ).toBeDisabled();
   await expect(
     page.getByText(
-      "Google sign-in is being set up. Use email and password below.",
+      "Google sign-in is unavailable. Use email and password below.",
       { exact: true },
     ),
   ).toBeVisible();
@@ -200,6 +200,8 @@ test("disabled or unavailable Google sign-in keeps email login usable", async ({
 test("one account switches six server-granted views and shows role-specific work controls", async ({
   page,
 }) => {
+  // Six full document navigations, sign-out and re-entry share one test budget.
+  test.setTimeout(90000);
   await setup(page, "ADMINISTRATOR");
   const seen: string[] = [];
   await page.route("**/api/me", async (r) => {
@@ -245,6 +247,9 @@ test("one account switches six server-granted views and shows role-specific work
     if ((await selector.inputValue()) !== role) {
       await selector.selectOption(role);
       await expect(page).toHaveURL(/\/machines$/);
+      await expect(
+        page.getByRole("heading", { name: "Asset registry", exact: true }),
+      ).toBeVisible({ timeout: 15000 });
       await expect(selector).toHaveValue(role);
     }
     await page.goto("/machines/WH-C/work-orders");
@@ -303,4 +308,59 @@ test("a revoked view fails closed and can return to the trusted default role", a
   await expect(
     page.getByRole("link", { name: /WH-C.*Blown-film line/ }),
   ).toBeVisible();
+});
+
+test("an invited Google identity retries an unavailable invitation lookup without exchanging the code again", async ({
+  page,
+}) => {
+  const state = await google(page, "no-membership");
+  let unavailable = true;
+  await page.route("**/api/team/onboarding/options", (r) =>
+    r.fulfill({ json: { passwordEmailConfigured: false } }),
+  );
+  await page.route("**/api/team/onboarding/available", (r) =>
+    unavailable
+      ? r.fulfill({
+          status: 503,
+          json: { message: "Verified invitation lookup unavailable" },
+        })
+      : r.fulfill({
+          json: {
+            items: [
+              {
+                id: "83042cb6-660a-42dd-8832-01797589a8b9",
+                email: "fixture@example.test",
+                role: "TECHNICIAN",
+                organization: "TEST invited organization",
+                displayName: "TEST invited technician",
+                machines: [],
+                status: "PENDING",
+                version: 1,
+              },
+            ],
+            total: 1,
+            page: 1,
+          },
+        }),
+  );
+  await page.goto("/login");
+  await page
+    .getByRole("button", { name: "Sign in with Google", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", {
+      name: "Workspace check unavailable",
+      exact: true,
+    }),
+  ).toBeVisible();
+  expect(state.exchanges()).toBe(1);
+  unavailable = false;
+  await page
+    .getByRole("button", { name: "Retry workspace check", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/join$/);
+  await expect(
+    page.getByRole("button", { name: "Accept invitation", exact: true }),
+  ).toBeVisible();
+  expect(state.exchanges()).toBe(1);
 });

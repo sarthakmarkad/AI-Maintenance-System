@@ -132,7 +132,7 @@ export type ReportSnapshot = {
   status: string;
   kind: string | null;
   total: number;
-  counts: { open: number; closed: number; skipped: number };
+  counts: { open: number; closed: number; skipped: number; cancelled?: number };
   warning: string | null;
   notes: string[];
   columns: string[];

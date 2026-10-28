@@ -1,3 +1,4 @@
+import { readingsTemplate } from "../imports/templates";
 import {
   BadRequestException,
   ConflictException,
@@ -62,12 +63,17 @@ export class ReadingsService {
     return this.database.client;
   }
   private async machine(user: Principal, code: string) {
-    const m = code === "WH-C" ? await this.repo.machine(user, code) : null;
+    const m = code !== "WH-B" ? await this.repo.machine(user, code) : null;
     if (!m)
       throw new NotFoundException(
         "Machine not found or unavailable to your account.",
       );
     return m;
+  }
+  async template(user: Principal, code: string) {
+    this.importer(user);
+    await this.machine(user, code);
+    return readingsTemplate(code);
   }
   private async markExisting(
     stage: ReadingStage,
@@ -128,7 +134,7 @@ export class ReadingsService {
       );
     this.active.add(user.userId);
     try {
-      const stage = await parseReadings(buffer, filename);
+      const stage = await parseReadings(buffer, filename, code);
       await this.markExisting(stage, user.orgId, m.id);
       const row = await this.db.$transaction(async (tx) => {
         const row = await tx.readingImport.create({

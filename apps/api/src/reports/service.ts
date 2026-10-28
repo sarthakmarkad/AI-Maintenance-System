@@ -181,7 +181,14 @@ export class ReportsService {
                         { workOrder: null },
                         {
                           workOrder: {
-                            is: { status: { not: "CLOSED" as const } },
+                            is: {
+                              status: {
+                                notIn: [
+                                  "CLOSED" as const,
+                                  "CANCELLED" as const,
+                                ],
+                              },
+                            },
                           },
                         },
                       ],
@@ -263,10 +270,15 @@ export class ReportsService {
             total: selected.length,
             counts: {
               open: selected.filter(
-                (o) => !o.skippedAt && o.workOrder?.status !== "CLOSED",
+                (o) =>
+                  !o.skippedAt &&
+                  !["CLOSED", "CANCELLED"].includes(o.workOrder?.status ?? ""),
               ).length,
               closed: selected.filter((o) => o.workOrder?.status === "CLOSED")
                 .length,
+              cancelled: selected.filter(
+                (o) => o.workOrder?.status === "CANCELLED",
+              ).length,
               skipped: selected.filter((o) => !!o.skippedAt).length,
             },
             warning: incomplete
@@ -277,7 +289,7 @@ export class ReportsService {
             notes: [
               "Dates select fixed due times in IST. Only generated tasks are included; later recurrences may not exist yet.",
               "Completed means the linked work order is CLOSED. Physical performed time is separate from review and closure.",
-              "Open excludes skipped tasks and includes unreleased, assigned, in-progress, awaiting-review and approved tasks.",
+              "Open excludes skipped and cancelled tasks. Cancelled work is retained and does not count as completed maintenance.",
             ],
             columns: [
               "Fixed due (IST)",
@@ -361,7 +373,7 @@ export class ReportsService {
                 ? { kind: q.kind }
                 : {}),
             ...(q.status === "OPEN"
-              ? { status: { not: "CLOSED" as const } }
+              ? { status: { notIn: ["CLOSED" as const, "CANCELLED" as const] } }
               : q.status === "CLOSED"
                 ? { status: "CLOSED" as const }
                 : {}),
@@ -395,8 +407,11 @@ export class ReportsService {
           kind: q.kind ?? null,
           total: orders.length,
           counts: {
-            open: orders.filter((o) => o.status !== "CLOSED").length,
+            open: orders.filter(
+              (o) => o.status !== "CLOSED" && o.status !== "CANCELLED",
+            ).length,
             closed: orders.filter((o) => o.status === "CLOSED").length,
+            cancelled: orders.filter((o) => o.status === "CANCELLED").length,
             skipped: 0,
           },
           warning: investigation
@@ -690,8 +705,9 @@ export class ReportsService {
           kind: o.kind,
           total: 1,
           counts: {
-            open: o.status === "CLOSED" ? 0 : 1,
+            open: o.status === "CLOSED" || o.status === "CANCELLED" ? 0 : 1,
             closed: o.status === "CLOSED" ? 1 : 0,
+            cancelled: o.status === "CANCELLED" ? 1 : 0,
             skipped: 0,
           },
           warning:

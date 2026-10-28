@@ -159,8 +159,9 @@ export class DocumentsService {
           total: matches.length,
           page: input.page,
           pageSize: 20,
-          canManage: manager,
-          canApprove: c.user.role === Role.MAINTENANCE_HEAD,
+          canManage: manager && !c.machine.archivedAt,
+          canApprove:
+            !c.machine.archivedAt && c.user.role === Role.MAINTENANCE_HEAD,
           maxBytes: 5 * 1024 * 1024,
           maxDocuments: MAX_DOCUMENTS,
           maxVersions: MAX_DOCUMENT_VERSIONS,

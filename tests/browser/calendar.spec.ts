@@ -8,7 +8,10 @@ const base = "/machines/WH-C/calendar",
   planId = "932a243c-054e-4c48-a5e5-74bb2d9a5974",
   orderId = "0457fd8c-808b-4ad8-a8bb-b8d836831c17";
 const local = (d: Date) =>
-    new Date(d.getTime() + 330 * 60000).toISOString().slice(0, 19),
+    new Date(d.getTime() + 330 * 60000)
+      .toISOString()
+      .slice(0, 19)
+      .replace(/:00$/, ""),
   today = local(new Date()).slice(0, 10),
   day = (offset: number) =>
     local(new Date(Date.now() + offset * 86400000)).slice(0, 10);
@@ -589,6 +592,7 @@ test("stale schedule actions block until explicit reload and expired access retu
   await expect(
     card.getByRole("button", { name: "Create work order", exact: true }),
   ).toBeDisabled();
+  await page.getByRole("button", { name: "Close form", exact: true }).click();
   await page
     .getByRole("button", { name: "Reload latest schedule", exact: true })
     .click();
@@ -601,4 +605,44 @@ test("stale schedule actions block until explicit reload and expired access retu
   await other.goto(base);
   await expect(other).toHaveURL(/\/login\?reason=expired$/);
   await other.close();
+});
+
+test("plan popup preserves uncontrolled entries and fixed-date choices when reopened", async ({
+  page,
+}) => {
+  const state = await mocks(page, { empty: true });
+  await open(page);
+  const trigger = page.getByRole("button", {
+    name: "Create maintenance plan",
+    exact: true,
+  });
+  await trigger.click();
+  const popup = page.getByRole("dialog", {
+    name: "Create a recurring plan",
+    exact: true,
+  });
+  await popup
+    .getByLabel("Plan title", { exact: true })
+    .fill("TEST retained calendar plan");
+  await popup
+    .getByLabel("Repeat frequency", { exact: true })
+    .selectOption("MONTHLY");
+  await popup.getByLabel("Reminder lead days", { exact: true }).fill("3");
+  await popup.getByRole("button", { name: "Close form", exact: true }).click();
+  await expect(trigger).toBeFocused();
+  await trigger.click();
+  await expect(popup.getByLabel("Plan title", { exact: true })).toHaveValue(
+    "TEST retained calendar plan",
+  );
+  await expect(
+    popup.getByLabel("Repeat frequency", { exact: true }),
+  ).toHaveValue("MONTHLY");
+  await expect(
+    popup.getByLabel("Reminder lead days", { exact: true }),
+  ).toHaveValue("3");
+  expect(state.bodies).toHaveLength(0);
+  await page.screenshot({
+    path: `test-results/plan-popup-${test.info().project.name}.png`,
+    fullPage: true,
+  });
 });

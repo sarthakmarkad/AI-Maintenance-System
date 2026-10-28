@@ -53,6 +53,7 @@ function metadata(s: ReportSnapshot) {
     ["Open", s.counts.open],
     ["Closed", s.counts.closed],
     ["Skipped", s.counts.skipped],
+    ["Cancelled", s.counts.cancelled ?? 0],
     ["Source fingerprint", s.fingerprint],
     ["Coverage / provenance", s.warning ?? "See report notes"],
     ...s.notes.map((n, i) => ["Note " + (i + 1), n]),
@@ -223,7 +224,7 @@ export function renderPdf(s: ReportSnapshot): Promise<Buffer> {
         "#657472",
       );
       text(
-        `Records: ${s.total} | Open: ${s.counts.open} | Closed: ${s.counts.closed}${s.report === "planned-maintenance" ? " | Skipped: " + s.counts.skipped : ""}`,
+        `Records: ${s.total} | Open: ${s.counts.open} | Closed: ${s.counts.closed} | Cancelled: ${s.counts.cancelled ?? 0}${s.report === "planned-maintenance" ? " | Skipped: " + s.counts.skipped : ""}`,
         10,
       );
       if (s.warning) {

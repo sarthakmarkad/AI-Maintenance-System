@@ -57,7 +57,7 @@ export const calendarQuery = z
     from: z.string().refine(strictDate),
     to: z.string().refine(strictDate),
     status: z
-      .enum(["UPCOMING", "DUE", "OVERDUE", "COMPLETED", "SKIPPED"])
+      .enum(["UPCOMING", "DUE", "OVERDUE", "COMPLETED", "SKIPPED", "CANCELLED"])
       .optional(),
     after: z.string().uuid().optional(),
   })
@@ -177,9 +177,11 @@ export class CalendarService {
       workOrderStatus: o.workOrder?.status ?? null,
       status: o.skippedAt
         ? "SKIPPED"
-        : o.workOrder?.status === "CLOSED"
-          ? "COMPLETED"
-          : phase(o.dueAt, now),
+        : o.workOrder?.status === "CANCELLED"
+          ? "CANCELLED"
+          : o.workOrder?.status === "CLOSED"
+            ? "COMPLETED"
+            : phase(o.dueAt, now),
       skippedAt: o.skippedAt?.toISOString() ?? null,
       skipReason: o.skipReason,
       planActive: o.plan.active,
@@ -198,7 +200,8 @@ export class CalendarService {
       });
       return {
         items: plans.map((p) => this.planView(p, new Date())),
-        canManage: c.user.role === Role.MAINTENANCE_HEAD,
+        canManage:
+          !c.machine.archivedAt && c.user.role === Role.MAINTENANCE_HEAD,
       };
     });
   }
@@ -483,6 +486,7 @@ export class CalendarService {
           OVERDUE: { AND: [openOccurrence, { dueAt: { lt: now } }] },
           COMPLETED: { workOrder: { is: { status: "CLOSED" } } },
           SKIPPED: { skippedAt: { not: null } },
+          CANCELLED: { workOrder: { is: { status: "CANCELLED" } } },
         };
         let cursor: Prisma.MaintenanceOccurrenceWhereInput = {};
         if (q.after) {
@@ -528,7 +532,8 @@ export class CalendarService {
           nextCursor: rows.length > 100 ? rows[99].id : null,
           counts,
           dayCounts,
-          canManage: c.user.role === Role.MAINTENANCE_HEAD,
+          canManage:
+            !c.machine.archivedAt && c.user.role === Role.MAINTENANCE_HEAD,
           serverTime: now.toISOString(),
           scheduling: {
             lastJobAt: this.lastJobAt,

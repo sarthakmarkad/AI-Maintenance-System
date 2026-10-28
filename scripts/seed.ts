@@ -1,8 +1,8 @@
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
+import { postgresClient } from "../apps/api/src/postgres";
 const url = process.env.DIRECT_URL;
 if (!url) throw new Error("DIRECT_URL is required for seed.");
-const db = new PrismaClient({ datasources: { db: { url } } });
+const db = postgresClient(url);
 async function main() {
   await db.$transaction(async (tx) => {
     const org = await tx.organization.upsert({
