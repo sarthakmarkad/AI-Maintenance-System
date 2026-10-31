@@ -41,7 +41,9 @@
     "test:rca:live": "npm run build:api && node --env-file-if-exists=.env tests/live/rca-drafting.mjs",
     "ai:setup": "node scripts/local-embeddings.mjs --setup",
     "test:ai:evaluate": "npm run build:api && node --env-file-if-exists=.env tests/live/chatbot-evaluation.mjs",
-    "test:system": "npm run db:test:prepare && npm run build:api && playwright test -c tests/system/playwright.config.ts"
+    "test:system": "npm run db:test:prepare && npm run build:api && playwright test -c tests/system/playwright.config.ts",
+    "start:api:production": "node scripts/start-production.mjs",
+    "build:web:production": "node scripts/build-web-production.mjs"
   },
   "dependencies": {
     "@nestjs/common": "11.2.7",

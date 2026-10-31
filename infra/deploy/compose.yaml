@@ -1,0 +1,39 @@
+name: maintenate
+services:
+  embeddings:
+    image: ollama/ollama:0.40.7@sha256:2e6cc92ffa43b4b1a2e70e315407e00ac97ec125afc71277d73c7efe01c4f31b
+    environment:
+      OLLAMA_HOST: 127.0.0.1:11434
+    volumes:
+      - embeddings:/root/.ollama
+      - ./start-embeddings.sh:/opt/maintenate/start-embeddings.sh:ro
+    entrypoint: ["/bin/sh", "/opt/maintenate/start-embeddings.sh"]
+    restart: unless-stopped
+    # API shares this network namespace. Never publish the model endpoint.
+    ports:
+      - "127.0.0.1:4000:4000"
+    healthcheck:
+      test: ["CMD", "ollama", "show", "nomic-embed-text:v1.5"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 180s
+  api:
+    build:
+      context: ../..
+      dockerfile: infra/deploy/api.Dockerfile
+    network_mode: service:embeddings
+    depends_on:
+      embeddings:
+        condition: service_healthy
+    env_file:
+      - ${MAINTENATE_BACKEND_ENV:?Set MAINTENATE_BACKEND_ENV to an absolute private backend.env path}
+    secrets:
+      - supabase-ca.crt
+    restart: unless-stopped
+    stop_grace_period: 35s
+secrets:
+  supabase-ca.crt:
+    file: ${MAINTENATE_DB_CA:?Set MAINTENATE_DB_CA to an absolute project CA certificate path}
+volumes:
+  embeddings:

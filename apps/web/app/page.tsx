@@ -67,13 +67,13 @@ export default function Home() {
         <Link
           href="/"
           className="brand landing-brand"
-          aria-label="Supreme home"
+          aria-label="Maintenate home"
         >
           <span className="brand-mark">
             <ScanLine size={25} />
           </span>
           <span>
-            SUPREME<small>Maintenance intelligence</small>
+            Maintenate<small>Maintenance intelligence</small>
           </span>
         </Link>
         <nav aria-label="Website navigation">
@@ -213,7 +213,7 @@ export default function Home() {
             <ScanLine size={23} />
           </span>
           <span>
-            SUPREME<small>Maintenance intelligence</small>
+            Maintenate<small>Maintenance intelligence</small>
           </span>
         </Link>
         <span>Machine maintenance · Built for informed decisions.</span>

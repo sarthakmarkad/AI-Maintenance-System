@@ -22,6 +22,10 @@ test("public landing explains the platform and uses local fonts without fetching
     }),
   ).toBeVisible();
   await expect(page.locator(".landing-feature")).toHaveCount(6);
+  await expect(page).toHaveTitle("Maintenate | Maintenance Intelligence");
+  await expect(
+    page.getByRole("link", { name: "Maintenate home", exact: true }),
+  ).toContainText("Maintenate");
   await expect(
     page.getByRole("link", { name: "Dashboard", exact: true }),
   ).toHaveAttribute("href", "/machines");
@@ -50,8 +54,16 @@ test("landing Dashboard entry preserves the sign-in boundary", async ({
   await page.getByRole("link", { name: "Dashboard", exact: true }).click();
   await expect(page).toHaveURL(/\/login$/);
   await expect(
+    page.getByRole("link", { name: "Maintenate home", exact: true }),
+  ).toBeVisible();
+  await expect(
     page.getByRole("heading", { name: "Welcome back." }),
   ).toBeVisible();
+  expect(
+    await page
+      .locator(".login-intro h1")
+      .evaluate((el) => el.scrollWidth <= el.clientWidth),
+  ).toBe(true);
   await page.screenshot({
     path: `test-results/login-redesign-${test.info().project.name}.png`,
     fullPage: true,

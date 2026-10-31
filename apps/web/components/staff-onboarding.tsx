@@ -179,7 +179,7 @@ export function StaffOnboarding() {
   return (
     <main className="auth-callback-page">
       <section className={"panel auth-callback-card " + styles.form}>
-        <span className="eyebrow">SUPREME / TEAM ACCESS</span>
+        <span className="eyebrow">MAINTENATE / TEAM ACCESS</span>
         <h1>Join your maintenance team</h1>
         {loading && <p role="status">Checking your invitation…</p>}
         {error && (

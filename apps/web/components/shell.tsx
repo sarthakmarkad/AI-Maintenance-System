@@ -201,12 +201,12 @@ export function Shell({
         }}
       >
         <div className="sidebar-brand-row">
-          <Link href="/" className="brand" aria-label="Supreme home">
+          <Link href="/" className="brand" aria-label="Maintenate home">
             <span className="brand-mark">
               <ScanLine size={23} />
             </span>
             <span>
-              SUPREME<small>Maintenance intelligence</small>
+              Maintenate<small>Maintenance intelligence</small>
             </span>
           </Link>
           <button
@@ -370,7 +370,9 @@ export function Shell({
           {children}
         </main>
         <footer className="workspace-footer">
-          <span>Supreme Industries · Maintenance intelligence</span>
+          <span>
+            Maintenate{user?.organization ? ` · ${user.organization}` : ""}
+          </span>
           <span>MACHINE RECORDS / HUMAN DECISIONS</span>
         </footer>
       </div>

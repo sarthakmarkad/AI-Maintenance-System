@@ -17,7 +17,7 @@ const mono = localFont({
   weight: "100 900",
 });
 export const metadata: Metadata = {
-  title: "Supreme | Maintenance Intelligence",
+  title: "Maintenate | Maintenance Intelligence",
   description:
     "Machine records, maintenance work and approved team references.",
 };

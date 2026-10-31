@@ -1,0 +1,34 @@
+name: Deployment package
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  backend-image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build isolated runtime image
+        run: docker build -f infra/deploy/api.Dockerfile -t maintenate-api:check .
+      - name: Check native dependencies and packaged files without connecting to services
+        run: |
+          docker run --rm --entrypoint node maintenate-api:check -e '
+            const assert = require("node:assert/strict");
+            const fs = require("node:fs");
+            const {execFileSync} = require("node:child_process");
+            assert.notEqual(process.getuid(), 0);
+            for (const file of ["apps/api/dist/main.js", "services/statistics/worker.py", "apps/api/assets/fonts/NotoSans-Regular.ttf"]) assert(fs.existsSync(file), file);
+            for (const file of [".env", ".git", ".local", "Maintenance_Handoff", "apps/api/dist/tests"]) assert(!fs.existsSync(file), file);
+            require("sharp"); require("@prisma/client"); require("@maintenance/api-client/chat-format"); require("./apps/api/dist/app.js");
+            execFileSync("python3", ["--version"]);
+            execFileSync("pdfinfo", ["-v"]);
+            execFileSync("pdftotext", ["-v"]);
+            console.log("Runtime package checks passed; no service credentials used.");
+          '
+      - name: Validate deployment topology
+        env:
+          MAINTENATE_BACKEND_ENV: /tmp/maintenate-empty.env
+          MAINTENATE_DB_CA: /tmp/maintenate-ca.crt
+        run: |
+          touch "$MAINTENATE_BACKEND_ENV" "$MAINTENATE_DB_CA"
+          docker compose -f infra/deploy/compose.yaml config --quiet

@@ -59,7 +59,7 @@ Set Auth **Site URL** to `http://localhost:3000` for this local installation. Pr
 
 Keep the built-in confirmation/recovery templates' `{{ .ConfirmationURL }}` links intact. Confirmation and recovery must be opened in the initiating browser so its PKCE verifier is available. Missing/expired verifiers fail closed; request a new link from that browser. SMTP configuration does not supply Google access for test audiences: if Google OAuth remains in Testing, add each actual staff address to Google's authorized test users as described in [GOOGLE-SIGN-IN-SETUP.md](GOOGLE-SIGN-IN-SETUP.md).
 
-After saving SMTP, use a **real intended staff/test recipient authorized by the owner** to check confirmation and recovery delivery, including spam folders. Confirm that account confirmation returns to the pending invitation, and that password recovery opens **Set a new password**, saves a strong password and allows a fresh login. Keep `TEAM_PASSWORD_EMAIL_READY=false` until these real checks pass; then set it to `true` privately and restart the backend. The automated fixture checks are not proof of inbox delivery.
+After saving SMTP, use a **real intended staff/test recipient authorized by the owner** to check confirmation and recovery delivery, including spam folders. Confirm that account confirmation returns to the pending invitation, and that password recovery opens **Set a new password**, saves a strong password and allows a fresh login. Keep `TEAM_PASSWORD_EMAIL_READY=false` while SMTP is unconfigured. Once configured, enable it privately and restart for a controlled recipient test; complete these real checks before broader staff rollout. The automated fixture checks are not proof of inbox delivery.
 
 For application invitation emails, separately set backend `RESEND_API_KEY`, `NOTIFICATION_EMAIL_PROVIDER=resend`, `NOTIFICATION_EMAIL_FROM=<verified-domain sender>`, and `EXTERNAL_NOTIFICATIONS_ENABLED=true`, then restart. This also changes the existing work-order sending configuration; review the sender before changing it. The Team page enables **Send email** only when these settings are complete and the sender is outside `resend.dev`.
 
@@ -86,3 +86,12 @@ Invitation sending reserves a durable receipt and audit before calling Resend. E
 ## Verification
 
 Tests use isolated `_test` PostgreSQL, real restricted runtime grants and API HTTP calls. Browser contract tests intercept only test Auth/API fixtures; full system journeys use the real API/database with Auth identity/contact test doubles confined to `tests/system`. Real staff enrollment, actual SMTP inbox delivery, remote access and new Google-user consent require configured owner accounts; no invented operational staff or real messages are created by this verification. Actual results and remaining limits are recorded in [VERIFICATION.md](VERIFICATION.md).
+
+
+## Local sender activation — 1 November 2026
+
+Owner confirmed domain verification and saved Supabase custom SMTP. The local application now uses `notifications@maintenate.sarthakmarkad.xyz` for invitation/work-order sending, retains its existing private Resend API key, and enables password signup/recovery for controlled testing. Supabase sender display name should be Maintenate. The application key may differ from the key entered in Supabase; each needs sending permission for this verified domain. No inbox-delivery or real staff acceptance claim follows from configuration validation alone. Complete confirmation/recovery/invitation delivery checks before inviting staff broadly. Localhost redirects remain appropriate only for this local test; public deployment still needs deliberate URL/provider configuration.
+
+## Owner acceptance — 1 November 2026
+
+The owner confirmed real recovery-email delivery and reset-screen redirection, followed by invitation delivery to a separate account and successful completion of joining with the assigned role and machine access. Local staff email/onboarding is therefore owner-verified beyond the automated fixtures. Production hosting/origin/redirect configuration remains separate; the current links still target localhost. See the matching VERIFICATION.md entry for the precise tested scope and remaining limits.

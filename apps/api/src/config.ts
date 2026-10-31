@@ -1,5 +1,7 @@
 import { z } from "zod";
-import "dotenv/config";
+import { config as loadEnvironment } from "dotenv";
+// Production receives only host-injected settings; never reload a developer .env.
+if (process.env.NODE_ENV !== "production") loadEnvironment();
 const optional = <T extends z.ZodTypeAny>(schema: T) =>
   z.preprocess((v) => (v === "" ? undefined : v), schema.optional());
 const schema = z

@@ -36,7 +36,7 @@ def field(draw, x, y, label, value, width=600):
 def shell(title, role, step):
     im=Image.new('RGB',(W,H),CREAM); d=ImageDraw.Draw(im)
     d.rectangle((0,0,W,68),fill=INK)
-    text(d,(34,21),'SUPREME',23,YELLOW,True)
+    text(d,(34,21),'MAINTENATE',23,YELLOW,True)
     text(d,(220,24),'MAINTENANCE INTELLIGENCE',16,'#eeeadf')
     text(d,(920,24),'ILLUSTRATIVE PRODUCT DEMO',15,'#eeeadf')
     d.rectangle((0,68,215,H),fill='#ebe5d7')
@@ -57,7 +57,7 @@ motor=ImageOps.fit(Image.open(Path(__file__).with_name('motor-concept.png')).con
 scenes=[]
 # Opening visual: only generated raster; all typography/UI below is deterministic.
 im=motor.copy(); d=ImageDraw.Draw(im)
-text(d,(60,66),'SUPREME / MAINTENANCE',20,bold=True)
+text(d,(60,66),'MAINTENATE / MAINTENANCE',20,bold=True)
 text(d,(60,190),'One issue.\nEvery handoff.',56,bold=True)
 text(d,(62,368),'From the first report\nto a human-reviewed record.',25)
 pill(d,62,480,'SEE THE WORKFLOW')

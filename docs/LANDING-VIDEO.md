@@ -54,3 +54,8 @@ Run `node scripts/landing-video/verify.mjs` from the repository root. It writes 
 - These checks establish media/player behavior with isolated browser fixtures, not operational workflow acceptance. No Safari/Firefox, real iOS device, screen-reader session, offline browser, production build or deployment was exercised in this subtask. Parent integration verification is separate. Shared `docs/VERIFICATION.md` and `docs/DECISIONS.md` were not edited.
 
 Final MP4 SHA-256: `1c120598d4c95da4a09126ad86c2ed9485fb5bec5b86a6c3f7baa64a702dc2a2`. Original generated still SHA-256: `795d1369e4251f0ee7195126227ce6fe3a0036aea19e901a4858c82e075138e6`. Only owned isolated fixture servers were stopped; port 3123 is released after verification.
+
+
+## Maintenate branding — 1 November 2026
+
+Regenerated the original 50-second storyboard, MP4 and poster with Maintenate branding, preserving its existing features, illustrative records, dimensions, silent looping behavior and reduced-motion fallback. No operational records or third-party media were introduced. Current MP4 SHA-256: `14e497b4d58a5abc558374344abb6baed83e60379abb93a934b29a19108d18d1`. This export supersedes the historical branded exports above.

@@ -99,7 +99,7 @@ export function PasswordRecovery({ reset = false }: { reset?: boolean }) {
   return (
     <main className="auth-callback-page">
       <section className={"panel auth-callback-card " + styles.form}>
-        <span className="eyebrow">SUPREME / ACCOUNT RECOVERY</span>
+        <span className="eyebrow">MAINTENATE / ACCOUNT RECOVERY</span>
         <h1>{reset ? "Set a new password" : "Forgot your password?"}</h1>
         {error && (
           <p role="alert" className="inline-error">

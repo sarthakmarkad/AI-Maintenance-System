@@ -118,7 +118,7 @@ export default function AuthCallback() {
     <main className="auth-callback-page">
       <section className="panel auth-callback-card">
         <ShieldCheck size={32} />
-        <span className="eyebrow">SUPREME / TEAM ACCESS</span>
+        <span className="eyebrow">MAINTENATE / TEAM ACCESS</span>
         <h1>
           {state === "loading"
             ? "Completing sign-in…"

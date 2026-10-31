@@ -86,21 +86,19 @@ function Login() {
   return (
     <main className="login-page">
       <section className="login-story">
-        <Link href="/" className="brand" aria-label="Supreme home">
+        <Link href="/" className="brand" aria-label="Maintenate home">
           <span className="brand-mark">
             <ScanLine size={26} />
           </span>
           <span>
-            SUPREME<small>Maintenance intelligence</small>
+            Maintenate<small>Maintenance intelligence</small>
           </span>
         </Link>
         <div className="login-intro">
           <div className="eyebrow">YOUR MACHINE WORKSPACES</div>
           <h1>
-            Better context.
-            <br />
-            Confident
-            <br />
+            Better context. <br />
+            Confident <br />
             <em>maintenance.</em>
           </h1>
           <p>
