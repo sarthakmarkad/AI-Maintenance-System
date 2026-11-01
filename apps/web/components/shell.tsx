@@ -1,4 +1,5 @@
 "use client";
+import { BrandLogo } from "@/components/brand-logo";
 import Link from "next/link";
 import { WorkOrderNotifications } from "./work-order-notifications";
 import { PageFinder } from "./page-finder";
@@ -202,12 +203,7 @@ export function Shell({
       >
         <div className="sidebar-brand-row">
           <Link href="/" className="brand" aria-label="Maintenate home">
-            <span className="brand-mark">
-              <ScanLine size={23} />
-            </span>
-            <span>
-              Maintenate<small>Maintenance intelligence</small>
-            </span>
+            <BrandLogo />
           </Link>
           <button
             id="workspace-menu-toggle"

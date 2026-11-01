@@ -1,8 +1,9 @@
 "use client";
+import { BrandLogo } from "@/components/brand-logo";
 import { Suspense, useEffect, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, ScanLine, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/components/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -87,12 +88,7 @@ function Login() {
     <main className="login-page">
       <section className="login-story">
         <Link href="/" className="brand" aria-label="Maintenate home">
-          <span className="brand-mark">
-            <ScanLine size={26} />
-          </span>
-          <span>
-            Maintenate<small>Maintenance intelligence</small>
-          </span>
+          <BrandLogo />
         </Link>
         <div className="login-intro">
           <div className="eyebrow">YOUR MACHINE WORKSPACES</div>

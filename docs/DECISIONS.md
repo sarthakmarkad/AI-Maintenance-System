@@ -311,3 +311,28 @@ The owner selected Maintenate as the product name. Rename the public/login/sideb
 ## Production deployment preparation — 1 November 2026
 
 Prepare Vercel frontend separately from the continuously running Nest API and embedded jobs. Preserve the current approved local Nomic embedding profile using loopback-only Ollama and a persistent model volume; do not silently replace vectors/provider profiles to fit a sleeping host. Supply Python/Poppler/fonts/native modules in the backend runtime. Production uses host-injected whitelisted settings and never reloads the developer `.env`; migration/owner/test credentials remain outside runtime. Preserve the existing invitation signing key. No startup migrations, automatic seed, public deployment, paid resource creation, Auth URL change or real test email is part of packaging. Hosting budget/account selection, Linux container execution and hosted acceptance remain pending. See DEPLOYMENT.md.
+
+
+## Approved Maintenate emblem — 1 November 2026
+
+Owner approved the existing gear/M/bars/swoosh design with the reference website’s pale lemon #F5FF81, rather than the teal alternative. Use one shared accessible header/sidebar identity and the same emblem for browser icons. Keep original semantic/status colors and all account/workflow behavior. See BRAND-ASSETS.md.
+
+
+## Owner-supplied final logo files — 1 November 2026
+
+Owner supplied a horizontal logo panel and square icon and requested these exact files. They supersede the generated transparent emblem. Use the complete supplied wordmark/tagline in shared branding and the supplied icon in browser metadata; preserve source bytes and aspect ratios.
+
+
+## Compact icon and wordmark — 1 November 2026
+
+Owner requested the supplied icon left of the separate supplied wordmark/tagline, replacing the large combined panel. Shared branding uses this compact arrangement on landing, login and dashboard, with responsive header/sidebar sizes and unchanged source images.
+
+
+## Transparent logo backgrounds — 1 November 2026
+
+Owner requested removal of the white rectangles around the separate icon and wordmark. Use alpha-transparent processed PNGs; preserve the charcoal icon tile and its internal white/yellow details. Retain original attachments unchanged and use new public filenames to avoid stale optimized-image caches.
+
+
+## Wordmark accent contrast — 1 November 2026
+
+Owner requested a border around the yellow dot above the i. Use the transparent wordmark variant with a restrained charcoal outline around that accent, keeping the compact icon/wordmark layout.

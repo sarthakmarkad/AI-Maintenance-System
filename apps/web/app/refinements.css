@@ -770,3 +770,42 @@
     width: 100%;
   }
 }
+
+/* Separate owner-supplied icon and wordmark, preserving their aspect ratios. */
+.brand {
+  min-width: 0;
+  gap: 8px;
+}
+.brand-logo-icon,
+.brand-logo-wordmark {
+  display: block;
+  height: auto;
+  object-fit: contain;
+}
+.brand-logo-icon {
+  width: 44px;
+  flex: 0 0 44px;
+}
+.brand-logo-wordmark {
+  width: 176px;
+  min-width: 0;
+  flex: 0 1 176px;
+}
+.sidebar .brand-logo-icon {
+  width: 40px;
+  flex-basis: 40px;
+}
+.sidebar .brand-logo-wordmark {
+  width: 148px;
+  flex-basis: 148px;
+}
+@media (max-width: 600px) {
+  .landing-header .brand-logo-icon {
+    width: 36px;
+    flex-basis: 36px;
+  }
+  .landing-header .brand-logo-wordmark {
+    width: 128px;
+    flex-basis: 128px;
+  }
+}

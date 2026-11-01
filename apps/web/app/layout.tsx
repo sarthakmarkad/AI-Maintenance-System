@@ -18,6 +18,10 @@ const mono = localFont({
 });
 export const metadata: Metadata = {
   title: "Maintenate | Maintenance Intelligence",
+  icons: {
+    icon: "/brand/maintenate-icon-transparent.png",
+    apple: "/brand/maintenate-icon-transparent.png",
+  },
   description:
     "Machine records, maintenance work and approved team references.",
 };

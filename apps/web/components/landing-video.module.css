@@ -72,7 +72,7 @@
   cursor: pointer;
 }
 .play:hover {
-  background: #eaf46d;
+  background: var(--highlight);
 }
 .play:focus-visible,
 .transcript summary:focus-visible,

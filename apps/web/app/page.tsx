@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/brand-logo";
 import Link from "next/link";
 import {
   ArrowDown,
@@ -8,7 +9,6 @@ import {
   CalendarDays,
   ClipboardList,
   FileChartColumn,
-  ScanLine,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
@@ -69,12 +69,7 @@ export default function Home() {
           className="brand landing-brand"
           aria-label="Maintenate home"
         >
-          <span className="brand-mark">
-            <ScanLine size={25} />
-          </span>
-          <span>
-            Maintenate<small>Maintenance intelligence</small>
-          </span>
+          <BrandLogo />
         </Link>
         <nav aria-label="Website navigation">
           <a href="#platform">Platform</a>
@@ -209,12 +204,7 @@ export default function Home() {
       </main>
       <footer className="landing-footer">
         <Link href="/" className="brand">
-          <span className="brand-mark">
-            <ScanLine size={23} />
-          </span>
-          <span>
-            Maintenate<small>Maintenance intelligence</small>
-          </span>
+          <BrandLogo />
         </Link>
         <span>Machine maintenance · Built for informed decisions.</span>
         <a href="#landing-content">Back to top ↑</a>

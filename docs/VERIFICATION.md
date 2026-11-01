@@ -804,3 +804,23 @@ Owner authorized restricted runtime-secret transfer and creation of one public F
 The pushed 8206794 Linux deployment-package workflow passed; Foundation checks failed in browser tests. Reproduced locally: 496 passed, six calendar cases failed because relative fixture days crossed the month boundary on November 1. Anchored browser time and fixture timestamps consistently at a fixed mid-month date; all 16 targeted desktop/mobile calendar cases passed. No production calendar behavior changed. Full browser suite has not been rerun after this fixture correction.
 
 Render build output also showed Prisma generating for fallback OpenSSL 1.1 because the build image lacked OpenSSL. Added OpenSSL/CA packages before Prisma generation and an explicit native OpenSSL 3 engine load to Linux package CI. Corrected container execution and hosted readiness still require verification after rollout.
+
+## Approved logo implementation — 1 November 2026
+
+Added the owner-approved gear/M emblem as a transparent private-source-free public brand asset. Shared identity replaces the old scan icon on landing header/footer, login and dashboard; browser icon metadata uses the same asset. Set the highlight token to reference #F5FF81. TypeScript, 22/22 targeted foundation/redesign desktop/mobile browser tests and the production frontend build passed. Inspected mobile login and navigation screenshots: emblem loads, wordmark is legible, layout fits. Build used MAINTENANCE_BROWSER_TEST=1 to preserve the local development build. No auth/DB changes, hosted redeployment or new operational test records were made in this logo change. Asset provenance and raster limitations are recorded in BRAND-ASSETS.md.
+
+## Exact supplied logo assets — 1 November 2026
+
+Replaced the generated emblem with the two owner-supplied images: full horizontal lockup in shared landing/login/dashboard branding and the supplied app icon in favicon/Apple metadata. Byte-for-byte comparisons against both attachments passed. TypeScript, 22 targeted desktop/mobile foundation/redesign tests and production frontend build passed. Inspected the mobile login screenshot: full logo is visible, proportions preserved and no overflow. After the browser run, enabled eager loading for the above-fold logo and simplified its image sizing hint; the production build passed with those final props. No hosted redeployment or auth/DB changes occurred.
+
+## Compact supplied icon and wordmark — 1 November 2026
+
+Replaced the single wide panel with separate supplied icon and wordmark images arranged side by side. Verified both source files byte-for-byte, matching image dimensions and preserved aspect ratios. TypeScript, all 22 targeted desktop/mobile foundation/redesign tests and the production frontend build passed. Inspected mobile login and navigation screenshots: compact paired identity, tagline retained, no overflow. No deployment, auth/DB changes or operational writes in this change.
+
+## Transparent logo background correction — 1 November 2026
+
+Replaced white-backed icon/wordmark with alpha-transparent processed PNGs under new filenames. Alpha inspection confirmed fully transparent exterior pixels on both images and preserved near-opaque artwork. Inspected the mobile login screenshot: underlying grid is visible around lettering and icon corners; no white rectangular matte remains. Charcoal icon tile and internal white/yellow details remain visible. TypeScript, 22 targeted desktop/mobile foundation/redesign checks, production frontend build and diff whitespace checks passed. Original attachments are unchanged; processed derivatives are documented in BRAND-ASSETS.md. No hosted publication, auth/DB change or operational writes in this correction.
+
+## Outlined wordmark accent — 1 November 2026
+
+Added a charcoal outline around the yellow i-dot in a new transparent wordmark variant and updated shared branding to use its new cache-safe filename. Dimensions remain 2170 × 725 and alpha transparency is present. TypeScript and both desktop/mobile landing checks passed; inspected the desktop landing screenshot. This is an asset-only visual correction; no auth, database or hosted deployment change.
