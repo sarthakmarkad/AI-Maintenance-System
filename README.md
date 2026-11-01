@@ -1,6 +1,6 @@
 # Maintenate
 
-Machine maintenance workspaces for registered equipment within an organization. WH-C remains the original Windmöller & Hölscher blown-film pilot; its exact model is unknown. Administrators can now register other machines and grant operator/technician access. This repository implements authenticated access, production workbook import and dashboards, synthetic hourly trends, role-controlled maintenance work orders, fixed-date planned maintenance, explainable statistical review, maintenance performance, private evidence/reports, in-app and opt-in email handoffs, approved references with document chat, and human-reviewed AI RCA drafting. Operational persistence is hosted in Supabase; the application and embedding worker remain local. Every registered machine has Production and Process trends tabs, with downloadable standard Excel templates. Custom workbook mappings, other process parameters/units and telemetry integrations remain separate work. See [machine registration and access](docs/MACHINE-REGISTRY.md).
+Machine maintenance workspaces for registered equipment within an organization. WH-C remains the original Windmöller & Hölscher blown-film pilot; its exact model is unknown. Administrators can now register other machines and grant operator/technician access. This repository implements authenticated access, production workbook import and dashboards, synthetic hourly trends, role-controlled maintenance work orders, fixed-date planned maintenance, explainable statistical review, maintenance performance, private evidence/reports, in-app and opt-in email handoffs, approved references with document chat, and human-reviewed AI RCA drafting. Operational persistence is hosted in Supabase. The frontend is deployed on Vercel and the Nest API on Render Free; local development remains available. Document embeddings/RAG remain local by owner choice until a later hosting upgrade. See [deployment status and limits](docs/DEPLOYMENT.md). Every registered machine has Production and Process trends tabs, with downloadable standard Excel templates. Custom workbook mappings, other process parameters/units and telemetry integrations remain separate work. See [machine registration and access](docs/MACHINE-REGISTRY.md).
 
 ## Start here
 
@@ -48,7 +48,7 @@ Allowed roles: `OPERATOR`, `TECHNICIAN`, `MAINTENANCE_HEAD`, `SUPERVISOR`, `MANA
 
 6. Restart local development after environment changes; sign in and verify `/api/me` and `/api/machines/WH-C`. Complete the hosted acceptance checklist in `docs/VERIFICATION.md`.
 
-Local PostgreSQL can be used with hosted Supabase Auth for development. The configured pilot now uses the existing hosted Supabase database as well as Auth; the application itself still runs on this computer.
+Local PostgreSQL can be used with hosted Supabase Auth for development. The configured pilot now uses the existing hosted Supabase database as well as Auth; local development still runs on this computer alongside the separate hosted frontend/API.
 
 ## Google sign-in and role views
 

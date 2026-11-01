@@ -1,6 +1,6 @@
 # Maintenate deployment preparation
 
-Status: packaging and configuration preparation only. No public services, paid resources, DNS changes or Auth URL changes were created by this work. The local app remains usable. Container execution and hosted acceptance are required before release.
+Current status, 1 November 2026: the frontend is live at https://maintenate.vercel.app and the restricted Nest API is live at https://maintenate-api.onrender.com on Render Free. Production CORS and Supabase Site URL/callback have been configured, and a real Google sign-in reached the hosted registry. RCA and email runtime settings were authorized and added after provider checks. Full document retrieval still requires a hosted embedding service; the original local Ollama topology below remains a reference, not a claim that Ollama runs on Render Free. See LIVE-TESTING-2026-11-01.md and VERIFICATION.md for acceptance limits.
 
 ## Layout
 
@@ -78,7 +78,7 @@ For an application rollback, stop the replacement API, restore the prior compati
 
 ## Verification limits
 
-Docker is not installed on the current workstation. The image/Compose artifacts and new CI checks have **not** been executed here; do not treat them as release-certified. No server account, real API hostname, public deployment or hosted Auth/email test has been configured in this work. Exact hosting cost and capacity remain pending. See [VERIFICATION.md](VERIFICATION.md) for executed checks.
+Docker is not installed on the current workstation. The deployment-package workflow subsequently passed on Linux, and Render built and ran the API image successfully. Local Compose/Ollama execution on a production host and capacity/uptime remain unverified. Render Free sleeps during inactivity, so embedded workers pause. Core readiness is not full feature acceptance. See [VERIFICATION.md](VERIFICATION.md) for executed checks.
 
 Primary references: [Vercel monorepos](https://vercel.com/docs/monorepos/monorepo-faq), [Vercel configuration](https://vercel.com/docs/project-configuration), [Ollama Docker](https://docs.ollama.com/docker), [Compose networking](https://docs.docker.com/compose/how-tos/networking/), [Render free-service limits](https://render.com/docs/free).
 
@@ -86,4 +86,4 @@ Primary references: [Vercel monorepos](https://vercel.com/docs/monorepos/monorep
 
 Owner selected Render Free first, with paid credits reserved for a later explicit upgrade. Root render.yaml declares only a free Docker web service: no Render database, private worker or disk. Import the repository as a Blueprint after this file is pushed, or create a Free Docker Web Service using infra/deploy/api.Dockerfile and repository-root build context. Supply the prompted values privately; retain the existing invitation secret and restricted Supabase runtime login. Set WEB_ORIGIN to the stable public frontend origin, not localhost. If the database URL references a CA file, upload that project certificate as a Render secret file and update sslrootcert to its actual /etc/secrets filename. Do not copy migration credentials.
 
-This initial profile deliberately leaves document AI, RCA AI and external work-order email off until their hosted checks/configuration are complete. It does not host Ollama. Calendar and other embedded jobs pause during sleep. Supabase Auth SMTP remains separately configured. Existing local configuration is unchanged. After deployment use the assigned Render HTTPS hostname plus /api as the Vercel API URL, complete the Auth cutover above, and run hosted acceptance before enabling additional services. No live deployment is established by the YAML alone.
+The initial blueprint deliberately defaults document AI, RCA AI and external work-order email off. On 1 November the owner separately authorized private RCA/email provider configuration and activation on the existing service; the initial blueprint defaults are not a statement of its current runtime overrides. Document AI remains off while hosted embeddings are unavailable. It does not host Ollama. Calendar and other embedded jobs pause during sleep. Supabase Auth SMTP remains separately configured. Existing local configuration is unchanged. After deployment use the assigned Render HTTPS hostname plus /api as the Vercel API URL, complete the Auth cutover above, and run hosted acceptance before enabling additional services. No live deployment is established by the YAML alone.

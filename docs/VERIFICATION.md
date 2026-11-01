@@ -824,3 +824,21 @@ Replaced white-backed icon/wordmark with alpha-transparent processed PNGs under 
 ## Outlined wordmark accent — 1 November 2026
 
 Added a charcoal outline around the yellow i-dot in a new transparent wordmark variant and updated shared branding to use its new cache-safe filename. Dimensions remain 2170 × 725 and alpha transparency is present. TypeScript and both desktop/mobile landing checks passed; inspected the desktop landing screenshot. This is an asset-only visual correction; no auth, database or hosted deployment change.
+
+
+## Live deployment and complete regression check — 1 November 2026
+
+Checked deployed release 361766e. Found and reproduced a browser CORS blocker: Render still allowed the custom domain instead of the Vercel frontend. With explicit owner authorization, updated only WEB_ORIGIN to https://maintenate.vercel.app and rebuilt/deployed Render (dep-dbjf8d8u01pc73fa5drg). Real browser readiness reads now return HTTP 200 and unauthenticated protected reads return a readable HTTP 401; 19 final live HTTP probes passed. Public desktop/mobile UI, invalid recovery/callback/invitation entry, assets/video and security headers were inspected. No signed-in production journey or operational write was performed.
+
+Strict TypeScript passed; 180 unit tests, 225 isolated PostgreSQL integration tests, 502 desktop/mobile fixture-backed browser tests and three real isolated persistence journeys passed (910 total). Hosted read-only integrity audit passed all 25 checks across 41 tables and 73 foreign keys. npm audit reports 10 moderate affected dependency entries and zero high/critical; no forced major dependency update was applied. Hosted AI/RCA/external work-order email remain disabled in the initial Render profile; actual hosted provider and auth-link round trips, sustained load and backup restoration are not certified. Details and evidence limits: [live testing report](LIVE-TESTING-2026-11-01.md).
+
+
+## Hosted Auth, provider activation and final scope — 1 November 2026
+
+Owner approved production Auth trust changes, private CommandCode/Resend transfer to Render, RCA/email activation and one owner email probe. Supabase Site URL now points to https://maintenate.vercel.app; exact production and localhost callbacks are retained. A real Google sign-in returned to the public registry. Authenticated registry/photos, production, process trends, work-order list/detail and head email settings loaded; Administrator/head/Technician views were inspected without submitting an operational action. The original Administrator view was restored.
+
+Real CommandCode chat/RAG acceptance passed with local Nomic embeddings and `_test` persistence (13 answer-provider calls, page references, general conversation, follow-up, retries, privacy and withdrawal). Live RCA checks found a negated-confirmation false positive; c585396 corrects it and strengthens synthetic-evidence instructions. Final RCA acceptance passed three cases with the real model and isolated records. Strict TypeScript, 181 unit tests, eight RCA integration tests and 20 RCA browser cases passed after the fix. No historical evidence/schema was changed. An intermediate policy-version experiment was rejected by the isolated database constraint and was reverted before release; no hosted migration or invalid hosted request was made.
+
+Render's private RCA/email settings were added; document AI remains off. Existing outbox had no pending sends at preflight. The authorized single delivery probe was accepted by Resend and the owner confirmed inbox receipt and its Vercel link. No work order or new email subscription was created. This verifies the sender/provider/inbox path; a new actual Render-worker handoff delivery was not forced. Hosted production readiness remains HTTP 200.
+
+Owner explicitly deferred hosted RAG until a later hosting upgrade; no OpenAI embedding transfer or new paid hosting was activated. Production Auth recovery/new-invitation round trips, new import commits, actual operational stage changes and a hosted company-order RCA write remain unperformed. Complete status, corrections and limits: [live testing report](LIVE-TESTING-2026-11-01.md).
