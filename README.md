@@ -1,157 +1,245 @@
-# Maintenate
+<div align="center">
+  <img src="apps/web/public/brand/maintenate-icon-transparent.png" alt="Maintenate icon" width="88" />
+  <h1>Maintenate</h1>
+  <p><strong>Machine maintenance. Clearer decisions.</strong></p>
+  <p>A shared workspace for maintenance teams to manage equipment, coordinate work,<br />track production and ask questions about approved machine references.</p>
+  <p>
+    <a href="https://maintenate.vercel.app"><strong>Open Maintenate</strong></a>
+    &nbsp; · &nbsp;
+    <a href="#the-workflow">Explore the workflow</a>
+    &nbsp; · &nbsp;
+    <a href="#local-development">Run locally</a>
+    &nbsp; · &nbsp;
+    <a href="docs/VERIFICATION.md">Verification notes</a>
+  </p>
+  <p>
+    <a href="https://github.com/sarthakmarkad/AI-Maintenance-System/actions/workflows/checks.yml"><img src="https://github.com/sarthakmarkad/AI-Maintenance-System/actions/workflows/checks.yml/badge.svg" alt="Foundation checks" /></a>
+    <a href="https://github.com/sarthakmarkad/AI-Maintenance-System/actions/workflows/deployment-package.yml"><img src="https://github.com/sarthakmarkad/AI-Maintenance-System/actions/workflows/deployment-package.yml/badge.svg" alt="Deployment package checks" /></a>
+    <img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white" alt="Built with TypeScript" />
+  </p>
+</div>
 
-Machine maintenance workspaces for registered equipment within an organization. WH-C remains the original Windmöller & Hölscher blown-film pilot; its exact model is unknown. Administrators can now register other machines and grant operator/technician access. This repository implements authenticated access, production workbook import and dashboards, synthetic hourly trends, role-controlled maintenance work orders, fixed-date planned maintenance, explainable statistical review, maintenance performance, private evidence/reports, in-app and opt-in email handoffs, approved references with document chat, and human-reviewed AI RCA drafting. Operational persistence is hosted in Supabase. The frontend is deployed on Vercel and the Nest API on Render Free; local development remains available. Keyword-based document retrieval is implemented for the existing hosted database without an embedding service; hosted activation is pending. See [deployment status and limits](docs/DEPLOYMENT.md). Every registered machine has Production and Process trends tabs, with downloadable standard Excel templates. Custom workbook mappings, other process parameters/units and telemetry integrations remain separate work. See [machine registration and access](docs/MACHINE-REGISTRY.md).
+---
 
-## Start here
+## One place for the maintenance workflow
 
-The project lives at `~/Documents/Projects/Maintenance` (the filesystem also resolves the user's lowercase `projects` path). No code is built in the ChatGPT project mirror.
+Maintenate connects an observed issue to an assigned technician, recorded findings, human review and a retained maintenance history. It also brings planned maintenance, production imports, machine references and advisory AI into the same role-controlled workspace.
 
-Prerequisites: Node 22.12–24, npm 11, Python 3.9+ available as `python3` on PATH. The configured pilot uses hosted Supabase PostgreSQL/pgvector. Document AI needs Poppler (`pdfinfo` / `pdftotext`). Keyword retrieval needs no Ollama; the optional legacy hybrid mode requires its configured embedding service. Native PostgreSQL 16/pgvector remains available for isolated local tests; Docker is an alternative for a fresh local installation.
+The public landing page is open to visitors. **The platform requires sign-in and an authorized organization membership**; knowing the URL does not grant access. Administrators invite staff and assign roles and machine access.
+
+<a href="https://maintenate.vercel.app">
+  <img src="apps/web/public/landing-video/poster.jpg" alt="Illustrative Maintenate walkthrough showing an operator recording a machine observation" width="100%" />
+</a>
+
+*Illustrative product walkthrough—not an operational record or a screenshot of every current screen. [Watch it on the landing page](https://maintenate.vercel.app) · [Walkthrough provenance](docs/LANDING-VIDEO.md)*
+
+## What you can do
+
+| Area | Capabilities |
+|---|---|
+| **Equipment & people** | Register machines, edit details, upload private machine photos, archive/restore assets, invite staff and manage roles and machine access. |
+| **Maintenance work** | Report breakdowns, assign technicians, capture findings and human RCA, return or approve submissions, close approved work and retain the complete history. |
+| **Planned maintenance** | Create recurring plans with fixed IST due dates, review due/overdue tasks, explicitly release planned work and receive in-app reminders. |
+| **Production & process data** | Preview and validate Excel imports before saving, inspect production/scrap totals, explore synthetic process trends and retain source references. Standard templates are available for registered machines. |
+| **Statistical review** | Inspect sudden changes, sustained shifts and gradual drifts with supporting readings. Heads can retain a review and explicitly open an investigation. |
+| **Evidence & reporting** | Preview photos, access private attachments, inspect maintenance workload and export maintenance registers or work-order history as PDF/Excel. |
+| **Notifications** | Receive role-specific in-app handoffs and opt into eligible work-order emails through a configured sender. |
+| **Knowledge & AI** | Version and approve PDF manuals/SOPs, ask follow-up questions with page citations, and generate advisory RCA drafts for human editing and review. |
+
+Detailed behavior and boundaries are documented in the [feature guides](#documentation).
+
+## The workflow
+
+### From an issue to a reviewed repair
+
+```mermaid
+flowchart LR
+    A[Operator reports an issue] --> B[Head assigns a technician]
+    B --> C[Technician starts work]
+    C --> D[Technician submits findings and RCA]
+    D --> E{Head review}
+    E -->|Return with reason| C
+    E -->|Approve| F[Head or Supervisor closes work]
+```
+
+Original reports, earlier submissions, actor roles and event times remain in history. Version checks and duplicate-safe requests protect against competing updates and repeated submissions.
+
+Planned work and investigations use their own completion evidence. They do not require a fabricated breakdown cause or restoration time. Statistical flags never create work orders automatically.
+
+### Clear responsibilities
+
+| Role | Main responsibility |
+|---|---|
+| **Administrator** | Manage staff, machine registry and access. Upload reference drafts; no engineering approval authority. |
+| **Operator** | Report observations and add permitted evidence on assigned machines. |
+| **Technician** | Start and complete assigned work, record findings and submit for review. |
+| **Maintenance Head** | Assign work, review submissions, manage maintenance plans and approve/withdraw references. |
+| **Supervisor** | Review operational visibility and close approved work within authorized scope. |
+| **Plant Management** | Inspect scoped dashboards, maintenance activity, reports and approved references. |
+
+All six roles can use the scoped assistant. Permissions come from trusted application records; signing in with Google or changing browser data cannot assign a role. See [team access](docs/TEAM-ACCESS.md) and [staff management](docs/STAFF-MANAGEMENT.md).
+
+## AI with traceable references
+
+The assistant handles general conversation and retrieves document passages when a question needs an approved manual or SOP.
+
+- **Answers:** DeepSeek V4.1 Flash through the backend-only CommandCode integration.
+- **Retrieval:** PostgreSQL keyword search over page-aware text from current approved PDFs. The hosted keyword path requires neither Ollama nor a paid embedding API.
+- **Evidence:** Document answers include checked quotations, reference revisions and PDF page citations. A separate support check runs before delivery.
+- **Access:** Organization/machine scope and current approvals are checked again before returning an answer. Replaced or withdrawn sources are excluded; affected saved replies are redacted on subsequent reads.
+- **Privacy:** CommandCode requests require the zero-data-retention routing header. Questions, bounded conversation context and selected passages are sent to the provider; credentials stay on the backend.
+- **Human control:** RCA drafts remain advisory. A technician reviews/edits them, and the normal human approval workflow still applies.
+
+Keyword search can miss paraphrases. AI can make mistakes, and library approval does not override a training/sample warning inside a file. Existing vector indexes remain available through the optional legacy hybrid mode. See [assistant setup and limits](docs/DOCUMENT-AI.md).
+
+## Architecture
+
+```mermaid
+flowchart LR
+    U[Browser] --> W[Next.js frontend · Vercel]
+    U --> S[Supabase Auth]
+    W --> A[NestJS REST API · Render]
+    A --> S
+    A --> P[(Private PostgreSQL · Supabase)]
+    A --> C[CommandCode · AI answers and RCA]
+    A --> R[Resend · Email]
+    A --> X[Python · Statistical analysis]
+```
+
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js App Router, React, TypeScript, Tailwind/shadcn-style components, Recharts |
+| Backend | NestJS REST, TypeScript, generated OpenAPI contracts |
+| Persistence | Prisma, PostgreSQL/pgvector, restricted runtime login and private `maintenance` schema |
+| Authentication | Supabase Auth, email/password and Google OAuth |
+| Processing | Python statistics worker, ExcelJS, Poppler PDF text extraction |
+| Hosting | Vercel frontend, Render Free API, Supabase database/Auth |
+
+Files, source evidence and saved chats are private application records. The browser uses authenticated API endpoints for operational data; it has no direct access to the private database schema. Migration credentials are separate from runtime credentials.
+
+## Local development
+
+**Requirements:** Node.js 22.12–24, npm 11 and Python 3.9+. PDF indexing additionally needs Poppler (`pdfinfo` and `pdftotext`). Native local database setup needs PostgreSQL 16 with pgvector and its binaries on `PATH`; a Docker alternative is documented in [deployment guidance](docs/DEPLOYMENT.md).
+
+### Existing configured workspace
 
 ```sh
-cd ~/Documents/Projects/Maintenance
 npm ci
-# Existing pilot: private backend/frontend environment files are already configured.
 npm run dev
 ```
 
-The existing hosted database is initialized: do not seed, restore or rerun the one-time transfer to start the app. For a **fresh local-only installation**, run `npm run db:local`, `npm run db:migrate`, `npm run db:seed` and `npm run db:grants` before development; copy `apps/web/.env.example` to `apps/web/.env.local` if absent and configure Auth. Hosted `db:migrate`/`db:status` now use the verified administrative TLS bridge described in [the migration runbook](docs/SUPABASE-MIGRATION.md).
+Existing hosted data is already initialized. Starting development does **not** require seeding, restoring a backup or repeating the database transfer.
 
-- Frontend: http://localhost:3000
-- The public landing page is at `/`. Its **Dashboard** entry opens `/machines`, with the existing sign-in boundary for signed-out visitors. The retained yellow theme now includes an original [50-second AI-assisted product walkthrough](docs/LANDING-VIDEO.md). Administrators can [edit machine details and private photos](docs/MACHINE-EDITING.md) from the registry or overview. See [the UI design notes](docs/UI-REDESIGN.md).
-- Operational entry forms open as popups; drafts and file selections remain when closed and reopened on the same page. Search and filters stay inline. See [popup behavior](docs/FORM-POPUPS.md).
-- Use `localhost` for the local pilot. Development requests to `127.0.0.1` redirect there when the API is configured for localhost, keeping authentication and API origin settings consistent.
-- NestJS API: http://localhost:4000/api
-- Swagger: http://localhost:4000/api/docs
-- OpenAPI JSON: http://localhost:4000/api/openapi.json
-- Liveness: `/api/health/live`; readiness: `/api/health/ready`
-
-The retained native database uses **127.0.0.1:55432**, `.local/pgdata`, and its own credentials. It does not use the existing PostgreSQL instance on port 5432. With hosted app connections, `npm run db:local` starts only the separate local test database using `TEST_*` credentials; it does not replace hosted settings or update the old operational snapshot. Stop it with `npm run db:local:stop`. Preserve `.local/pgdata` and private migration checkpoints for rollback evidence.
-
-For a fresh checkout, the API can start without Supabase credentials but fails closed: unauthenticated protected requests return 401, bearer requests cannot authenticate, and readiness returns 503. The login screen explains missing setup and disables sign-in. This is intentional; there is no mock/development login or runtime file store.
-
-For repeatable persistence and user-workflow checks, see [system testing and database audit](docs/SYSTEM-TESTING.md). `npm run db:audit` checks hosted integrity read-only; `npm run test:system` runs real API/database browser journeys against the isolated test database.
-
-## Connect actual Supabase authentication
-
-1. Create/select an authorized Supabase project. Obtain its URL and **public publishable key** (or legacy anon key). Do not put a secret/service-role key in frontend configuration.
-2. Set `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` in root `.env`.
-3. Set the same URL/key as `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in `apps/web/.env.local`. `NEXT_PUBLIC_API_URL=http://localhost:4000/api`.
-4. For a fresh organization's first Administrator, create/verify their Supabase Auth account using trusted administration and copy its actual UUID. Further staff join through **Team → Invite staff**; see [individual accounts and SMTP setup](docs/STAFF-MANAGEMENT.md). Auth signup alone cannot grant application privileges.
-5. Provision a trusted application membership, e.g.:
+### Fresh local checkout
 
 ```sh
-npm run db:provision -- <actual-auth-user-uuid> OPERATOR "Display name" WH-C
+git clone https://github.com/sarthakmarkad/AI-Maintenance-System.git
+cd AI-Maintenance-System
+npm ci
+
+# Native bootstrap creates a private root .env; do not pre-create it for this path.
+npm run db:local
+cp apps/web/.env.example apps/web/.env.local
 ```
 
-Allowed roles: `OPERATOR`, `TECHNICIAN`, `MAINTENANCE_HEAD`, `SUPERVISOR`, `MANAGEMENT`, `ADMINISTRATOR`. Operators/technicians require an explicit machine grant. The CLI creates new memberships only and does not silently change existing roles. For explicitly approved multi-role pilot access on an existing identity, see [team access](docs/TEAM-ACCESS.md) and the separate trusted `db:grant-roles` command. It uses `DIRECT_URL` and writes membership/grants/audit atomically. The owner must verify the supplied UUID belongs to the intended Auth user.
+Configure Supabase Auth in both private environment files using the supplied [backend](.env.example) and [frontend](apps/web/.env.example) examples. Preserve the database credentials created by bootstrap. Use only the public publishable key in frontend settings.
 
-6. Restart local development after environment changes; sign in and verify `/api/me` and `/api/machines/WH-C`. Complete the hosted acceptance checklist in `docs/VERIFICATION.md`.
-
-Local PostgreSQL can be used with hosted Supabase Auth for development. The configured pilot now uses the existing hosted Supabase database as well as Auth; local development still runs on this computer alongside the separate hosted frontend/API.
-
-## Google sign-in and role views
-
-Administrators can invite individual staff, assign one role and machine access, and deactivate/reactivate accounts while preserving history. Google or an existing confirmed password account can accept a shared invitation now; new password signup/recovery require the documented custom SMTP setup. See [staff management](docs/STAFF-MANAGEMENT.md).
-
-Email/password login supports every trusted application role. The existing pilot account now offers six individually enforced role views, without duplicate Auth users or shared permission unions. See [the role matrix and enforcement](docs/TEAM-ACCESS.md).
-
-Google OAuth application code and tested PKCE callbacks are implemented. The owner has configured Google OAuth; hosted provider availability and the real redirect to Google were verified, and the owner reports checking the login. The button reads actual provider availability; existing email sign-in stays usable. Follow [the exact Google setup guide](docs/GOOGLE-SIGN-IN-SETUP.md). No Google client secret belongs in frontend settings.
-
-## Database configuration
-
-`DATABASE_URL` is the restricted runtime connection. Imports and maintenance workflows need the milestone-specific narrow grants; run `npm run db:grants` after migrations. `DIRECT_URL` is an owner/migration connection; keep it out of the running API environment in a deployed environment. Prisma migrations/seed/provisioning use owner credentials, not browser tokens. The private `maintenance` schema is not intended for exposure through Supabase Data API. The initial migration revokes public and existing Supabase browser/service role grants; no browser table policies or browser database access are used.
-
-The configured Supabase project uses its session pooler on port 5432, a dedicated non-owner `maintenance_app_runtime` login, and a project CA with hostname/certificate verification. The Prisma PostgreSQL driver adapter uses a bounded pool and UTC sessions; domain IST handling is unchanged. Keep `maintenance` out of exposed schemas. Runtime permissions protect identities/role grants and immutable machine codes while narrowly permitting audited registry metadata/photo/access administration, imports and workflow/history writes. `anon`, `authenticated` and `service_role` have no access to the private schema. **Do not use the database owner as DATABASE_URL in production.** Hosted counts, content digests, grants, real-role scoped reads and vector retrieval were verified; see [migration evidence and administrative limits](docs/SUPABASE-MIGRATION.md).
-
-If using Docker instead of native PostgreSQL:
+For this **fresh local database only**:
 
 ```sh
-LOCAL_DB_PASSWORD=<choose-private-password> docker compose -f infra/docker-compose.yml up -d
+npm run db:migrate
+npm run db:seed
+npm run db:grants
+npm run dev
 ```
 
-Copy `.env.example` to `.env`, set the owner URL, create a restricted runtime login with a private password using trusted PostgreSQL administration, and set its URL. Then migrate, seed, and apply runtime grants. Docker was not exercised on this computer.
+The native database uses port `55432`, separate from an existing server on `5432`. If a root `.env` already exists, bootstrap will not overwrite it; follow the manual connection setup in the [database runbook](docs/SUPABASE-MIGRATION.md). Core protected routes fail closed until Auth and trusted membership are configured.
 
-## Commands and checks
-
-```sh
-npm run typecheck
-npm test                    # backend HTTP, configuration, verifier and workflow contract
-npm run test:db             # isolated *_test database only; migrates, seeds twice, applies grants
-npm exec playwright -- install chromium
-npm run test:web            # desktop + mobile; intercepted Auth/API fixtures; isolated build cache
-npm run build               # NestJS TypeScript + Next.js production build
-npm run api:generate        # OpenAPI JSON + generated frontend response types
-npm audit
-```
-
-Database tests require `TEST_DATABASE_URL` (owner) and `TEST_RUNTIME_DATABASE_URL` (restricted login), pointing to the same separate database ending in `_test`. Native bootstrap creates these privately. Do not point tests at operational databases. CI configuration is included; its hosted execution has not been observed.
-
-## Repository
-
-| Path | Purpose |
+| Local service | Address |
 |---|---|
-| `apps/web` | Next.js App Router, Supabase login, protected registry/machine pages, Excel review, production dashboard, synthetic process trends, maintenance workflow and calendar, Tailwind/shadcn-style components and Recharts |
-| `apps/api` | NestJS REST, verified identity, trusted membership lookup, scoped machine queries, errors/logging/health/Swagger, bounded XLSX parser, staged imports, production totals, synthetic reading trends, scoped statistical review, versioned work-order actions and durable schedule/reminder processing |
-| `packages/api-client` | Generated OpenAPI response types consumed by frontend |
-| `services/statistics` | Isolated, standard-library Python worker for causal synthetic pattern rules; launched by NestJS |
-| `prisma` | Reviewed foundation schema, migration, relational constraints and indexes |
-| `scripts` | Seed, trusted account provisioning, isolated database and contract generation |
-| `infra` | Local PostgreSQL Compose option and narrow runtime grants |
-| `docs` | Decisions, data boundaries, complete scope map and verification evidence |
-| `Maintenance_Handoff` | Ignored, unchanged local reference material and original workbooks |
+| Web app | http://localhost:3000 |
+| REST API | http://localhost:4000/api |
+| Swagger UI | http://localhost:4000/api/docs |
+| OpenAPI JSON | http://localhost:4000/api/openapi.json |
+| Readiness | http://localhost:4000/api/health/ready |
 
-Work-order photos/documents are retained privately in PostgreSQL with immutable metadata; see [attachment workflow and limits](docs/ATTACHMENTS.md). Production XLSX uploads are parsed in memory; source rows and reconciled daily records persist in PostgreSQL. Original file-byte storage is deferred to private Supabase Storage. Recharts renders saved quantities with gaps. A bounded NestJS calendar worker persists occurrence cursors and in-app reminders in PostgreSQL. A separate bounded Python process evaluates synthetic statistical patterns on demand, without database/provider credentials. The approved-document assistant supports private PostgreSQL full-text retrieval and backend-only CommandCode DeepSeek calls. Legacy pgvector indexes remain available in explicit hybrid mode; no Redis queue is introduced. Future service directories will be added with their implementation.
+<details>
+<summary><strong>First Administrator and optional services</strong></summary>
 
-## History-preserving removal
-
-Administrators can archive and restore machines; Maintenance heads can cancel pre-approval work orders of every kind; users can remove their own saved conversations. Historical evidence remains retained. See [removal workflows and role permissions](docs/RECORD-REMOVAL.md).
-
-## Current boundary and next milestone
-
-The local app is configured with hosted Supabase Auth and operational PostgreSQL for the **Maintenance** project in Sarthak Markad’s organization (Mumbai). Public URL/key settings and private database/provider credentials stay in ignored environment files. Hosted Auth settings, rejection of invalid credentials/tokens, and a real successful browser sign-in were exercised earlier. The database cutover preserved all 31 tables/842 rows and 13 vectors, including existing identities, files, chats and immutable evidence. The six existing role views were checked read-only against hosted data; authenticated browser login was not repeated for this cutover. Evidence and remaining limits are recorded in `docs/VERIFICATION.md`. No application deployment occurred.
-
-Production Excel **preview → validation → duplicate-safe commit → persisted dashboard totals** is implemented. Open [WH-C Production](http://localhost:3000/machines/WH-C/production), use company production automatically, and select **Import workbook**. Inspect one monthly WH-C sheet, review exclusions, acknowledge source notes and import selected valid days. Operators/technicians/management cannot import. Saved daily controls are never added as extra output; repeat files cannot duplicate a saved date. See [production behavior and limits](docs/PRODUCTION-IMPORT.md).
-
-Synthetic **hourly readings and trends** are implemented at [WH-C Process trends](http://localhost:3000/machines/WH-C/readings). Import the supplied workbook, review excluded rows and acknowledge the demonstration rules before saving. The page shows three separate parameter charts, gaps, statistics, retrospective review periods and source/receipt history. It never combines synthetic readings with authentic production or creates an automatic breakdown. See [reading behavior and limits](docs/PROCESS-READINGS.md).
-
-Trusted local administrators can also load the supplied demo through the same service, using the restricted runtime connection and a verified existing Auth UUID:
+For a new seeded installation, create/verify the first Administrator in Supabase Auth, confirm the actual user UUID and provision the trusted membership through local administration:
 
 ```sh
-npm run demo:readings -- <verified-Auth-user-UUID> Maintenance_Handoff/data/synthetic/WH-C_Synthetic_Process_Readings_14_Days.xlsx
-# After reviewing the preview, explicitly commit:
-npm run demo:readings -- <verified-Auth-user-UUID> Maintenance_Handoff/data/synthetic/WH-C_Synthetic_Process_Readings_14_Days.xlsx --commit --acknowledge-synthetic
+npm run db:provision -- <actual-auth-user-uuid> ADMINISTRATOR "Display name"
 ```
 
-The command rechecks active stored membership, import role and WH-C scope. CLI imports are identified as LOCAL_CLI in audit metadata; this is trusted local administration, not a hosted Supabase login claim. No alternative browser authentication is added. Retrying a fully imported dataset adds no observations.
+This command targets the seeded pilot organization; it is not public self-registration. Further staff join through **Team → Invite staff**. Operators and Technicians require explicit machine grants. Configure [Google OAuth](docs/GOOGLE-SIGN-IN-SETUP.md), [staff SMTP](docs/STAFF-MANAGEMENT.md) and [work-order email](docs/EXTERNAL-NOTIFICATIONS.md) using their guides.
 
-Persistent **breakdown reporting and work orders** are implemented at [WH-C Work orders](http://localhost:3000/machines/WH-C/work-orders). Operators report; heads assign; assigned technicians submit repair findings and human RCA; heads approve or return; supervisors or heads close approved work. Original reports and earlier submissions stay in history. Your existing Administrator account can view these records and has no engineering action authority. At the user’s explicit request, the existing pilot identity now has all six server-granted role views under **Active role**. Administrator stays the default and cannot approve while that view is active. Independent-person approval acceptance still requires separate staff identities. See [workflow behavior and limits](docs/WORK-ORDERS.md).
+For keyword-based AI, install Poppler, configure the existing CommandCode account and set these backend-only values:
 
-The [WH-C Maintenance calendar](http://localhost:3000/machines/WH-C/calendar) supports daily/weekly/monthly plans, technician assignment, upcoming/due/overdue views, explicit planned work-order release, reasoned skips, pause/resume and in-app reminders. Select **Maintenance head** to create the first real plan; no company schedule is invented. Planned technician completion records performed work/time and keeps human review/closure, without fabricated breakdown RCA. Dates stay fixed as requested. Jobs run while the local API is running and catch up after restart. See [calendar rules and limits](docs/CALENDAR.md).
+```dotenv
+DOCUMENT_AI_PROVIDER=commandcode
+COMMANDCODE_MODEL=deepseek/deepseek-v4.1-flash
+DOCUMENT_RETRIEVAL_MODE=keyword
+DOCUMENT_AI_ENABLED=true
+```
 
-**Statistical patterns** now appear below the three charts on [WH-C Process trends](http://localhost:3000/machines/WH-C/readings). Sudden-change, sustained-shift and gradual-drift flags explain the prior baseline and supporting readings, with chart markers, filters and paging. Only the active Maintenance head view can retain an investigation/dismissal decision with a reason. Reviews preserve exact evidence. The head can explicitly open and assign an investigation from a retained review; the technician records findings/outcome, the head reviews, and the head/supervisor closes. Review history links current progress. Detection never creates a breakdown or work order automatically. See [policy, Python setup and limits](docs/STATISTICAL-PATTERNS.md).
+Store `COMMANDCODE_API_KEY` privately in the backend environment. Answer calls consume the provider account's allowance. An OpenAI API key is not needed for this configuration. Restart after changing environment settings.
 
-**Maintenance performance** is available at [WH-C Maintenance performance](http://localhost:3000/machines/WH-C/performance). All six scoped roles can inspect workload, older backlog, created/closed activity, generated planned-task completion and investigation outcomes. The technician sees its own open-assignment count. Open source records for role-authorized action; the dashboard is read-only. See [definitions, workflow and role activities](docs/MAINTENANCE-PERFORMANCE.md).
+</details>
 
-The dashboard focuses on maintenance workflow performance. MTTR, MTBF and machine-availability cards are omitted at the owner’s request. Reported temperature/pressure ranges remain unverified and are not safe limits or normal bands. All 20 intended areas remain in scope.
+## Testing & verification
 
-**Private work-order attachments** are available under **Photos & documents** on each work-order detail page. The reporting operator can add evidence before assignment; the assigned technician can add it after starting work and before submission. JPEG/PNG/PDF files are limited to 5 MB each and 20 per order. All scoped roles can preview JPEG/PNG photos in the app or download files; submitted evidence is frozen until return. Uploads, versioned history and audit save together in private PostgreSQL, now hosted in Supabase. See [attachment permissions, storage and limits](docs/ATTACHMENTS.md).
+```sh
+npm run typecheck       # API, web and browser-test TypeScript
+npm test                # Unit and provider-contract tests
+npm run test:db         # Isolated PostgreSQL integration tests
+npm run test:web        # Desktop/mobile browser fixtures
+npm run test:system     # Isolated real API/database browser journeys
+npm run build           # Production API and frontend build
+npm run db:audit        # Read-only audit of the configured database
+```
 
-**Maintenance reports** are available at [WH-C Reports](http://localhost:3000/machines/WH-C/reports). Preview work-order, planned-maintenance and investigation registers with explicit IST dates, then download a PDF summary or full-current-field Excel workbook. Work-order detail also exports a complete-history PDF/Excel report and attachment manifest. All six roles use existing trusted scope; previews/versions guard stale downloads, and generated exports append protected audit. Keep `apps/api/assets/fonts` with packaged API builds. See [report definitions, workflow and limits](docs/REPORTS.md).
+Install the browser once with `npm exec playwright -- install chromium`. Database tests require matching `TEST_DATABASE_URL` and `TEST_RUNTIME_DATABASE_URL` connections to a separate database ending in `_test`. Never use operational databases for test incidents.
 
-**Work-order notifications** appear above WH-C workspaces for the active Technician and Maintenance head views. Technicians see their own current assignments/releases and returned work; heads see unassigned operator breakdown reports and submissions awaiting review. Explicit role-specific read receipts do not change work orders. Calendar due-date reminders remain separate. See [handoff rules and limits](docs/WORK-ORDER-NOTIFICATIONS.md).
+`npm run test:ai:keyword` is an explicit real-provider acceptance test confined to `_test`; it consumes the configured answer-provider allowance and is not part of ordinary CI. `npm run api:generate` refreshes the OpenAPI contracts.
 
-**Manuals & SOPs** is available at [WH-C approved references](http://localhost:3000/machines/WH-C/documents). Administrator or Maintenance head uploads private PDF drafts/revisions; only the head approves or withdraws references with a reason. Other scoped roles see only the current approved file. Uploading a draft preserves the existing approval; superseded/withdrawn evidence remains available to head/admin. No company manual is preloaded and no AI is added. See [document workflow and limits](docs/DOCUMENT-LIBRARY.md).
+See [system testing](docs/SYSTEM-TESTING.md) and [verification evidence](docs/VERIFICATION.md) for executed checks, fixture boundaries and remaining acceptance work. CI badges report the repository checks, not a guarantee of production reliability.
 
-**AI assistant** at `/machines/WH-C/assistant` offers saved private conversations and follow-up questions. General questions receive ordinary AI replies; SOP/manual or local-equipment questions retrieve current approved PDF passages for cited advisory replies. General chat does not depend on ready documents. Starter suggestions, numbered source citations and a Knowledge drawer keep the conversation uncluttered. Approval queues page-aware indexing; drafts/withdrawn/obsolete revisions are excluded. All scoped roles can ask; head/admin can retry indexing. CommandCode/local embedding setup, billing/access limits and verification are documented in [DOCUMENT-AI.md](docs/DOCUMENT-AI.md). Model-specific live acceptance, local embeddings, citations, insufficient-evidence handling and withdrawal checks are recorded in docs/VERIFICATION.md.
+## Deployment & operating boundaries
 
+The app is deployed at **[maintenate.vercel.app](https://maintenate.vercel.app)** with its API on Render and operational persistence in Supabase. Follow the [deployment runbook](docs/DEPLOYMENT.md) for private environment settings, Auth redirects, migrations and rollback.
 
-Document AI setup: install Poppler (`brew install poppler` on this Mac), apply migration 035, and set `DOCUMENT_RETRIEVAL_MODE=keyword`. `npm run dev` skips the embedding service in this mode. Optional legacy hybrid setup uses Ollama and `npm run ai:setup`. The pilot uses backend `DOCUMENT_AI_PROVIDER=commandcode` and `COMMANDCODE_API_KEY` with `deepseek/deepseek-v4.1-flash`; no direct OpenAI credits are required. `npm run test:ai:keyword` is the explicit keyword acceptance test using the configured answer provider, confined to the isolated `_test` database. Answer calls consume the existing provider allowance; no embedding API is called. See [DOCUMENT-AI.md](docs/DOCUMENT-AI.md).
+- **Render Free can sleep.** First requests may be slow; embedded schedules, indexing and email jobs pause while the API sleeps.
+- **AI responses are checked before display.** Standalone greetings avoid model calls; clear document continuations skip routing. Document generation and support verification can still take several seconds.
+- **Process analysis is synthetic.** Demonstration readings and their flags do not establish real machine faults or causes of company production losses.
+- **Imports use reviewed layouts.** WH-C is the original validated pilot; its exact model is unknown. Registered machines support the tested standard templates. Other columns, units or process parameters need explicit reviewed mappings.
+- **Removal preserves history.** Machines can be archived/restored and eligible work orders cancelled; historical evidence is retained.
+- **Operational rollout needs company acceptance.** Validate real staff handoffs, suitable machine documents, backup restoration and hosting capacity before relying on the system for daily work.
 
-**Email alerts** are available for active Technician and Maintenance head views at `/machines/WH-C/notification-settings`. Each person opts in using their confirmed sign-in email; only new actionable handoffs after enrollment are eligible. The durable queue suppresses stale assignments/revoked access, records attempts and uses bounded provider-idempotent retries. Provider acceptance is separate from inbox delivery and from in-app read status. Sending stays off until the backend Resend sender/key and feature flag are configured; no real emails were sent during implementation. See [external email workflow and setup](docs/EXTERNAL-NOTIFICATIONS.md).
+## Repository map
 
-**AI-assisted RCA drafting** is optional inside the assigned technician's BREAKDOWN completion form after starting work. Generate from recorded work-order text/current human inputs, review attributed evidence and unconfirmed possibilities, edit suggestions and explicitly copy selected fields into the form. Service-restored time stays manual. Submit through the existing workflow; Maintenance head approves or returns the human report, and Supervisor/head closes it. All scoped readers can expand retained AI drafting evidence, which does not claim that submitted text is an unedited AI output. Planned work and investigations keep their existing completion forms. See [AI RCA workflow, permissions and limits](docs/AI-RCA-DRAFTING.md).
+```text
+apps/
+  web/                  Next.js interface and authenticated workspaces
+  api/                  NestJS API, workflows, imports and AI adapters
+packages/api-client/    Generated API types and shared chat formatting
+services/statistics/    Isolated Python statistical analysis
+prisma/                 Schema and reviewed migrations
+scripts/                Administration, database tools and checks
+infra/                  Runtime grants and deployment packaging
+docs/                   Feature guides, decisions and verification
+```
 
-## Deployment preparation
+Credentials, company workbooks, local database files and test artifacts are excluded from Git. `Maintenance_Handoff/` is ignored, read-only local reference material.
 
-Production packaging, Vercel settings, private backend/embedding topology, Auth/email cutover and rollback steps are in [DEPLOYMENT.md](docs/DEPLOYMENT.md). These artifacts do not deploy the app. Linux container verification and hosted acceptance remain required.
+## Documentation
+
+| Topic | Guides |
+|---|---|
+| Assets & staff | [Registry](docs/MACHINE-REGISTRY.md) · [Machine editing/photos](docs/MACHINE-EDITING.md) · [Staff](docs/STAFF-MANAGEMENT.md) · [Permissions](docs/TEAM-ACCESS.md) |
+| Maintenance | [Work orders](docs/WORK-ORDERS.md) · [Calendar](docs/CALENDAR.md) · [Removal](docs/RECORD-REMOVAL.md) |
+| Data & analysis | [Production imports](docs/PRODUCTION-IMPORT.md) · [Process readings](docs/PROCESS-READINGS.md) · [Excel templates](docs/STANDARD-EXCEL-TEMPLATES.md) · [Statistical patterns](docs/STATISTICAL-PATTERNS.md) |
+| Knowledge & AI | [Document library](docs/DOCUMENT-LIBRARY.md) · [Assistant](docs/DOCUMENT-AI.md) · [AI RCA drafting](docs/AI-RCA-DRAFTING.md) |
+| Evidence & visibility | [Attachments](docs/ATTACHMENTS.md) · [Reports](docs/REPORTS.md) · [Performance](docs/MAINTENANCE-PERFORMANCE.md) |
+| Notifications | [In-app](docs/WORK-ORDER-NOTIFICATIONS.md) · [Email](docs/EXTERNAL-NOTIFICATIONS.md) |
+| Engineering & operations | [Deployment](docs/DEPLOYMENT.md) · [Database](docs/SUPABASE-MIGRATION.md) · [Decisions](docs/DECISIONS.md) · [Verification](docs/VERIFICATION.md) |
