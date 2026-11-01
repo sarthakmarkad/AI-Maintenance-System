@@ -25,7 +25,7 @@ test("reviewed WHB mapping retains AS downtime, AT remarks, cells and independen
   assert(r.warnings.some((w) => /Reviewed source mapping/.test(w)));
 });
 test("WHB source mapping cannot relabel another machine, guess category layouts or declare synthetic values authentic", async () => {
-  for (const code of ["WH-C", "WH-B", "WHB2", "PUMP-01"]) {
+  for (const code of ["WH-C", "WH-B", "WHB2", "WHB10", "PUMP-01"]) {
     const l = await loadWorkbook(
       await whbProductionFixture(),
       "TEST.xlsx",
@@ -121,4 +121,29 @@ test("WHB date/control errors and unexpected data after explicit summary remain 
     }),
     /Unexpected data after the summary/,
   );
+});
+
+test("owner-confirmed WHB1 registration keeps the reviewed WHB layout and rejects mismatched headings", async () => {
+  const bytes = await whbProductionFixture();
+  const loaded = await loadWorkbook(bytes, "TEST-WHB1.xlsx", "WHB1");
+  assert(loaded.sheets[0].supported);
+  const parsed = parseSheet(loaded, "SEP-2026", "SYNTHETIC");
+  const original = await parse();
+  assert.equal(parsed.parserVersion, original.parserVersion);
+  assert.deepEqual(parsed.days, original.days);
+  assert(parsed.warnings.some((w) => w.includes("registered machine WHB1")));
+  assert.throws(
+    () => parseSheet(loaded, "SEP-2026", "AUTHENTIC"),
+    /labeled synthetic/,
+  );
+  for (const heading of ["W & H C M/C", "W & H B M/C extra"]) {
+    const invalid = await loadWorkbook(
+      await whbProductionFixture((s) => {
+        s.getCell("A1").value = heading;
+      }),
+      "TEST-WHB1.xlsx",
+      "WHB1",
+    );
+    assert.equal(invalid.sheets[0].supported, false);
+  }
 });

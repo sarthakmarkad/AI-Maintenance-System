@@ -165,3 +165,121 @@ test("synthetic reading templates validate both Guide and row machine IDs while 
   assert(!wrong.rows[0].eligible);
   assert(wrong.rows[0].problems.some((s) => s.includes("only PUMP-01")));
 });
+
+test("any registered code can explicitly map only a recognized layout and exact source heading", async () => {
+  const { whbProductionFixture } = await import("./whb-production-fixture");
+  const bytes = await whbProductionFixture();
+  const unconfirmed = await loadWorkbook(bytes, "TEST.xlsx", "EXTRUDER-99");
+  assert.equal(unconfirmed.sheets[0].supported, false);
+  const mapping = unconfirmed.mappingOptions.find(
+    (o) => o.layout === "MONTHLY_WHB",
+  )!;
+  assert(mapping);
+  const loaded = await loadWorkbook(bytes, "TEST.xlsx", "EXTRUDER-99", mapping);
+  assert(loaded.sheets[0].supported);
+  const parsed = parseSheet(loaded, "SEP-2026", "SYNTHETIC");
+  assert.equal(parsed.parserVersion, "whb-monthly-production-v1");
+  assert.deepEqual(parsed.workbookMapping, mapping);
+  assert.equal(parsed.days[0].rows[0].rawCells.AS8, 0.5);
+  assert.equal(parsed.days[0].rows[0].remarks, "TEST original remarks");
+  assert.throws(
+    () => parseSheet(loaded, "SEP-2026", "AUTHENTIC"),
+    /labeled synthetic/,
+  );
+  assert.equal(
+    (
+      await loadWorkbook(bytes, "TEST.xlsx", "EXTRUDER-99", {
+        ...mapping,
+        heading: "Other machine",
+      })
+    ).sheets[0].supported,
+    false,
+  );
+  assert.equal(
+    (
+      await loadWorkbook(bytes, "TEST.xlsx", "EXTRUDER-99", {
+        ...mapping,
+        layout: "STANDARD",
+      })
+    ).sheets[0].supported,
+    false,
+  );
+  const broken = await whbProductionFixture((s) => {
+    s.getCell("AT4").value = "OTHER UNIT";
+  });
+  const invalid = await loadWorkbook(
+    broken,
+    "TEST.xlsx",
+    "EXTRUDER-99",
+    mapping,
+  );
+  assert.equal(invalid.sheets[0].supported, false);
+  assert.equal(invalid.mappingOptions.length, 0);
+});
+
+test("mapping confirmation rejects missing consent, unknown layouts and forged mapping fields", async () => {
+  const { mappingInput } = await import("../production/service");
+  const mapping = {
+    heading: "Original machine heading",
+    layout: "MONTHLY_WHB",
+    confirmed: true,
+  };
+  assert.deepEqual(mappingInput(JSON.stringify(mapping)), {
+    heading: mapping.heading,
+    layout: mapping.layout,
+  });
+  for (const value of [
+    "bad JSON",
+    JSON.stringify({ ...mapping, confirmed: false }),
+    JSON.stringify({ ...mapping, layout: "GUESS" }),
+    JSON.stringify({ ...mapping, orgId: "forged" }),
+  ])
+    assert.throws(() => mappingInput(value));
+});
+
+test("confirmed standard and monthly layouts retain units and block extra mapped columns", async () => {
+  const bytes = await production("SOURCE-01");
+  const inspected = await loadWorkbook(bytes, "TEST.xlsx", "REGISTERED-01");
+  const standard = inspected.mappingOptions.find(
+    (o) => o.layout === "STANDARD",
+  )!;
+  assert(standard);
+  const parsed = parseSheet(
+    await loadWorkbook(bytes, "TEST.xlsx", "REGISTERED-01", standard),
+    "SEP-2026",
+    "SYNTHETIC",
+  );
+  assert(parsed.days[0].eligible);
+  const monthlyBytes = await productionFixture();
+  const monthly = await loadWorkbook(
+    monthlyBytes,
+    "TEST.xlsx",
+    "REGISTERED-01",
+  );
+  const mapping = monthly.mappingOptions.find(
+    (o) => o.layout === "MONTHLY_WHC",
+  )!;
+  assert(mapping);
+  assert(
+    parseSheet(
+      await loadWorkbook(monthlyBytes, "TEST.xlsx", "REGISTERED-01", mapping),
+      "SEP-2026",
+      "SYNTHETIC",
+    ).days.some((d) => d.eligible),
+  );
+  const changed = await productionFixture({
+    mutate: (s) => {
+      s.getCell("AT8").value = 999;
+    },
+  });
+  const loaded = await loadWorkbook(
+    changed,
+    "TEST.xlsx",
+    "REGISTERED-01",
+    mapping,
+  );
+  assert.throws(
+    () => parseSheet(loaded, "SEP-2026", "SYNTHETIC"),
+    /outside the confirmed monthly layout/,
+  );
+});

@@ -23,6 +23,10 @@ export const SUPPORTED_PRODUCTION_PARSERS = [
   "whb-monthly-production-v1",
 ] as const;
 export const MAX_FILE_BYTES = 8 * 1024 * 1024;
+export type WorkbookMapping = {
+  heading: string;
+  layout: "STANDARD" | "MONTHLY_WHC" | "MONTHLY_WHB";
+};
 export type Source = "AUTHENTIC" | "SYNTHETIC";
 export type Problem = {
   severity: "ERROR" | "WARNING";
@@ -65,6 +69,7 @@ export type ParsedSheet = {
   filename: string;
   workbookHash: string;
   warnings: string[];
+  workbookMapping?: WorkbookMapping;
   days: ParsedDay[];
 };
 export type SheetInfo = {
@@ -93,9 +98,10 @@ const months: Record<string, number> = {
 };
 const norm = (value: string) => value.trim().replace(/\s+/g, " ").toUpperCase();
 // Owner-confirmed source identity, 28 October 2026. This is a reviewed mapping
-// for WHB, not punctuation normalization or a general workbook identity bypass.
+// for WHB and the owner-confirmed WHB1 registration (1 November 2026).
+// This is not punctuation normalization or a general workbook identity bypass.
 const whbHeading = (heading: string, machineCode: string) =>
-  machineCode === "WHB" &&
+  ["WHB", "WHB1"].includes(machineCode) &&
   /^W\s*&\s*H\s+B\s+M\/C(?:\s*-\s*SYNTHETIC DEMONSTRATION)?$/i.test(
     heading.trim(),
   );
@@ -244,7 +250,11 @@ function numeric(
   }
   return round(parsed);
 }
-function sheetInfo(sheet: ExcelJS.Worksheet, machineCode: string): SheetInfo {
+function sheetInfo(
+  sheet: ExcelJS.Worksheet,
+  machineCode: string,
+  mapping?: WorkbookMapping,
+): SheetInfo {
   const heading = text(sheet.getCell("A1"));
   const result = {
     name: sheet.name,
@@ -263,8 +273,15 @@ function sheetInfo(sheet: ExcelJS.Worksheet, machineCode: string): SheetInfo {
     .split("-")
     .map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
     .join("\\s*-\\s*");
-  const whb = whbHeading(heading, machineCode);
-  if (!whb && !new RegExp(`^${prefix}(?=$|[\\s:/|])`, "i").test(heading.trim()))
+  const mapped = mapping && norm(mapping.heading) === norm(heading);
+  const whb = mapped
+    ? mapping.layout === "MONTHLY_WHB"
+    : whbHeading(heading, machineCode);
+  if (
+    !mapped &&
+    !whb &&
+    !new RegExp(`^${prefix}(?=$|[\\s:/|])`, "i").test(heading.trim())
+  )
     return {
       ...result,
       reason: `The heading must identify the selected machine ${machineCode}.`,
@@ -282,6 +299,11 @@ function sheetInfo(sheet: ExcelJS.Worksheet, machineCode: string): SheetInfo {
     return { ...result, reason: "Sheet year is outside the supported range." };
   result.month = `${year}-${String(months[match[1]]).padStart(2, "0")}`;
   const standard = sheet.getCell("A2").value === "maintenance-production-v1";
+  if (mapped && (mapping.layout === "STANDARD") !== standard)
+    return {
+      ...result,
+      reason: "This worksheet does not match the confirmed template layout.",
+    };
   const required: Record<string, string> = standard
     ? PRODUCTION_TEMPLATE_HEADERS
     : {
@@ -453,6 +475,7 @@ export async function loadWorkbook(
   buffer: Buffer,
   filename: string,
   machineCode = "WH-C",
+  mapping?: WorkbookMapping,
 ) {
   if (!/^[A-Z0-9][A-Z0-9-]{0,31}$/.test(machineCode))
     throw new BadRequestException("Invalid selected machine code.");
@@ -484,12 +507,35 @@ export async function loadWorkbook(
     throw new BadRequestException(
       "The workbook exceeds the supported sheet, row or column limits.",
     );
+  const sheets = workbook.worksheets.map((sheet) =>
+    sheetInfo(sheet, machineCode, mapping),
+  );
+  const options = new Map<string, WorkbookMapping>();
+  for (const sheet of workbook.worksheets) {
+    if (sheets.find((info) => info.name === sheet.name)?.supported) continue;
+    const heading = text(sheet.getCell("A1")).trim();
+    if (!heading || heading.length > 200) continue;
+    for (const layout of ["STANDARD", "MONTHLY_WHC", "MONTHLY_WHB"] as const) {
+      const candidate = { heading, layout };
+      if (sheetInfo(sheet, machineCode, candidate).supported)
+        options.set(`${norm(heading)}:${layout}`, candidate);
+    }
+  }
   return {
     workbook,
     filename: path.win32.basename(path.basename(filename)),
     workbookHash: createHash("sha256").update(buffer).digest("hex"),
     machineCode,
-    sheets: workbook.worksheets.map((sheet) => sheetInfo(sheet, machineCode)),
+    mapping:
+      mapping &&
+      sheets.some(
+        (info) =>
+          info.supported && norm(info.heading) === norm(mapping.heading),
+      )
+        ? mapping
+        : undefined,
+    mappingOptions: [...options.values()],
+    sheets,
   };
 }
 function rawRow(row: ExcelJS.Row, maxColumn = 45) {
@@ -530,7 +576,13 @@ export function parseSheet(
       "This workbook is labeled synthetic and cannot be imported as company production.",
     );
   const standard = sheet.getCell("A2").value === "maintenance-production-v1";
-  const whb = !standard && whbHeading(info.heading, loaded.machineCode);
+  const mapped =
+    loaded.mapping && norm(loaded.mapping.heading) === norm(info.heading);
+  const whb =
+    !standard &&
+    (mapped
+      ? loaded.mapping!.layout === "MONTHLY_WHB"
+      : whbHeading(info.heading, loaded.machineCode));
   const controlColumn = standard ? 7 : 5,
     scrapControlColumn = standard ? 8 : 30,
     jobChangesColumn = standard ? 5 : 6,
@@ -541,6 +593,14 @@ export function parseSheet(
         if (!blank(sheet.getCell(row, col)))
           throw new BadRequestException(
             `Unexpected data at ${sheet.getCell(row, col).address}; the standard template supports columns A–I only. Use an explicit mapping for other columns.`,
+          );
+  }
+  if (mapped && !standard && !whb) {
+    for (let row = 8; row <= sheet.rowCount; row++)
+      for (let col = remarksColumn + 1; col <= sheet.columnCount; col++)
+        if (!blank(sheet.getCell(row, col)))
+          throw new BadRequestException(
+            `Unexpected data at ${sheet.getCell(row, col).address}; this is outside the confirmed monthly layout. Review the layout before importing.`,
           );
   }
   const result: ParsedSheet = {
@@ -556,15 +616,20 @@ export function parseSheet(
     source,
     filename: loaded.filename,
     workbookHash: loaded.workbookHash,
+    ...(mapped ? { workbookMapping: loaded.mapping } : {}),
     warnings: [
       "Formula cells use saved results; formulas are not recalculated. Daily production and scrap totals are reconciliation controls, not extra output.",
       "Downtime units and actual shift start times remain unconfirmed. Original workbook bytes are processed in memory and are not retained by the application. Keep your original file.",
     ],
     days: [],
   };
-  if (whb)
+  if (mapped)
     result.warnings.push(
-      "Reviewed source mapping: “W & H B M/C” identifies registered machine WHB, confirmed by the owner. Scrap G–AC, daily controls E/AD, downtime AG–AS (unconfirmed units), remarks AT. Populated columns beyond AT exclude the affected date block; no values are silently dropped.",
+      `Confirmed workbook mapping: source heading “${info.heading.trim()}” belongs to selected machine ${loaded.machineCode}; reviewed layout ${loaded.mapping!.layout}. Original cells and validation rules are retained.`,
+    );
+  else if (whb)
+    result.warnings.push(
+      `Reviewed source mapping: “W & H B M/C” identifies registered machine ${loaded.machineCode}, confirmed by the owner. Scrap G–AC, daily controls E/AD, downtime AG–AS (unconfirmed units), remarks AT. Populated columns beyond AT exclude the affected date block; no values are silently dropped.`,
     );
   const scrapHeaders: Record<number, string> = {};
   const downtimeHeaders: Record<number, string> = {};

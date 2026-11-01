@@ -353,3 +353,13 @@ Owner requested a clearer presentation after reviewing their Plant Management co
 Owner chose to keep the current non-Fast DeepSeek model and zero-data-retention requirement after the Fast endpoint rejected that header. Removed the unpublished Fast candidate configuration/adapter changes and retained the existing local/live selection. No privacy override is introduced.
 
 For latency, use only anchored whole-message greetings/thanks for provider-free replies. Mixed questions still require ordinary routing. Clear continuations of the latest document answer go directly to retrieval; general conversations and changed-topic questions do not inherit that shortcut. Preserve trusted membership checks, configured-provider gating, rate limits, atomic private history, source-change rejection and independent support verification. This removes unnecessary model calls but does not promise subsecond document answers or remove Render Free cold starts.
+
+
+## WHB1 workbook identity confirmation — 1 November 2026
+
+Owner explicitly confirmed WHB1 is the same W & H B machine identified by the reviewed company workbook. Permit the exact reviewed monthly mapping for WHB1 alongside WHB; preserve all layout/data validation, machine-scoped persistence and historical imports. Do not infer other aliases, rename immutable registry codes, merge records or edit the workbook. Make all-unsupported inspection failures visible immediately.
+
+
+## Reusable mappings for newly registered machines — 1 November 2026
+
+Owner requested that adding a machine should not require another code-specific import fix. Offer only recognized, already reviewed production layouts with an explicit source-heading-to-selected-machine confirmation by an authorized importer. Capture mapping evidence in the immutable preview/audit and reuse the latest successful committed mapping within the same organization/machine. Avoid a schema migration or an unversioned mutable mapping cache. Unknown layouts/units remain blocked; no silent relabeling, original-file edits or cross-machine data migration. Historical code-specific compatibility remains intact.

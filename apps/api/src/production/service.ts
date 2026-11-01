@@ -20,8 +20,34 @@ import {
   sumKg,
   type ParsedSheet,
   type Source,
+  type WorkbookMapping,
 } from "./parser";
 
+export const workbookMappingSchema = z
+  .object({
+    heading: z
+      .string()
+      .trim()
+      .min(1)
+      .max(200)
+      .refine((s) => !/[\x00-\x1f]/.test(s), "Use the source machine heading."),
+    layout: z.enum(["STANDARD", "MONTHLY_WHC", "MONTHLY_WHB"]),
+  })
+  .strict();
+export function mappingInput(value: unknown): WorkbookMapping | undefined {
+  if (value === undefined) return undefined;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(String(value));
+  } catch {
+    throw new BadRequestException("Invalid workbook mapping.");
+  }
+  const confirmed = validated(
+    workbookMappingSchema.extend({ confirmed: z.literal(true) }).strict(),
+    parsed,
+  );
+  return { heading: confirmed.heading, layout: confirmed.layout };
+}
 const dateSchema = z
   .string()
   .refine(strictDate, "Use a real date in YYYY-MM-DD format.");
@@ -120,19 +146,45 @@ export class ProductionService {
       this.active.delete(user.userId);
     }
   }
+  private async rememberedMapping(
+    orgId: string,
+    machineId: string,
+  ): Promise<WorkbookMapping | undefined> {
+    const prior = await this.db.productionImport.findFirst({
+      where: {
+        orgId,
+        machineId,
+        status: "COMMITTED",
+        staged: { path: ["workbookMapping"], not: Prisma.AnyNull },
+      },
+      orderBy: [{ committedAt: "desc" }, { id: "desc" }],
+      select: { staged: true },
+    });
+    if (!prior) return undefined;
+    const result = workbookMappingSchema.safeParse(
+      (prior.staged as any).workbookMapping,
+    );
+    return result.success ? result.data : undefined;
+  }
   async inspect(
     user: Principal,
     code: string,
     buffer: Buffer,
     filename: string,
+    confirmedMapping?: WorkbookMapping,
   ) {
-    await this.machine(user, code);
+    const machine = await this.machine(user, code);
     return this.process(user, async () => {
-      const loaded = await loadWorkbook(buffer, filename, code);
+      const mapping =
+        confirmedMapping ??
+        (await this.rememberedMapping(user.orgId, machine.id));
+      const loaded = await loadWorkbook(buffer, filename, code, mapping);
       return {
         filename: loaded.filename,
         workbookHash: loaded.workbookHash,
         sheets: loaded.sheets,
+        mapping: loaded.mapping ?? null,
+        mappingOptions: loaded.mappingOptions,
       };
     });
   }
@@ -143,10 +195,14 @@ export class ProductionService {
     filename: string,
     sheet: string,
     source: Source,
+    confirmedMapping?: WorkbookMapping,
   ) {
     const machine = await this.machine(user, code);
     return this.process(user, async () => {
-      const loaded = await loadWorkbook(buffer, filename, code);
+      const mapping =
+        confirmedMapping ??
+        (await this.rememberedMapping(user.orgId, machine.id));
+      const loaded = await loadWorkbook(buffer, filename, code, mapping);
       const staged = parseSheet(loaded, sheet, source);
       await this.markExisting(staged, user.orgId, machine.id);
       const record = await this.db.$transaction(async (tx) => {
@@ -174,6 +230,9 @@ export class ProductionService {
               workbookHash: loaded.workbookHash,
               sheet,
               source,
+              ...(staged.workbookMapping
+                ? { workbookMapping: staged.workbookMapping }
+                : {}),
               eligibleDays: staged.days.filter((day) => day.eligible).length,
             },
           },

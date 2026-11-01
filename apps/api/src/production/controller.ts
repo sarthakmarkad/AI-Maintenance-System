@@ -40,6 +40,7 @@ import {
   dashboardQuery,
   sourceSchema,
   validated,
+  mappingInput,
 } from "./service";
 import {
   CommitProductionDto,
@@ -54,8 +55,8 @@ const upload = () =>
     limits: {
       fileSize: MAX_FILE_BYTES,
       files: 1,
-      fields: 2,
-      parts: 3,
+      fields: 3,
+      parts: 4,
       fieldSize: 1024,
     },
   });
@@ -126,7 +127,13 @@ export class ProductionController {
     schema: {
       type: "object",
       required: ["file"],
-      properties: { file: { type: "string", format: "binary" } },
+      properties: {
+        file: { type: "string", format: "binary" },
+        mapping: {
+          type: "string",
+          description: "JSON: heading, reviewed layout, confirmed:true",
+        },
+      },
     },
   })
   inspect(
@@ -135,9 +142,19 @@ export class ProductionController {
     @UploadedFile() file: Express.Multer.File | undefined,
     @Body() body: unknown,
   ) {
-    validated(z.object({}).strict(), body);
+    const input = validated(
+      z.object({ mapping: z.string().max(1024).optional() }).strict(),
+      body,
+    );
+    const mapping = mappingInput(input.mapping);
     const data = fileData(file);
-    return this.service.inspect(user, code, data.buffer, data.originalname);
+    return this.service.inspect(
+      user,
+      code,
+      data.buffer,
+      data.originalname,
+      mapping,
+    );
   }
   @Post("previews")
   @Roles(...importers)
@@ -153,6 +170,10 @@ export class ProductionController {
         file: { type: "string", format: "binary" },
         sheet: { type: "string" },
         source: { type: "string", enum: ["AUTHENTIC", "SYNTHETIC"] },
+        mapping: {
+          type: "string",
+          description: "JSON: heading, reviewed layout, confirmed:true",
+        },
       },
     },
   })
@@ -164,7 +185,11 @@ export class ProductionController {
   ) {
     const input = validated(
       z
-        .object({ sheet: z.string().min(1).max(100), source: sourceSchema })
+        .object({
+          sheet: z.string().min(1).max(100),
+          source: sourceSchema,
+          mapping: z.string().max(1024).optional(),
+        })
         .strict(),
       body,
     );
@@ -176,6 +201,7 @@ export class ProductionController {
       data.originalname,
       input.sheet,
       input.source,
+      mappingInput(input.mapping),
     );
   }
   @Get("previews/:id")

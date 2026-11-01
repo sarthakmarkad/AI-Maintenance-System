@@ -40,7 +40,7 @@ The public landing page is open to visitors. **The platform requires sign-in and
 | **Equipment & people** | Register machines, edit details, upload private machine photos, archive/restore assets, invite staff and manage roles and machine access. |
 | **Maintenance work** | Report breakdowns, assign technicians, capture findings and human RCA, return or approve submissions, close approved work and retain the complete history. |
 | **Planned maintenance** | Create recurring plans with fixed IST due dates, review due/overdue tasks, explicitly release planned work and receive in-app reminders. |
-| **Production & process data** | Preview and validate Excel imports before saving, inspect production/scrap totals, explore synthetic process trends and retain source references. Standard templates are available for registered machines. |
+| **Production & process data** | Preview and validate Excel imports before saving, inspect production/scrap totals, explore synthetic process trends and retain source references. Standard templates are available for registered machines; supported legacy layouts can be connected through an explicit workbook-to-machine confirmation and reused after a successful import. |
 | **Statistical review** | Inspect sudden changes, sustained shifts and gradual drifts with supporting readings. Heads can retain a review and explicitly open an investigation. |
 | **Evidence & reporting** | Preview photos, access private attachments, inspect maintenance workload and export maintenance registers or work-order history as PDF/Excel. |
 | **Notifications** | Receive role-specific in-app handoffs and opt into eligible work-order emails through a configured sender. |

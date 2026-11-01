@@ -1685,6 +1685,10 @@
                   "file": {
                     "type": "string",
                     "format": "binary"
+                  },
+                  "mapping": {
+                    "type": "string",
+                    "description": "JSON: heading, reviewed layout, confirmed:true"
                   }
                 }
               }
@@ -1812,6 +1816,10 @@
                       "AUTHENTIC",
                       "SYNTHETIC"
                     ]
+                  },
+                  "mapping": {
+                    "type": "string",
+                    "description": "JSON: heading, reviewed layout, confirmed:true"
                   }
                 }
               }
@@ -8474,6 +8482,26 @@
           "heading"
         ]
       },
+      "WorkbookMappingDto": {
+        "type": "object",
+        "properties": {
+          "heading": {
+            "type": "string"
+          },
+          "layout": {
+            "type": "string",
+            "enum": [
+              "STANDARD",
+              "MONTHLY_WHC",
+              "MONTHLY_WHB"
+            ]
+          }
+        },
+        "required": [
+          "heading",
+          "layout"
+        ]
+      },
       "WorkbookInfoDto": {
         "type": "object",
         "properties": {
@@ -8488,6 +8516,21 @@
             "items": {
               "$ref": "#/components/schemas/SheetInfoDto"
             }
+          },
+          "mappingOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkbookMappingDto"
+            }
+          },
+          "mapping": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/WorkbookMappingDto"
+              }
+            ]
           }
         },
         "required": [
@@ -8678,6 +8721,9 @@
           },
           "parserVersion": {
             "type": "string"
+          },
+          "workbookMapping": {
+            "$ref": "#/components/schemas/WorkbookMappingDto"
           },
           "source": {
             "type": "string",

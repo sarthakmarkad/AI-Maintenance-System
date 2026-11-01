@@ -87,3 +87,25 @@ Prisma now correctly declares the existing `(orgId,machineId)` ProductionRow ind
 ## Company-data Production page — 29 October 2026
 
 At the owner’s request, removed the Authentic/Synthetic dataset dropdown and its demo-switch state. The date-filtered dashboard and import preview always send AUTHENTIC explicitly. Simplified the page/import copy to company production, while retaining original source references, excluded-date review and acknowledgement. Historical synthetic badges remain conditional on the stored record’s actual provenance; no data, source enum, constraints or API permissions are changed. The known-synthetic rejection message now explains that such a workbook cannot be imported as company production rather than directing users to the removed dropdown. Process trends remain a separate synthetic-data workflow.
+
+
+## Owner-confirmed WHB1 registration — 1 November 2026
+
+The owner confirmed that registered code **WHB1** represents the same physical “W & H B M/C” machine previously reviewed under WHB. Extend the existing reviewed `whb-monthly-production-v1` layout to exactly WHB and WHB1. This adds no generic alias normalization or heading override; WH-B, WHB2, WHB10 and unrelated machines remain rejected for that heading. The original WH-C and standard-template behavior is unchanged. New preview warnings name the actual selected registration.
+
+All category/header checks, AS downtime versus AT remarks mapping, source cells/formula caches, invalid-date/shift quarantine, unmapped-column rejection, daily controls and duplicate-safe commit rules remain. Existing imports stay with their original machine IDs; this change neither merges registrations nor moves/copies historical production. Date uniqueness remains per stored machine/source, so maintain one intended registration for subsequent records rather than importing the same physical output into both.
+
+When inspection finds no eligible worksheets, the UI now explains this immediately, expands the per-sheet reasons and disables worksheet selection/preview. Filename changes cannot repair a mismatched source heading or unknown layout. No schema change or operational import was required.
+
+
+## Reusable workbook identity mapping — 1 November 2026
+
+New registrations do not require new hardcoded machine aliases when their workbook uses a supported layout. Inspection now offers source-heading/layout candidates only when the complete existing header checks recognize the standard nine-column template, the reviewed monthly A–AS layout, or the reviewed extended-downtime A–AT layout. This is layout recognition, not automatic machine identification. Unknown layouts, units or columns are not mapped by guesswork.
+
+An authorized importer explicitly selects the detected heading/layout and confirms that it belongs to the selected registered machine. The server requires literal confirmation and validates a bounded strict mapping object. It rechecks the original sheet heading and complete layout during both inspection and preview. The workbook is never rewritten, and known synthetic markers still reject company-data declarations. Mapped monthly A–AS files with populated columns outside the confirmed layout are rejected; the existing A–AT block quarantine and standard-template extra-column safeguards remain.
+
+The mapping is captured in the immutable preview snapshot and preview audit. Only a successful COMMITTED import makes it reusable: later inspections/previews read the latest committed mapping for that exact organization/machine. Failed, expired or abandoned previews cannot change the remembered mapping. This uses existing protected import snapshots and grants; no schema migration or separate mutable settings store is added. The latest confirmed mapping is reused only for its matching source heading; changed formats must pass layout checks again. A new successful confirmed mapping becomes the remembered selection, while earlier snapshots remain intact.
+
+Administrator, Maintenance head and Supervisor retain existing import authority for confirmation; Operator, Technician and Management cannot configure or commit imports. Confirmation does not grant engineering approval authority. Cross-machine/organization lookups, archival protection, original cells/hash/provenance, source separation, controls, quarantines, duplicate dates and atomic commit/audit behavior remain. This does not merge duplicate physical-machine registrations or move existing production. Importers remain responsible for confirming the physical machine correctly.
+
+User steps: select workbook → Read worksheets → if prompted, choose the detected heading/layout and confirm the selected machine → Confirm mapping and read worksheets → preview one sheet → review exclusions and commit selected valid dates. The next import with that heading/layout uses the saved confirmation automatically. Other spreadsheet layouts need explicit engineering/parser review or conversion to the provided standard template.

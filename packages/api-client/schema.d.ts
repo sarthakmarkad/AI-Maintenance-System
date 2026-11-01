@@ -1384,10 +1384,17 @@ export interface components {
             reason: string | null;
             heading: string;
         };
+        WorkbookMappingDto: {
+            heading: string;
+            /** @enum {string} */
+            layout: "STANDARD" | "MONTHLY_WHC" | "MONTHLY_WHB";
+        };
         WorkbookInfoDto: {
             filename: string;
             workbookHash: string;
             sheets: components["schemas"]["SheetInfoDto"][];
+            mappingOptions?: components["schemas"]["WorkbookMappingDto"][];
+            mapping?: components["schemas"]["WorkbookMappingDto"] | null;
         };
         ProductionRowDto: {
             sourceRow: number;
@@ -1439,6 +1446,7 @@ export interface components {
             sheet: string;
             month: string;
             parserVersion: string;
+            workbookMapping?: components["schemas"]["WorkbookMappingDto"];
             /** @enum {string} */
             source: "AUTHENTIC" | "SYNTHETIC";
             /** @enum {string} */
@@ -3728,6 +3736,8 @@ export interface operations {
                 "multipart/form-data": {
                     /** Format: binary */
                     file: string;
+                    /** @description JSON: heading, reviewed layout, confirmed:true */
+                    mapping?: string;
                 };
             };
         };
@@ -3807,6 +3817,8 @@ export interface operations {
                     sheet: string;
                     /** @enum {string} */
                     source: "AUTHENTIC" | "SYNTHETIC";
+                    /** @description JSON: heading, reviewed layout, confirmed:true */
+                    mapping?: string;
                 };
             };
         };

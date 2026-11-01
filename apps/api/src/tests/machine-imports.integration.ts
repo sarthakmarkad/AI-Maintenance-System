@@ -140,6 +140,8 @@ before(async () => {
     [first, orgId],
     [second, orgId],
     ["WHB", orgId],
+    ["WHB1", orgId],
+    ["ROLL-03", orgId],
     [first, foreign],
   ]) {
     const m = await db.machine.create({
@@ -295,79 +297,81 @@ test("standard production previews/commits retain job grain, controls, cells and
     404,
   );
 });
-test("reviewed WHB workbook persists its parser, original AT/AS cells and safe retry without crossing machines", async () => {
-  const bytes = await whbProductionFixture();
-  const inspected = (
-    await http("post", "WHB", "/production/inspect")
-      .attach("file", bytes, "TEST-WHB.xlsx")
-      .expect(201)
-  ).body;
-  assert(inspected.sheets[0].supported);
-  const p = (
-    await previewProduction("WHB", bytes, "SYNTHETIC", "head").expect(201)
-  ).body;
-  assert.equal(p.parserVersion, "whb-monthly-production-v1");
-  assert(p.days[0].eligible);
-  const blocked = (
-    await previewProduction(
-      "WHB",
-      await whbProductionFixture((s) => {
-        s.getCell("AD8").value = null;
-        s.getCell("AD10").value = 3;
-      }),
-      "SYNTHETIC",
-      "head",
-    ).expect(201)
-  ).body;
-  assert.equal(blocked.days[0].eligible, false);
-  assert(
-    blocked.days[0].problems.some(
-      (p: { code: string }) => p.code === "INVALID_SHIFT",
-    ),
-  );
-  assert.equal(blocked.days[0].rows[2].rawCells.AD10, 3);
-  await commitProduction("WHB", blocked.id).expect(400);
-  assert.equal(
-    await db.productionDay.count({ where: { importId: blocked.id } }),
-    0,
-  );
-  await commitProduction("WHB", p.id).expect(201);
-  assert.equal(
-    (await commitProduction("WHB", p.id).expect(201)).body.alreadyCommitted,
-    true,
-  );
-  const saved = await db.productionImport.findUniqueOrThrow({
-    where: { id: p.id },
+for (const code of ["WHB", "WHB1"])
+  test(`reviewed ${code} workbook persists its parser, original AT/AS cells and safe retry without crossing machines`, async () => {
+    const bytes = await whbProductionFixture();
+    const inspected = (
+      await http("post", code, "/production/inspect")
+        .attach("file", bytes, "TEST-WHB.xlsx")
+        .expect(201)
+    ).body;
+    assert(inspected.sheets[0].supported);
+    const p = (
+      await previewProduction(code, bytes, "SYNTHETIC", "head").expect(201)
+    ).body;
+    assert.equal(p.parserVersion, "whb-monthly-production-v1");
+    assert(p.days[0].eligible);
+    const blocked = (
+      await previewProduction(
+        code,
+        await whbProductionFixture((s) => {
+          s.getCell("AD8").value = null;
+          s.getCell("AD10").value = 3;
+        }),
+        "SYNTHETIC",
+        "head",
+      ).expect(201)
+    ).body;
+    assert.equal(blocked.days[0].eligible, false);
+    assert(
+      blocked.days[0].problems.some(
+        (p: { code: string }) => p.code === "INVALID_SHIFT",
+      ),
+    );
+    assert.equal(blocked.days[0].rows[2].rawCells.AD10, 3);
+    await commitProduction(code, blocked.id).expect(400);
+    assert.equal(
+      await db.productionDay.count({ where: { importId: blocked.id } }),
+      0,
+    );
+    await commitProduction(code, p.id).expect(201);
+    assert.equal(
+      (await commitProduction(code, p.id).expect(201)).body.alreadyCommitted,
+      true,
+    );
+    const saved = await db.productionImport.findUniqueOrThrow({
+      where: { id: p.id },
+    });
+    assert.equal(saved.parserVersion, "whb-monthly-production-v1");
+    const day = await db.productionDay.findFirstOrThrow({
+      where: { importId: p.id },
+      include: { rows: true },
+    });
+    assert.equal(day.rows.length, 2);
+    assert.equal(Number(day.controlScrapKg), 3);
+    const row = day.rows.find((r) => r.sourceRow === 8)!;
+    assert.equal(row.remarks, "TEST original remarks");
+    assert.equal(
+      (row.downtime as Record<string, number>)["AS: no planning"],
+      0.5,
+    );
+    assert.equal(
+      (row.rawCells as Record<string, unknown>).AT8,
+      "TEST original remarks",
+    );
+    await commitProduction(first, p.id).expect(404);
+    await commitProduction(code === "WHB" ? "WHB1" : "WHB", p.id).expect(404);
+    await previewProduction(first, bytes, "SYNTHETIC").expect(400);
+    await previewProduction(code, bytes, "SYNTHETIC", "operator").expect(403);
+    await http("get", code, `/production/previews/${p.id}`, "foreign").expect(
+      404,
+    );
+    const duplicate = (
+      await previewProduction(code, bytes, "SYNTHETIC").expect(201)
+    ).body;
+    assert(duplicate.days[0].alreadyImported);
+    assert.equal(duplicate.days[0].eligible, false);
   });
-  assert.equal(saved.parserVersion, "whb-monthly-production-v1");
-  const day = await db.productionDay.findFirstOrThrow({
-    where: { importId: p.id },
-    include: { rows: true },
-  });
-  assert.equal(day.rows.length, 2);
-  assert.equal(Number(day.controlScrapKg), 3);
-  const row = day.rows.find((r) => r.sourceRow === 8)!;
-  assert.equal(row.remarks, "TEST original remarks");
-  assert.equal(
-    (row.downtime as Record<string, number>)["AS: no planning"],
-    0.5,
-  );
-  assert.equal(
-    (row.rawCells as Record<string, unknown>).AT8,
-    "TEST original remarks",
-  );
-  await commitProduction(first, p.id).expect(404);
-  await previewProduction(first, bytes, "SYNTHETIC").expect(400);
-  await previewProduction("WHB", bytes, "SYNTHETIC", "operator").expect(403);
-  await http("get", "WHB", `/production/previews/${p.id}`, "foreign").expect(
-    404,
-  );
-  const duplicate = (
-    await previewProduction("WHB", bytes, "SYNTHETIC").expect(201)
-  ).body;
-  assert(duplicate.days[0].alreadyImported);
-  assert.equal(duplicate.days[0].eligible, false);
-});
 test("wrong-machine files cannot be reassigned and identical dates stay separate across machines/provenance", async () => {
   const bytes = await production(first);
   const inspect = (
@@ -493,4 +497,74 @@ test("revoked machine grants deny both workspaces and existing preview bytes wit
   await http("get", first, `/readings/previews/${readingId}`, "foreign").expect(
     404,
   );
+});
+
+test("confirmed generic mappings persist only after commit and never transfer to another machine", async () => {
+  const code = "ROLL-03",
+    bytes = await whbProductionFixture();
+  const inspected = (
+    await http("post", code, "/production/inspect")
+      .attach("file", bytes, "TEST.xlsx")
+      .expect(201)
+  ).body;
+  assert.equal(inspected.sheets[0].supported, false);
+  const option = inspected.mappingOptions.find(
+    (o: any) => o.layout === "MONTHLY_WHB",
+  );
+  assert(option);
+  const mapping = JSON.stringify({ ...option, confirmed: true });
+  await http("post", code, "/production/inspect")
+    .field("mapping", JSON.stringify(option))
+    .attach("file", bytes, "TEST.xlsx")
+    .expect(400);
+  await http("post", code, "/production/inspect", "operator")
+    .field("mapping", mapping)
+    .attach("file", bytes, "TEST.xlsx")
+    .expect(403);
+  const preview = (
+    await http("post", code, "/production/previews")
+      .field("sheet", "SEP-2026")
+      .field("source", "SYNTHETIC")
+      .field("mapping", mapping)
+      .attach("file", bytes, "TEST.xlsx")
+      .expect(201)
+  ).body;
+  assert(preview.days[0].eligible);
+  assert.deepEqual(preview.workbookMapping, option);
+  const pending = (
+    await http("post", code, "/production/inspect")
+      .attach("file", bytes, "TEST.xlsx")
+      .expect(201)
+  ).body;
+  assert.equal(pending.sheets[0].supported, false);
+  const event = await db.auditEvent.findFirstOrThrow({
+    where: { orgId, entityId: preview.id, action: "PRODUCTION_PREVIEWED" },
+  });
+  assert.deepEqual((event.detail as any).workbookMapping, option);
+  await commitProduction(code, preview.id).expect(201);
+  const reused = (
+    await http("post", code, "/production/inspect")
+      .attach("file", bytes, "TEST.xlsx")
+      .expect(201)
+  ).body;
+  assert(reused.sheets[0].supported);
+  assert.deepEqual(reused.mapping, option);
+  const duplicate = (
+    await previewProduction(code, bytes, "SYNTHETIC").expect(201)
+  ).body;
+  assert(duplicate.days[0].alreadyImported);
+  assert.equal(duplicate.days[0].eligible, false);
+  const other = (
+    await http("post", second, "/production/inspect")
+      .attach("file", bytes, "TEST.xlsx")
+      .expect(201)
+  ).body;
+  assert.equal(other.sheets[0].supported, false);
+  await http("get", second, `/production/previews/${preview.id}`).expect(404);
+  await http(
+    "get",
+    code,
+    `/production/previews/${preview.id}`,
+    "foreign",
+  ).expect(404);
 });

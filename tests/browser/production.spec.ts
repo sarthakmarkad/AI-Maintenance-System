@@ -55,7 +55,12 @@ function dashboard(saved: boolean, source: string) {
 }
 async function mockProduction(
   page: Page,
-  options: { role?: string; commitConflict?: boolean; expired?: boolean } = {},
+  options: {
+    role?: string;
+    commitConflict?: boolean;
+    expired?: boolean;
+    unsupported?: boolean;
+  } = {},
 ) {
   await setup(page, options.role || "ADMINISTRATOR");
   let saved = false;
@@ -87,9 +92,11 @@ async function mockProduction(
             {
               name: "SEP-2026",
               month: "2026-09",
-              supported: true,
-              reason: null,
-              heading: "WH-C M/C",
+              supported: !options.unsupported,
+              reason: options.unsupported
+                ? "The heading must identify the selected machine WH-C."
+                : null,
+              heading: options.unsupported ? "OTHER MACHINE" : "WH-C M/C",
             },
             {
               name: "SEP-2026 EPL",
@@ -297,5 +304,45 @@ test("an expired production request returns to sign-in with its reason preserved
   await expect(page).toHaveURL(/login\?reason=expired/);
   await expect(
     page.getByRole("alert").filter({ hasText: "Your session expired" }),
+  ).toBeVisible();
+});
+
+test("a workbook with no eligible sheets shows rejection reasons immediately and cannot open a preview", async ({
+  page,
+}) => {
+  await mockProduction(page, { unsupported: true });
+  await signIn(page);
+  await page.goto("/machines/WH-C/production");
+  await page
+    .getByRole("button", { name: "Import workbook", exact: true })
+    .click();
+  await page.locator("#production-file").setInputFiles({
+    name: "TEST-other-machine.xlsx",
+    mimeType:
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    buffer,
+  });
+  await page
+    .getByRole("button", { name: "Read worksheets", exact: true })
+    .click();
+  const dialog = page.getByRole("dialog", {
+    name: "Import production Excel",
+    exact: true,
+  });
+  await expect(dialog.getByRole("alert")).toContainText(
+    "No worksheets are eligible for this machine",
+  );
+  await expect(dialog.getByLabel("Worksheet", { exact: true })).toBeDisabled();
+  await expect(
+    dialog.getByRole("button", { name: "Preview selected sheet", exact: true }),
+  ).toBeDisabled();
+  await expect(dialog.locator("details.sheet-notes")).toHaveAttribute(
+    "open",
+    "",
+  );
+  await expect(
+    dialog.getByText("The heading must identify the selected machine WH-C.", {
+      exact: false,
+    }),
   ).toBeVisible();
 });

@@ -35,6 +35,12 @@ import { Button } from "./ui/button";
 import { ExcelTemplateButton } from "./excel-template-button";
 import { FormPopup } from "./ui/form-popup";
 const productionSource = "AUTHENTIC";
+type Mapping = NonNullable<WorkbookInfo["mapping"]>;
+const mappingNames: Record<string, string> = {
+  STANDARD: "Standard production template",
+  MONTHLY_WHC: "Monthly production sheet",
+  MONTHLY_WHB: "Monthly production sheet with extended downtime",
+};
 const number = (value: number) =>
   new Intl.NumberFormat("en-IN", { maximumFractionDigits: 3 }).format(value);
 const monthWindow = (month: string) => ({
@@ -72,6 +78,9 @@ export function ProductionWorkspace({
   const [file, setFile] = useState<File | null>(null);
   const [workbook, setWorkbook] = useState<WorkbookInfo | null>(null);
   const [sheet, setSheet] = useState("");
+  const [pendingMapping, setPendingMapping] = useState<Mapping | null>(null);
+  const [mappingChoice, setMappingChoice] = useState("");
+  const [mappingAck, setMappingAck] = useState(false);
   const [preview, setPreview] = useState<ProductionPreview | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
   const [ack, setAck] = useState(false);
@@ -127,7 +136,7 @@ export function ProductionWorkspace({
     setCommitted(null);
     setImportError("");
   }
-  async function inspect() {
+  async function inspect(confirmedMapping?: Mapping) {
     if (!file) return;
     setBusy("Inspecting workbook…");
     setImportError("");
@@ -135,6 +144,9 @@ export function ProductionWorkspace({
     try {
       const body = new FormData();
       body.set("file", file);
+      const chosen = confirmedMapping ?? pendingMapping;
+      if (chosen)
+        body.set("mapping", JSON.stringify({ ...chosen, confirmed: true }));
       const info = await api<WorkbookInfo>(
         `${base}/inspect`,
         token,
@@ -142,6 +154,9 @@ export function ProductionWorkspace({
         { method: "POST", body },
       );
       setWorkbook(info);
+      if (confirmedMapping) setPendingMapping(confirmedMapping);
+      setMappingChoice("");
+      setMappingAck(false);
       const currentMonth = new Intl.DateTimeFormat("en-CA", {
         timeZone: "Asia/Kolkata",
         year: "numeric",
@@ -169,6 +184,11 @@ export function ProductionWorkspace({
       body.set("file", file);
       body.set("sheet", sheet);
       body.set("source", productionSource);
+      if (pendingMapping)
+        body.set(
+          "mapping",
+          JSON.stringify({ ...pendingMapping, confirmed: true }),
+        );
       const data = await api<ProductionPreview>(
         `${base}/previews`,
         token,
@@ -337,12 +357,12 @@ export function ProductionWorkspace({
                 existing validated monthly layout with this machine’s heading.
                 Keep daily controls separate from job rows.
               </p>
-              {machine.code === "WHB" && (
+              {["WHB", "WHB1"].includes(machine.code) && (
                 <p className="import-intro">
-                  WHB also accepts the reviewed “W &amp; H B M/C” monthly
-                  workbook: scrap in G–AC, daily controls in E/AD, downtime in
-                  AG–AS and remarks in AT. Select a month and review its
-                  excluded dates before saving.
+                  {machine.code} also accepts the reviewed “W &amp; H B M/C”
+                  monthly workbook: scrap in G–AC, daily controls in E/AD,
+                  downtime in AG–AS and remarks in AT. Select a month and review
+                  its excluded dates before saving.
                 </p>
               )}
               <label>
@@ -371,6 +391,9 @@ export function ProductionWorkspace({
                     onChange={(event) => {
                       setFile(event.target.files?.[0] || null);
                       setWorkbook(null);
+                      setPendingMapping(null);
+                      setMappingChoice("");
+                      setMappingAck(false);
                       setSheet("");
                       resetPreview();
                     }}
@@ -379,19 +402,87 @@ export function ProductionWorkspace({
                 <Button
                   variant="outline"
                   disabled={!file || !!busy}
-                  onClick={inspect}
+                  onClick={() => void inspect()}
                 >
                   Read worksheets
                 </Button>
               </div>
               {workbook && (
                 <div className="sheet-controls">
+                  {!!workbook.mappingOptions?.length && (
+                    <div className="production-mapping">
+                      <h3>Connect this workbook to {machine.code}</h3>
+                      <p>
+                        A supported layout was found. Confirm the workbook
+                        belongs to this machine before continuing. The mapping
+                        is remembered after a successful import.
+                      </p>
+                      <label>
+                        Workbook heading and layout
+                        <select
+                          aria-label="Workbook heading and layout"
+                          value={mappingChoice}
+                          disabled={!!busy}
+                          onChange={(event) => {
+                            setMappingChoice(event.target.value);
+                            setMappingAck(false);
+                          }}
+                        >
+                          <option value="">Choose a detected layout</option>
+                          {workbook.mappingOptions.map((option, i) => (
+                            <option key={i} value={i}>
+                              {option.heading} — {mappingNames[option.layout]}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={mappingAck}
+                          disabled={!!busy || !mappingChoice}
+                          onChange={(event) =>
+                            setMappingAck(event.target.checked)
+                          }
+                        />
+                        I confirm this workbook heading identifies{" "}
+                        {machine.code} ({machine.name}).
+                      </label>
+                      <Button
+                        disabled={!!busy || !mappingChoice || !mappingAck}
+                        onClick={() => {
+                          const selected =
+                            workbook.mappingOptions?.[Number(mappingChoice)];
+                          if (selected) void inspect(selected);
+                        }}
+                      >
+                        Confirm mapping and read worksheets
+                      </Button>
+                    </div>
+                  )}
+                  {workbook.mapping && !workbook.mappingOptions?.length && (
+                    <p className="mapping-summary">
+                      Workbook heading: {workbook.mapping.heading} ·{" "}
+                      {mappingNames[workbook.mapping.layout]}. Imported records
+                      stay with {machine.code}.
+                    </p>
+                  )}
+                  {!workbook.sheets.some((item) => item.supported) && (
+                    <p role="alert" className="inline-error">
+                      No worksheets are eligible for this machine. Review the
+                      reasons below. Renaming the file does not change its
+                      machine heading or layout.
+                    </p>
+                  )}
                   <label>
                     Worksheet
                     <select
                       aria-label="Worksheet"
                       value={sheet}
-                      disabled={!!busy}
+                      disabled={
+                        !!busy ||
+                        !workbook.sheets.some((item) => item.supported)
+                      }
                       onChange={(event) => {
                         setSheet(event.target.value);
                         resetPreview();
@@ -413,7 +504,10 @@ export function ProductionWorkspace({
                   <Button onClick={makePreview} disabled={!sheet || !!busy}>
                     Preview selected sheet
                   </Button>
-                  <details className="sheet-notes">
+                  <details
+                    className="sheet-notes"
+                    open={!workbook.sheets.some((item) => item.supported)}
+                  >
                     <summary>
                       Sheet eligibility ({workbook.sheets.length} sheets)
                     </summary>

@@ -12,10 +12,19 @@ export class SheetInfoDto {
   @ApiProperty({ type: String, nullable: true }) reason!: string | null;
   @ApiProperty() heading!: string;
 }
+export class WorkbookMappingDto {
+  @ApiProperty() heading!: string;
+  @ApiProperty({ enum: ["STANDARD", "MONTHLY_WHC", "MONTHLY_WHB"] })
+  layout!: string;
+}
 export class WorkbookInfoDto {
   @ApiProperty() filename!: string;
   @ApiProperty() workbookHash!: string;
   @ApiProperty({ type: [SheetInfoDto] }) sheets!: SheetInfoDto[];
+  @ApiProperty({ type: [WorkbookMappingDto], required: false })
+  mappingOptions?: WorkbookMappingDto[];
+  @ApiProperty({ type: WorkbookMappingDto, nullable: true, required: false })
+  mapping?: WorkbookMappingDto | null;
 }
 export class ProductionRowDto {
   @ApiProperty() sourceRow!: number;
@@ -59,6 +68,8 @@ export class ProductionPreviewDto {
   @ApiProperty() sheet!: string;
   @ApiProperty() month!: string;
   @ApiProperty() parserVersion!: string;
+  @ApiProperty({ type: WorkbookMappingDto, required: false })
+  workbookMapping?: WorkbookMappingDto;
   @ApiProperty({ enum: ["AUTHENTIC", "SYNTHETIC"] }) source!: string;
   @ApiProperty({ enum: ["PREVIEW", "COMMITTED"] }) status!: string;
   @ApiProperty({ format: "date-time" }) createdAt!: string;
