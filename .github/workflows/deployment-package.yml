@@ -20,6 +20,7 @@ jobs:
             for (const file of ["apps/api/dist/main.js", "services/statistics/worker.py", "apps/api/assets/fonts/NotoSans-Regular.ttf"]) assert(fs.existsSync(file), file);
             for (const file of [".env", ".git", ".local", "Maintenance_Handoff", "apps/api/dist/tests"]) assert(!fs.existsSync(file), file);
             require("sharp"); require("@prisma/client"); require("@maintenance/api-client/chat-format"); require("./apps/api/dist/app.js");
+            require("./node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node");
             execFileSync("python3", ["--version"]);
             execFileSync("pdfinfo", ["-v"]);
             execFileSync("pdftotext", ["-v"]);

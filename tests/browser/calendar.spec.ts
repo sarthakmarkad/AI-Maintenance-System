@@ -7,14 +7,16 @@ import type { Principal } from "../../apps/api/src/repository";
 const base = "/machines/WH-C/calendar",
   planId = "932a243c-054e-4c48-a5e5-74bb2d9a5974",
   orderId = "0457fd8c-808b-4ad8-a8bb-b8d836831c17";
+// Keep fixture days in one month, including when CI runs on a month boundary.
+const fixtureNow = new Date("2026-10-15T06:30:00Z");
 const local = (d: Date) =>
     new Date(d.getTime() + 330 * 60000)
       .toISOString()
       .slice(0, 19)
       .replace(/:00$/, ""),
-  today = local(new Date()).slice(0, 10),
+  today = local(new Date(fixtureNow)).slice(0, 10),
   day = (offset: number) =>
-    local(new Date(Date.now() + offset * 86400000)).slice(0, 10);
+    local(new Date(fixtureNow.getTime() + offset * 86400000)).slice(0, 10);
 const plan = () => ({
   id: planId,
   requestId: "2625b575-df3e-4dd7-9dcf-70bc886f6f4f",
@@ -31,11 +33,11 @@ const plan = () => ({
   version: 1,
   pauseReason: null,
   nextSequence: 6,
-  nextDueAt: new Date(Date.now() + 36 * 86400000).toISOString(),
+  nextDueAt: new Date(fixtureNow.getTime() + 36 * 86400000).toISOString(),
   catchingUp: false,
-  lastGeneratedAt: new Date().toISOString(),
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
+  lastGeneratedAt: new Date(fixtureNow).toISOString(),
+  createdAt: new Date(fixtureNow).toISOString(),
+  updatedAt: new Date(fixtureNow).toISOString(),
 });
 const task = (offset: number, status: string, index: number) => ({
   id: `cdb08f90-2380-498a-90b2-4b6049e7f00${index}`,
@@ -72,6 +74,7 @@ async function mocks(
     plannedStatus?: string;
   } = {},
 ) {
+  await page.clock.setFixedTime(fixtureNow);
   await setup(page, role);
   let p = empty ? null : plan(),
     tasks = empty
@@ -96,14 +99,14 @@ async function mocks(
     description: "TEST routine instructions.",
     priority: "NORMAL",
     impact: "OBSERVATION",
-    reportedAt: new Date(Date.now() - 3600000).toISOString(),
+    reportedAt: new Date(fixtureNow.getTime() - 3600000).toISOString(),
     observedAt: null,
     reporter: { userId, displayName: "TEST head" },
     technician: { userId, displayName: "TEST technician" },
     technicianId: userId,
     startedAt:
       plannedStatus === "IN_PROGRESS"
-        ? new Date(Date.now() - 1800000).toISOString()
+        ? new Date(fixtureNow.getTime() - 1800000).toISOString()
         : null,
     findings: null,
     rootCause: null,
@@ -119,7 +122,7 @@ async function mocks(
     closedAt: null,
     closedBy: null,
     closer: null,
-    updatedAt: new Date().toISOString(),
+    updatedAt: new Date(fixtureNow).toISOString(),
     maintenanceOccurrence: {
       id: task(0, "DUE", 2).id,
       planId,
@@ -163,15 +166,18 @@ async function mocks(
           action as "start" | "submit",
           b,
           [],
-          new Date(),
+          new Date(fixtureNow),
         );
         order = {
           ...order,
           ...next,
           startedAt:
-            action === "start" ? new Date().toISOString() : order.startedAt,
-          submittedAt: action === "submit" ? new Date().toISOString() : null,
-          updatedAt: new Date().toISOString(),
+            action === "start"
+              ? new Date(fixtureNow).toISOString()
+              : order.startedAt,
+          submittedAt:
+            action === "submit" ? new Date(fixtureNow).toISOString() : null,
+          updatedAt: new Date(fixtureNow).toISOString(),
         };
       }
       await r.fulfill({ json: view() });
@@ -238,7 +244,7 @@ async function mocks(
                   dueAt: tasks[0].dueAt,
                   orderId: null,
                   read,
-                  createdAt: new Date().toISOString(),
+                  createdAt: new Date(fixtureNow).toISOString(),
                 },
               ]
             : [],
@@ -271,7 +277,7 @@ async function mocks(
       } else {
         t.status = "SKIPPED";
         t.skipReason = b.reason;
-        t.skippedAt = new Date().toISOString();
+        t.skippedAt = new Date(fixtureNow).toISOString();
         t.version++;
         await r.fulfill({ json: { skipped: true } });
       }
@@ -303,9 +309,9 @@ async function mocks(
         dayCounts,
         canManage: role === "MAINTENANCE_HEAD",
         nextCursor: null,
-        serverTime: new Date().toISOString(),
+        serverTime: new Date(fixtureNow).toISOString(),
         scheduling: {
-          lastJobAt: new Date().toISOString(),
+          lastJobAt: new Date(fixtureNow).toISOString(),
           failed: false,
           catchingUp: false,
         },
@@ -521,7 +527,7 @@ test("planned technician submission uses performed work/time without invented br
     .fill("TEST planned checks completed");
   await page
     .getByLabel("Maintenance performed (IST)", { exact: true })
-    .fill(local(new Date()));
+    .fill(local(new Date(fixtureNow)));
   await page
     .getByRole("button", { name: "Submit for review", exact: true })
     .click();

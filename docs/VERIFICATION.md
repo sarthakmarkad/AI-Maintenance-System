@@ -792,3 +792,15 @@ Executed checks:
 - Current dependency audit: **10 moderate, 0 high, 0 critical** findings in the full tree; the pruned package reports eight moderate findings. The chain is a minimatch glob-amplification advisory through existing spreadsheet/archive/tooling dependencies. Audit suggestions include breaking dependency downgrades; no blind forced fix was applied. Review compatible remediation before release. Private audit output: .local/deployment-audit.json.
 
 Limits: Docker is unavailable locally, so image build, container startup, Compose execution, model download/persistence, Linux native tools, HTTPS proxy, host capacity, worker restart behavior and hosted role/Auth/email/AI acceptance remain unverified. The refreshed chatbot key was not exercised by these deployment checks. Budget/account selection and actual deployment remain pending. See DEPLOYMENT.md.
+
+## Render Free selection
+
+Added a root Blueprint for one Free Docker backend with manually supplied runtime settings and no paid resources. AI and workflow email are disabled in this initial hosted profile pending acceptance/configuration; local settings are unchanged. YAML formatting and diff checks passed. Render parsing, image build, resource usage and live deployment remain unverified; no hosting credentials or account connection are available in the current tools.
+
+## Render rollout and CI correction — 1 November 2026
+
+Owner authorized restricted runtime-secret transfer and creation of one public Free backend. Created maintenate-api in Singapore, service srv-dbjckdtg1s2s73fc5cd0, hostname https://maintenate-api.onrender.com. Initial deployment of 8206794 built and started but readiness returned 503; hosted acceptance is not yet complete. Runtime secrets remain in ignored local files and Render, with verified CA TLS and no owner/migration credentials. AI/work-order email are initially disabled. Frontend and Auth origin cutover remain pending.
+
+The pushed 8206794 Linux deployment-package workflow passed; Foundation checks failed in browser tests. Reproduced locally: 496 passed, six calendar cases failed because relative fixture days crossed the month boundary on November 1. Anchored browser time and fixture timestamps consistently at a fixed mid-month date; all 16 targeted desktop/mobile calendar cases passed. No production calendar behavior changed. Full browser suite has not been rerun after this fixture correction.
+
+Render build output also showed Prisma generating for fallback OpenSSL 1.1 because the build image lacked OpenSSL. Added OpenSSL/CA packages before Prisma generation and an explicit native OpenSSL 3 engine load to Linux package CI. Corrected container execution and hosted readiness still require verification after rollout.

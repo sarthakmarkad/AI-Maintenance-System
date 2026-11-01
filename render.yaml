@@ -1,0 +1,34 @@
+# Initial free backend only. No paid worker, database or persistent disk.
+services:
+  - type: web
+    name: maintenate-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./infra/deploy/api.Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health/ready
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: WEB_ORIGIN
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: TEAM_INVITATION_SECRET
+        sync: false
+      - key: TEAM_PASSWORD_EMAIL_READY
+        value: "true"
+      # Enable after separately checking provider access and embedding hosting.
+      - key: DOCUMENT_AI_ENABLED
+        value: "false"
+      - key: RCA_AI_ENABLED
+        value: "false"
+      # Review eligible recipients/queue before enabling live delivery.
+      - key: EXTERNAL_NOTIFICATIONS_ENABLED
+        value: "false"
