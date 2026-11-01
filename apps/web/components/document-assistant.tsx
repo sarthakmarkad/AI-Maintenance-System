@@ -747,31 +747,58 @@ export function DocumentAssistant({
                         </strong>
                       )}
                       {t.answer.statements.length ? (
-                        <ul className={styles.answerPoints}>
-                          {t.answer.statements.map((s, i) => (
-                            <li key={i}>
-                              <ChatReply
-                                text={s.text}
-                                citations={s.citations.map((c, j) => (
-                                  <button
-                                    key={j}
-                                    className={styles.citation}
-                                    aria-label={`Source ${c.sourceId.slice(1)} for reply ${t.ordinal}`}
-                                    onClick={() =>
-                                      setPanel({
-                                        kind: "sources",
-                                        turnId: t.id,
-                                        sourceId: c.sourceId,
-                                      })
-                                    }
-                                  >
-                                    {c.sourceId.slice(1)}
-                                  </button>
-                                ))}
-                              />
-                            </li>
-                          ))}
-                        </ul>
+                        <div className={styles.documentAnswer}>
+                          <div className={styles.answerHeading}>
+                            <BookOpen size={15} aria-hidden="true" />
+                            <span>Reference highlights</span>
+                            <small>
+                              {t.answer.statements.length}{" "}
+                              {t.answer.statements.length === 1
+                                ? "point"
+                                : "points"}
+                            </small>
+                          </div>
+                          <ul className={styles.answerPoints}>
+                            {t.answer.statements.map((s, i) => (
+                              <li key={i}>
+                                <ChatReply
+                                  text={s.text}
+                                  citations={s.citations.map((c, j) => {
+                                    const source = t.answer.sources.find(
+                                      (source) => source.id === c.sourceId,
+                                    );
+                                    return (
+                                      <button
+                                        key={j}
+                                        className={styles.citation}
+                                        aria-label={`Source ${c.sourceId.slice(1)} for reply ${t.ordinal}`}
+                                        onClick={() =>
+                                          setPanel({
+                                            kind: "sources",
+                                            turnId: t.id,
+                                            sourceId: c.sourceId,
+                                          })
+                                        }
+                                        title={
+                                          source
+                                            ? `${source.title} · Page ${source.page}`
+                                            : undefined
+                                        }
+                                      >
+                                        <BookOpen
+                                          size={12}
+                                          aria-hidden="true"
+                                        />
+                                        Source {c.sourceId.slice(1)}
+                                        {source ? ` · p. ${source.page}` : ""}
+                                      </button>
+                                    );
+                                  })}
+                                />
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       ) : (
                         <ChatReply text={t.answer.message} />
                       )}

@@ -863,3 +863,66 @@ test("formatted document points retain their own source controls", async ({
     "Inspect the visible indicator",
   );
 });
+
+test("management can scan a long saved document answer without losing qualifications or citations", async ({
+  page,
+}) => {
+  const f = await fixture(page, "MANAGEMENT");
+  await send(page);
+  const answer = f.threads[0].turns[0].answer;
+  const original = answer.statements[0];
+  const savedTexts = [
+    "TEST sample only — unapproved for machine use. The machine model and approved settings have not been supplied.",
+    "**Confirm the reference.** Check the applicable revision before preparing the test record.",
+    ...Array.from(
+      { length: 10 },
+      (_, i) =>
+        `Record test observation ${i + 1} without changing settings or bypassing protection.`,
+    ),
+  ];
+  answer.statements = savedTexts.map((text) => ({ ...original, text }));
+  await page.reload();
+  const reply = page.getByRole("article", {
+    name: "Assistant reply 1",
+    exact: true,
+  });
+  await expect(
+    reply.getByText("Reference highlights", { exact: true }),
+  ).toBeVisible();
+  await expect(reply.getByText("12 points", { exact: true })).toBeVisible();
+  const points = reply.locator("ul > li");
+  await expect(points).toHaveCount(12);
+  await expect(points.first()).toContainText(savedTexts[0]);
+  await expect(points.nth(1).locator("strong")).toHaveText(
+    "Confirm the reference.",
+  );
+  const citations = reply.getByRole("button", {
+    name: "Source 1 for reply 1",
+    exact: true,
+  });
+  await expect(citations).toHaveCount(12);
+  await expect(citations.first()).toHaveText("Source 1 · p. 1");
+  await expect(citations.first()).toHaveAttribute(
+    "title",
+    "TEST temperature SOP · Page 1",
+  );
+  await expect(points.last()).toContainText("test observation 10");
+  const box = await reply.boundingBox();
+  expect(box!.x).toBeGreaterThanOrEqual(0);
+  expect(box!.x + box!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
+  await reply
+    .getByText("Reference highlights", { exact: true })
+    .scrollIntoViewIfNeeded();
+  await page.screenshot({
+    path: `test-results/management-answer-${test.info().project.name}.png`,
+    fullPage: true,
+  });
+  await citations.last().click();
+  await expect(
+    page.getByRole("heading", { name: "Sources for this reply" }),
+  ).toBeVisible();
+  await expect(page.locator("blockquote")).toContainText(
+    "Inspect the visible indicator",
+  );
+  expect(answer.statements.map((point: any) => point.text)).toEqual(savedTexts);
+});

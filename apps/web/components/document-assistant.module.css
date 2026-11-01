@@ -1055,7 +1055,7 @@
 }
 
 .replyContent {
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.75;
   color: #343430;
   overflow-wrap: anywhere;
@@ -1184,4 +1184,99 @@
   flex: 0 0 34px;
   justify-content: center;
   padding: 8px;
+}
+
+/* Source-backed answers keep every saved point visible and its citation attached. */
+.documentAnswer {
+  margin: 4px 0 16px;
+}
+.answerHeading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 650;
+  color: #52524c;
+  margin-bottom: 16px;
+}
+.answerHeading small {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 400;
+  color: #73736c;
+}
+.chat .documentAnswer .answerPoints {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  counter-reset: answer-point;
+}
+.chat .documentAnswer .answerPoints > li {
+  position: relative;
+  padding: 0 0 18px 36px;
+  margin: 0 0 18px;
+  border-bottom: 1px solid #eae9e2;
+  counter-increment: answer-point;
+}
+.chat .documentAnswer .answerPoints > li::before {
+  content: counter(answer-point, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 4px;
+  font-size: 11px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: #73736c;
+}
+.chat .documentAnswer .answerPoints > li:first-child {
+  padding: 15px 16px 15px 48px;
+  background: #f7f8ec;
+  border: 1px solid #e5e7ce;
+  border-radius: 10px;
+}
+.chat .documentAnswer .answerPoints > li:first-child::before {
+  left: 15px;
+  top: 20px;
+}
+.chat .documentAnswer .answerPoints > li:last-child {
+  margin-bottom: 0;
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.chat .documentAnswer .answerPoints > li:first-child:last-child {
+  border-bottom: 1px solid #e5e7ce;
+  padding-bottom: 15px;
+}
+.chat .pointCitations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 9px;
+}
+.chat .pointCitations .citation {
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px;
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.3;
+  border: 1px solid #e5e4dc;
+  border-radius: 6px;
+  background: #fff;
+}
+.chat .pointCitations .citation:hover {
+  background: #f0efe9;
+  border-color: #b6b6ac;
+}
+@media (max-width: 600px) {
+  .chat .documentAnswer .answerPoints > li {
+    padding-left: 28px;
+  }
+  .chat .documentAnswer .answerPoints > li:first-child {
+    padding-left: 40px;
+    padding-right: 12px;
+  }
+  .chat .documentAnswer .answerPoints > li:first-child::before {
+    left: 12px;
+  }
 }

@@ -341,3 +341,8 @@ Owner requested a border around the yellow dot above the i. Use the transparent 
 ## Hosted chatbot without embedding charges — 1 November 2026
 
 Owner rejected additional embedding API credits and approved implementing retrieval using existing infrastructure. Add explicit `DOCUMENT_RETRIEVAL_MODE=keyword`: PostgreSQL English/simple full-text ranking with page-aware approved text, and the existing CommandCode DeepSeek answer/support provider. No embedding requests or placeholder vectors; retain legacy immutable vector profiles and hybrid compatibility. New keyword chunks have NULL embeddings only under a database-guarded exact profile. Retain scoped approvals, role checks, exact citations, support checks, private history and source-change rejection. This trades semantic paraphrase recall for no additional embedding service. It consumes existing CommandCode allowance and remains subject to Render Free sleep. Hosted migration/release activation requires explicit owner approval under AGENTS.md; implementation testing alone is not a deployment.
+
+
+## Readable source-backed chatbot replies — 1 November 2026
+
+Owner requested a clearer presentation after reviewing their Plant Management conversation. Keep all immutable answer text, applicability/training caveats and citations. Improve visual hierarchy, paragraph size/spacing, point markers and source buttons that expose PDF page and reference title. Prompt future document replies for concise source-supported bold labels and related-detail grouping, without adding unsupported content or hiding procedure restrictions. No role, retrieval, approval or history policy changes.
