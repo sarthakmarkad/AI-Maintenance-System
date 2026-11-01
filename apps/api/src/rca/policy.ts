@@ -237,9 +237,15 @@ export function validateRcaOutput(
     const support = item.sourceIds.map((id) => sources.get(id)!.text).join(" ");
     if (numbers(item.text).some((n) => !numbers(support).includes(n)))
       throw new RcaProviderError("RCA_UNSUPPORTED_NUMBER");
+    // A narrowly worded denial of confirmation is not a claim of confirmation.
+    // Scan the remaining text too, so a disclaimer cannot hide a later claim.
+    const claimText = item.text.replace(
+      /\b(?:no\s+confirmed\s+cause|not(?:\s+yet)?\s+confirmed|without\s+treating\s+(?:it|this|that)\s+as\s+a\s+confirmed\s+cause)\b/gi,
+      "unconfirmed",
+    );
     if (
       /\b(confirmed|definitive|proven|caused by|root cause is|service restored|restored at|approved|verified SOP|current SOP|per SOP|according to (?:the )?(?:SOP|manual)|image shows|photo shows|OCR)\b/i.test(
-        item.text,
+        claimText,
       ) ||
       /\d{4}-\d\d-\d\d|\d\d:\d\d/.test(item.text)
     )

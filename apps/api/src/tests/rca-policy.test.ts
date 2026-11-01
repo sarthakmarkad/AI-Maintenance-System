@@ -267,3 +267,28 @@ test("explicit confirmation, restoration, current SOP/image and date claims are 
       /UNSUPPORTED_CLAIM/,
     );
 });
+
+test("explicit uncertainty is accepted without letting disclaimers hide unsupported claims", () => {
+  const evidence = snapshot(rcaOrder(), [], rcaInput().human);
+  const output = (text: string) =>
+    rcaOutput({ missingChecks: [{ text, sourceIds: ["S2"] }] });
+  for (const text of [
+    "Determine whether the disagreement persists, without treating it as a confirmed cause.",
+    "The cause is not confirmed; record inspection findings.",
+    "The cause is not yet confirmed; inspect before concluding.",
+    "There is no confirmed cause; complete the missing checks.",
+  ]) {
+    const draft = validateRcaOutput(output(text), evidence);
+    assert.equal(draft.missingChecks[0].text, text);
+  }
+  for (const text of [
+    "There is no confirmed cause, but confirmed bearing damage needs repair.",
+    "The cause is not confirmed; the root cause is bearing damage.",
+    "Without treating it as a confirmed cause, service restored.",
+    "Not confirmedly safe: confirmed damage.",
+  ])
+    assert.throws(
+      () => validateRcaOutput(output(text), evidence),
+      /UNSUPPORTED_CLAIM/,
+    );
+});

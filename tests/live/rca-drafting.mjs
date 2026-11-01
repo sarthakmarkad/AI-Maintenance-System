@@ -137,7 +137,11 @@ try {
     },
   };
   const receipt = await rca.generate(users.TECHNICIAN, "WH-C", order.id, input);
-  assert.equal(receipt.status, "GENERATED");
+  assert.equal(
+    receipt.status,
+    "GENERATED",
+    receipt.reason ?? "Generation failed",
+  );
   assert(receipt.draft);
   assert.equal(receipt.draft.status, "INSUFFICIENT_EVIDENCE");
   assert.equal(receipt.draft.hypotheses.length, 0);
