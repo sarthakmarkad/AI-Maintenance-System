@@ -302,7 +302,7 @@ test("the reported greeting and capability prompts use general chat with no corp
   assert.deepEqual(b.turn.answer.sources, []);
   assert.deepEqual(b.turn.answer.statements, []);
   assert.equal(embeddingCalls, before);
-  assert.equal(conversationCalls, calls + 2);
+  assert.equal(conversationCalls, calls + 1);
   assert.equal(conversationHistory[0].question, "hiii");
   assert.equal(conversationHistory[0].mode, "GENERAL");
   const c = (
@@ -314,7 +314,7 @@ test("the reported greeting and capability prompts use general chat with no corp
   ).body;
   assert.equal(c.turn.answer.status, "NO_APPROVED_DOCUMENTS");
   assert.equal(embeddingCalls, before);
-  assert.equal(conversationCalls, calls + 2);
+  assert.equal(conversationCalls, calls + 1);
 });
 test("drafts excluded; approval queues once; concurrent workers produce complete immutable vector index", async () => {
   const receipt = await upload();
@@ -634,7 +634,11 @@ test("removing a conversation during generation prevents a new saved or delivere
       .expect(200);
   };
   try {
-    await message("hello", "head", saved.chatId).expect(409);
+    await message(
+      "What is preventive maintenance?",
+      "head",
+      saved.chatId,
+    ).expect(409);
   } finally {
     conversationHook = null;
   }
@@ -844,12 +848,22 @@ test("a failed general provider response saves no turn and releases the busy slo
     key = randomUUID();
   conversationError = true;
   try {
-    await message("hello", "head", undefined, key).expect(503);
+    await message(
+      "What is preventive maintenance?",
+      "head",
+      undefined,
+      key,
+    ).expect(503);
   } finally {
     conversationError = false;
   }
   assert.equal(await db.documentChat.count({ where: { orgId } }), count);
-  await message("hello", "head", undefined, key).expect(200);
+  await message(
+    "What is preventive maintenance?",
+    "head",
+    undefined,
+    key,
+  ).expect(200);
 });
 test("revocation during a general reply denies delivery and rolls back personal chat persistence", async () => {
   const m = await db.membership.findUniqueOrThrow({
@@ -864,7 +878,7 @@ test("revocation during a general reply denies delivery and rolls back personal 
     });
   };
   try {
-    await message("hello", "operator").expect(404);
+    await message("What is preventive maintenance?", "operator").expect(404);
   } finally {
     conversationHook = null;
     await db.machineAccess.create({
@@ -1078,4 +1092,31 @@ test("a timed-out summary supplies labeled exact reference text with unchanged s
     answerHook = null;
   }
   await action(await detail(r.documentId), "withdraw");
+});
+
+test("standalone greetings need no provider while clear document follow-ups retain cited verification", async () => {
+  const calls = conversationCalls;
+  conversationError = true;
+  let greeting;
+  try {
+    greeting = (await message("Hello!", "head").expect(200)).body;
+  } finally {
+    conversationError = false;
+  }
+  assert.equal(greeting.turn.answer.status, "GENERAL_ANSWER");
+  assert.equal(conversationCalls, calls);
+  const answer = (
+    await message(
+      "According to the SOP, how should the TEST indicator be checked?",
+      "head",
+      greeting.chatId,
+    ).expect(200)
+  ).body;
+  assert.equal(answer.turn.answer.status, "ANSWERED");
+  const followup = (
+    await message("continue", "head", greeting.chatId).expect(200)
+  ).body;
+  assert.equal(followup.turn.answer.status, "ANSWERED");
+  assert(followup.turn.answer.statements[0].citations.length);
+  assert.equal(conversationCalls, calls);
 });

@@ -42,6 +42,7 @@ global.fetch = async (url, init) => {
     throw Error("Unexpected provider in live acceptance");
   if (target.startsWith("http://127.0.0.1:11434/") && target.endsWith("/embed"))
     localEmbeddingRequests++;
+  const started = Date.now();
   const response = await actualFetch(url, init);
   if (target.includes("commandcode")) {
     const body = await response
@@ -50,6 +51,7 @@ global.fetch = async (url, init) => {
       .catch(() => null);
     usage.push({
       status: response.status,
+      elapsedMs: Date.now() - started,
       model: body?.model,
       finishReason: body?.choices?.[0]?.finish_reason,
       usage: body?.usage,
@@ -366,7 +368,7 @@ try {
   await mkdir(".local", { recursive: true });
   await writeFile(
     keyword
-      ? ".local/keyword-live-e2e.json"
+      ? ".local/keyword-latency-live-e2e.json"
       : ".local/commandcode-live-e2e.json",
     JSON.stringify(result, null, 2),
   );

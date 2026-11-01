@@ -346,3 +346,10 @@ Owner rejected additional embedding API credits and approved implementing retrie
 ## Readable source-backed chatbot replies — 1 November 2026
 
 Owner requested a clearer presentation after reviewing their Plant Management conversation. Keep all immutable answer text, applicability/training caveats and citations. Improve visual hierarchy, paragraph size/spacing, point markers and source buttons that expose PDF page and reference title. Prompt future document replies for concise source-supported bold labels and related-detail grouping, without adding unsupported content or hiding procedure restrictions. No role, retrieval, approval or history policy changes.
+
+
+## Preserve retention and reduce unnecessary chat calls — 1 November 2026
+
+Owner chose to keep the current non-Fast DeepSeek model and zero-data-retention requirement after the Fast endpoint rejected that header. Removed the unpublished Fast candidate configuration/adapter changes and retained the existing local/live selection. No privacy override is introduced.
+
+For latency, use only anchored whole-message greetings/thanks for provider-free replies. Mixed questions still require ordinary routing. Clear continuations of the latest document answer go directly to retrieval; general conversations and changed-topic questions do not inherit that shortcut. Preserve trusted membership checks, configured-provider gating, rate limits, atomic private history, source-change rejection and independent support verification. This removes unnecessary model calls but does not promise subsecond document answers or remove Render Free cold starts.

@@ -85,3 +85,26 @@ export function selectReference(
   }
   return null;
 }
+
+// Whole-message matches only: a greeting followed by a question still needs the model.
+export function immediateConversation(question: string): string | null {
+  const q = question.trim();
+  if (
+    /^(?:h+i+|hello+|hey+|good (?:morning|afternoon|evening))[.!?\s]*$/i.test(q)
+  )
+    return "Hi! How can I help? Ask a general question or tell me which SOP or manual you want to explore.";
+  if (
+    /^(?:thanks|thank you|thanks a lot|thank you very much)[.!?\s]*$/i.test(q)
+  )
+    return "You're welcome!";
+  return null;
+}
+export function documentFollowup(question: string, history: ChatContext[]) {
+  return (
+    history.at(-1)?.mode === "DOCUMENTS" &&
+    (/^(?:explain|simplify|make) (?:that|it)\b/i.test(question) ||
+      /^(?:continue|go on|tell me more|what (?:next|else)|(?:show|list|give me) (?:the )?(?:steps|checklist))[.!?\s]*$/i.test(
+        question,
+      ))
+  );
+}

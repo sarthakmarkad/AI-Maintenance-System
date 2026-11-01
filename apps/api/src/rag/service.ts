@@ -30,6 +30,8 @@ import {
   explicitDocumentSummary,
   summaryRequest,
   selectReference,
+  immediateConversation,
+  documentFollowup,
 } from "./planning";
 import { currentApproved, type Approved } from "./store";
 import { keywordQuery } from "./keyword";
@@ -346,11 +348,12 @@ export class DocumentAiService {
     this.enter(user.userId);
     try {
       // An explicit reference/equipment request needs no paid routing call.
-      const reply =
-        requiresDocuments(question) ||
-        explicitDocumentSummary(question) ||
-        (history.at(-1)?.mode === "DOCUMENTS" &&
-          /^(?:explain|simplify|make) (?:that|it)\b/i.test(question))
+      const immediate = immediateConversation(question);
+      const reply = immediate
+        ? { mode: "GENERAL" as const, reply: immediate }
+        : requiresDocuments(question) ||
+            explicitDocumentSummary(question) ||
+            documentFollowup(question, history)
           ? { mode: "DOCUMENTS" as const, reply: "" }
           : await this.ai.converse(question, history);
       if (reply.mode === "DOCUMENTS")
