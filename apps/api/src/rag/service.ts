@@ -32,6 +32,7 @@ import {
   selectReference,
 } from "./planning";
 import { currentApproved, type Approved } from "./store";
+import { keywordQuery } from "./keyword";
 @Injectable()
 export class DocumentAiService {
   private busy = new Set<string>();
@@ -167,11 +168,14 @@ export class DocumentAiService {
     tx: Prisma.TransactionClient,
     sources: Approved[],
     question: string,
-    vector: number[],
+    vector: number[] | null,
     perDocument = 3,
   ) {
     const ids = sources.map((s) => s.fileId),
       profile = settings(this.config).profile;
+    const keyword = settings(this.config).retrievalMode === "keyword";
+    const query = keywordQuery(question);
+    if (keyword && !query) return [];
     const rows = await tx.$queryRaw<
       (Omit<
         Passage,
@@ -182,18 +186,38 @@ export class DocumentAiService {
         | "documentVersion"
         | "approvalId"
       > & { vr: number; lr: number; lex: number })[]
-    >(Prisma.sql`
+    >(
+      keyword
+        ? Prisma.sql`
+      WITH queries AS (
+        SELECT websearch_to_tsquery('english',${query}) AS english,
+          websearch_to_tsquery('simple',${query}) AS simple
+      ), candidates AS (
+        SELECT c.id AS "chunkId",c."indexId",c."documentId",c."fileId",c.page,c.ordinal,c.text,c.hash,
+          0::float8 AS similarity,
+          ts_rank_cd(c."searchEnglish",q.english,32)+ts_rank_cd(c.search,q.simple,32) AS score,
+          ts_rank_cd(c."searchEnglish",plainto_tsquery('english',${question}),32) AS all_terms
+        FROM maintenance."DocumentRagChunk" c JOIN maintenance."DocumentRagIndex" i ON i.id=c."indexId"
+        CROSS JOIN queries q
+        WHERE c."orgId"=${sources[0].orgId}::uuid AND c."machineId"=${sources[0].machineId}::uuid
+          AND c."fileId" IN (${Prisma.join(ids.map((id) => Prisma.sql`${id}::uuid`))})
+          AND i.profile=${profile} AND i.status='READY'
+          AND (c."searchEnglish" @@ q.english OR c.search @@ q.simple)
+      ) SELECT * FROM candidates ORDER BY all_terms DESC,score DESC,"fileId",page,ordinal,"chunkId" LIMIT 48`
+        : Prisma.sql`
       WITH candidates AS (
         SELECT c.id AS "chunkId", c."indexId",c."documentId",c."fileId",c.page,c.text,c.hash,
           1-(c.embedding OPERATOR(extensions.<=>) ${JSON.stringify(vector)}::extensions.vector) AS similarity,
           ts_rank_cd(c.search,plainto_tsquery('simple',${question})) AS lex
         FROM maintenance."DocumentRagChunk" c JOIN maintenance."DocumentRagIndex" i ON i.id=c."indexId"
-        WHERE c."fileId" IN (${Prisma.join(ids.map((id) => Prisma.sql`${id}::uuid`))}) AND i.profile=${profile} AND i.status='READY'
+        WHERE c."orgId"=${sources[0].orgId}::uuid AND c."machineId"=${sources[0].machineId}::uuid
+          AND c."fileId" IN (${Prisma.join(ids.map((id) => Prisma.sql`${id}::uuid`))}) AND i.profile=${profile} AND i.status='READY'
       ), ranked AS (
         SELECT *,row_number() OVER(ORDER BY similarity DESC,"chunkId")::int AS vr,
         row_number() OVER(ORDER BY lex DESC,"chunkId")::int AS lr FROM candidates
       ) SELECT * FROM ranked WHERE (vr<=24 OR (lex>0 AND lr<=24)) AND (similarity>=0.25 OR lex>0)
-        ORDER BY (1.0/(60+vr)+CASE WHEN lex>0 THEN 1.0/(60+lr) ELSE 0 END) DESC,"chunkId" LIMIT 48`);
+        ORDER BY (1.0/(60+vr)+CASE WHEN lex>0 THEN 1.0/(60+lr) ELSE 0 END) DESC,"chunkId" LIMIT 48`,
+    );
     const chosen: Passage[] = [];
     for (const row of rows) {
       if (
@@ -409,15 +433,18 @@ export class DocumentAiService {
         );
       const documentHistory = history.filter((h) => h.mode !== "GENERAL");
       const retrievalQuestion = documentHistory.length
-        ? `${documentHistory[0].question.slice(0, 400)}\n${documentHistory.at(-1)!.question.slice(0, 300)}\n${question}`
+        ? settings(this.config).retrievalMode === "keyword"
+          ? `${question}\n${documentHistory.at(-1)!.question.slice(0, 300)}\n${documentHistory[0].question.slice(0, 400)}`
+          : `${documentHistory[0].question.slice(0, 400)}\n${documentHistory.at(-1)!.question.slice(0, 300)}\n${question}`
         : question;
       const complete = target ? await this.completeReference(target) : null;
-      const vector = complete
-        ? null
-        : validateVectors(
-            await this.ai.embed([retrievalQuestion], "query"),
-            1,
-          )[0];
+      const vector =
+        complete || settings(this.config).retrievalMode === "keyword"
+          ? null
+          : validateVectors(
+              await this.ai.embed([retrievalQuestion], "query"),
+              1,
+            )[0];
       const { sources, passages, currentReady } = await this.db.$transaction(
         async (tx) => {
           const c = await this.orders.context(tx, user, code),
@@ -453,7 +480,7 @@ export class DocumentAiService {
                     tx,
                     sources,
                     retrievalQuestion,
-                    vector!,
+                    vector,
                     summary ? 8 : 3,
                   )
                 : [],

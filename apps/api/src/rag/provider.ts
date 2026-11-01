@@ -151,6 +151,8 @@ export class DocumentAiProvider implements RagAi {
     }
   }
   async embed(texts: string[], purpose: "document" | "query" = "document") {
+    if (settings(this.config).retrievalMode === "keyword")
+      throw new RagError("EMBEDDINGS_DISABLED");
     if (settings(this.config).provider === "commandcode")
       return new LocalEmbeddings(this.config).embed(texts, purpose);
     const result: number[][] = [];

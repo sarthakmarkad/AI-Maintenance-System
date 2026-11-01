@@ -58,6 +58,7 @@ test("production process gets only runtime settings; owner, test and unrelated c
     VERCEL_TOKEN: "private-token",
     NEXT_PUBLIC_API_URL: "private-token",
     COMMANDCODE_API_KEY: "test-only-private-commandcode-key",
+    DOCUMENT_RETRIEVAL_MODE: "keyword",
     PATH: "/usr/bin",
   });
   assert.equal(env.NODE_ENV, "production");
@@ -71,6 +72,7 @@ test("production process gets only runtime settings; owner, test and unrelated c
   ])
     assert.equal(env[k], undefined);
   assert.equal(env.COMMANDCODE_API_KEY, "test-only-private-commandcode-key");
+  assert.equal(env.DOCUMENT_RETRIEVAL_MODE, "keyword");
   assert.equal(env.PATH, "/usr/bin");
   assert.equal(
     productionEnvironment({ ...backend, PORT: "8080", HOST: "127.0.0.1" }).PORT,

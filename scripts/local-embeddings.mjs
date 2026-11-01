@@ -4,6 +4,7 @@ const setup = process.argv.includes("--setup");
 const needed =
   setup ||
   (process.env.DOCUMENT_AI_ENABLED !== "false" &&
+    process.env.DOCUMENT_RETRIEVAL_MODE !== "keyword" &&
     Boolean(process.env.COMMANDCODE_API_KEY) &&
     (!process.env.DOCUMENT_AI_PROVIDER ||
       process.env.DOCUMENT_AI_PROVIDER === "commandcode"));

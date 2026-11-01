@@ -15,12 +15,14 @@ const { VERIFIER } = require("../../apps/api/dist/auth");
 const { DocumentIndexer } = require("../../apps/api/dist/rag/indexer");
 const { settings } = require("../../apps/api/dist/rag/policy");
 const { textPdf } = require("../../apps/api/dist/tests/rag-fixture");
+const keyword = process.argv.includes("--keyword");
 const owner = process.env.TEST_DATABASE_URL,
   runtime = process.env.TEST_RUNTIME_DATABASE_URL;
 if (
   !owner ||
   !runtime ||
   !new URL(owner).pathname.endsWith("_test") ||
+  new URL(owner).host !== new URL(runtime).host ||
   new URL(owner).pathname !== new URL(runtime).pathname
 )
   throw Error("Live AI acceptance requires the isolated *_test database.");
@@ -35,7 +37,7 @@ global.fetch = async (url, init) => {
   const target = String(url);
   if (
     !target.startsWith("https://api.commandcode.ai/provider/v1/") &&
-    !target.startsWith("http://127.0.0.1:11434/")
+    !(!keyword && target.startsWith("http://127.0.0.1:11434/"))
   )
     throw Error("Unexpected provider in live acceptance");
   if (target.startsWith("http://127.0.0.1:11434/") && target.endsWith("/embed"))
@@ -97,6 +99,8 @@ try {
     NODE_ENV: "test",
     DATABASE_URL: runtime,
     DOCUMENT_AI_PROVIDER: "commandcode",
+    DOCUMENT_RETRIEVAL_MODE: keyword ? "keyword" : "hybrid",
+    DOCUMENT_AI_ENABLED: "true",
     OPENAI_API_KEY: "",
   });
   const module = await Test.createTestingModule({
@@ -337,7 +341,9 @@ try {
     passed: true,
     provider: "commandcode",
     model: settings(config).answerModel,
-    localEmbeddings: true,
+    localEmbeddings: !keyword,
+    retrievalMode: settings(config).retrievalMode,
+    embeddingRequests: localEmbeddingRequests,
     pages: 2,
     answerStatus: answer.status,
     sourcePages: answer.sources.map((s) => s.page),
@@ -359,7 +365,9 @@ try {
   };
   await mkdir(".local", { recursive: true });
   await writeFile(
-    ".local/commandcode-live-e2e.json",
+    keyword
+      ? ".local/keyword-live-e2e.json"
+      : ".local/commandcode-live-e2e.json",
     JSON.stringify(result, null, 2),
   );
   console.log(JSON.stringify(result, null, 2));

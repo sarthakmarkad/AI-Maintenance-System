@@ -38,6 +38,7 @@
     "demo:readings": "npm run build:api && node scripts/import-synthetic-readings.mjs",
     "dev:embeddings": "node scripts/local-embeddings.mjs",
     "test:ai:live": "npm run build:api && node --env-file-if-exists=.env tests/live/document-ai.mjs",
+    "test:ai:keyword": "npm run build:api && node --env-file-if-exists=.env tests/live/document-ai.mjs --keyword",
     "test:rca:live": "npm run build:api && node --env-file-if-exists=.env tests/live/rca-drafting.mjs",
     "ai:setup": "node scripts/local-embeddings.mjs --setup",
     "test:ai:evaluate": "npm run build:api && node --env-file-if-exists=.env tests/live/chatbot-evaluation.mjs",

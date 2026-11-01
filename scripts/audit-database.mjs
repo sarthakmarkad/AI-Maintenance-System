@@ -235,10 +235,14 @@ try {
       if (vector.length)
         await zero(
           "Stored vectors retain the 1536-dimension storage contract",
-          'SELECT count(*)::text AS count FROM maintenance."DocumentRagChunk" WHERE ' +
+          'SELECT count(*)::text AS count FROM maintenance."DocumentRagChunk" WHERE embedding IS NOT NULL AND ' +
             ident(vector[0].name) +
             ".vector_dims(embedding)<>1536",
         );
+      await zero(
+        "Text-only profiles omit embeddings and vector profiles retain them",
+        `SELECT count(*)::text AS count FROM maintenance."DocumentRagChunk" c JOIN maintenance."DocumentRagIndex" i ON i.id=c."indexId" WHERE (i.profile='keyword:english-simple-v1:poppler-v1:page-chunks-v1')<>(c.embedding IS NULL)`,
+      );
       const browser = await tx.$queryRawUnsafe(
         "SELECT rolname::text AS role,has_schema_privilege(oid,'maintenance','USAGE') AS usage FROM pg_roles WHERE rolname IN ('anon','authenticated','service_role')",
       );

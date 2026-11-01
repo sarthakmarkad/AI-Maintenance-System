@@ -336,3 +336,8 @@ Owner requested removal of the white rectangles around the separate icon and wor
 ## Wordmark accent contrast — 1 November 2026
 
 Owner requested a border around the yellow dot above the i. Use the transparent wordmark variant with a restrained charcoal outline around that accent, keeping the compact icon/wordmark layout.
+
+
+## Hosted chatbot without embedding charges — 1 November 2026
+
+Owner rejected additional embedding API credits and approved implementing retrieval using existing infrastructure. Add explicit `DOCUMENT_RETRIEVAL_MODE=keyword`: PostgreSQL English/simple full-text ranking with page-aware approved text, and the existing CommandCode DeepSeek answer/support provider. No embedding requests or placeholder vectors; retain legacy immutable vector profiles and hybrid compatibility. New keyword chunks have NULL embeddings only under a database-guarded exact profile. Retain scoped approvals, role checks, exact citations, support checks, private history and source-change rejection. This trades semantic paraphrase recall for no additional embedding service. It consumes existing CommandCode allowance and remains subject to Render Free sleep. Hosted migration/release activation requires explicit owner approval under AGENTS.md; implementation testing alone is not a deployment.

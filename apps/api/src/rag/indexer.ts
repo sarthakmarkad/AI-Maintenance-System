@@ -100,10 +100,13 @@ export class DocumentIndexer {
       const extracted = await this.extractor.extract(file.content);
       if (!(await db.$transaction(active)))
         throw new RagError("SOURCE_NO_LONGER_APPROVED");
-      const vectors = validateVectors(
-        await this.ai.embed(extracted.chunks.map((c) => c.text)),
-        extracted.chunks.length,
-      );
+      const vectors =
+        settings(this.config).retrievalMode === "keyword"
+          ? null
+          : validateVectors(
+              await this.ai.embed(extracted.chunks.map((c) => c.text)),
+              extracted.chunks.length,
+            );
       await db.$transaction(
         async (tx) => {
           await tx.$queryRaw`SELECT id FROM maintenance."DocumentRagIndex" WHERE id=${claimed.id}::uuid FOR UPDATE`;
@@ -118,7 +121,7 @@ export class DocumentIndexer {
             throw new RagError("SOURCE_NO_LONGER_APPROVED");
           for (let i = 0; i < extracted.chunks.length; i++) {
             const c = extracted.chunks[i],
-              vector = JSON.stringify(vectors[i]);
+              vector = vectors ? JSON.stringify(vectors[i]) : null;
             await tx.$executeRaw`INSERT INTO maintenance."DocumentRagChunk" (id,"orgId","machineId","documentId","fileId","indexId",ordinal,page,text,hash,embedding)
            VALUES (${randomUUID()}::uuid,${claimed.orgId}::uuid,${claimed.machineId}::uuid,${claimed.documentId}::uuid,${claimed.fileId}::uuid,${claimed.id}::uuid,${c.ordinal},${c.page},${c.text},${c.hash},${vector}::extensions.vector)`;
           }

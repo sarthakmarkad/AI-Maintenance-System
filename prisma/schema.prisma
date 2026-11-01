@@ -702,8 +702,9 @@ model DocumentRagChunk {
   page Int
   text String
   hash String @db.VarChar(64)
-  embedding Unsupported("vector(1536)")
+  embedding Unsupported("vector(1536)")?
   search Unsupported("tsvector")? @default(dbgenerated())
+  searchEnglish Unsupported("tsvector")? @default(dbgenerated())
   index DocumentRagIndex @relation(fields:[orgId,machineId,documentId,fileId,indexId],references:[orgId,machineId,documentId,fileId,id],onDelete:Restrict)
   @@unique([indexId,ordinal])
   @@index([orgId,machineId,indexId],map:"DocumentRagChunk_scope_index_idx")

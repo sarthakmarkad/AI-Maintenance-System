@@ -842,3 +842,23 @@ Real CommandCode chat/RAG acceptance passed with local Nomic embeddings and `_te
 Render's private RCA/email settings were added; document AI remains off. Existing outbox had no pending sends at preflight. The authorized single delivery probe was accepted by Resend and the owner confirmed inbox receipt and its Vercel link. No work order or new email subscription was created. This verifies the sender/provider/inbox path; a new actual Render-worker handoff delivery was not forced. Hosted production readiness remains HTTP 200.
 
 Owner explicitly deferred hosted RAG until a later hosting upgrade; no OpenAI embedding transfer or new paid hosting was activated. Production Auth recovery/new-invitation round trips, new import commits, actual operational stage changes and a hosted company-order RCA write remain unperformed. Complete status, corrections and limits: [live testing report](LIVE-TESTING-2026-11-01.md).
+
+
+## Keyword retrieval without embedding service — 1 November 2026
+
+Implemented an explicit keyword retrieval profile, English/simple generated full-text search, NULL-vector indexing under profile-specific database guards, bounded parameterized search and existing citation/support/access checks. Legacy vector profiles and old evidence remain unchanged. Migration 035 was exercised only in the isolated database. No hosted schema, runtime settings or operational records were changed.
+
+Passed strict API/web/browser-test TypeScript, 184 unit tests, all 230 isolated PostgreSQL integration tests, 64 desktop/mobile chatbot browser cases, Prisma validation, formatting/diff checks and the complete production API/frontend build. Five new database cases cover text indexing without embeddings, stemming/exact technical tokens/ranking, six-role and tenant/machine scope, approval replacement/withdrawal including generation races, and direct SQL profile/immutability guards. Deployment-config tests forward the new non-secret mode; embedding calls fail explicitly in keyword mode. Initial new test fixture errors were corrected before the final pass. Stale compiled tests for the abandoned paid-embedding experiment were moved out of generated output before the unit run; no such source is included in this release.
+
+`npm run test:ai:keyword` passed against real CommandCode `deepseek/deepseek-v4.1-flash`, using synthetic PDFs/identities only in `_test`. Private report `.local/keyword-live-e2e.json` records passed=true, retrievalMode=keyword, zero embedding requests, 13 answer-provider requests and citations on pages 1 and 2. Greeting/general chat, saved follow-up/history, exact retry, insufficient evidence and withdrawal exclusion passed. Network guards reject embedding endpoints. This uses the existing answer allowance; it does not establish a free unlimited model service.
+
+Limits: no authenticated hosted keyword answer has been verified; hosted migration and owner Render activation are pending. Browser cases use isolated fixtures, not operational incidents. English stemming/exact keyword matching can miss paraphrases and non-English matches. No new load, large-corpus performance or engineering-accuracy benchmark is claimed. Existing Render Free cold starts and provider availability/quotas remain.
+
+Frozen migration 035 SHA-256: `8c89ff5b5833a883b1da793d1a8a5d2c16825b114a26796577761c4ad9dd8861`. Hosted application remains unchanged pending release approval.
+
+
+## Approved keyword migration and release preparation — 1 November 2026
+
+Owner explicitly approved applying migration 035 and committing/pushing this release. Prisma preflight showed only 035 pending; the retained checksum matched the frozen fingerprint. Applied through the existing verified-TLS owner migration workflow. A repeatable-read, read-only checkpoint compared row counts and deterministic row-content digests across all 40 application tables before/after, excluding only the new generated search column; every table matched. Existing vector values and saved chats are preserved. The post-migration hosted audit passed 26 checks across 41 tables and 73 foreign keys with no failures. Private checkpoint/audit artifacts remain ignored under `.local/keyword-retrieval-20261101/`.
+
+Browser control remains stopped. The owner has been given the two non-secret Render overrides (`DOCUMENT_RETRIEVAL_MODE=keyword`, `DOCUMENT_AI_ENABLED=true`) for manual activation after deployment. No new provider secrets, paid service or operational test records were introduced. Hosted activation and authenticated public chatbot acceptance remain pending; isolated real-provider success does not certify that runtime state.

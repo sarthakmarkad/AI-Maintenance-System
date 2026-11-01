@@ -35,6 +35,7 @@ const schema = z
     SUPABASE_URL: optional(z.string().url()),
     SUPABASE_PUBLISHABLE_KEY: optional(z.string().min(10)),
     DOCUMENT_AI_PROVIDER: z.enum(["commandcode", "openai"]).optional(),
+    DOCUMENT_RETRIEVAL_MODE: z.enum(["hybrid", "keyword"]).optional(),
     COMMANDCODE_API_KEY: optional(z.string().trim().min(20)),
     COMMANDCODE_MODEL: z
       .enum(["deepseek/deepseek-v4.1-flash", "z-ai/glm-5.3-flash"])

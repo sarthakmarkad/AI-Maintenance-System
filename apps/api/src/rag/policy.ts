@@ -12,6 +12,8 @@ export const CHUNK_SIZE = 1200;
 export const CHUNK_OVERLAP = 180;
 export const MAX_TEXT = 500000;
 export const POLICY = "approved-documents-v3";
+export const KEYWORD_PROFILE =
+  "keyword:english-simple-v1:poppler-v1:page-chunks-v1";
 export const askSchema = z
   .object({ question: z.string().trim().min(3).max(1000) })
   .strict();
@@ -24,17 +26,24 @@ export function settings(config: Config) {
     config.DOCUMENT_AI_PROVIDER ??
     (config.COMMANDCODE_API_KEY ? "commandcode" : "openai");
   const local = provider === "commandcode";
-  const embeddingModel = local
-    ? LOCAL_MODEL
-    : (config.OPENAI_EMBEDDING_MODEL ?? "text-embedding-3-small");
-  const profile = local
-    ? `nomic15:${config.LOCAL_EMBEDDING_DIGEST ?? LOCAL_DIGEST}:768-pad1536:task1:poppler-v1:page-chunks-v1`
-    : `${embeddingModel}:${DIMENSIONS}:poppler-v1:page-chunks-v1`;
+  const keyword = config.DOCUMENT_RETRIEVAL_MODE === "keyword";
+  const embeddingModel = keyword
+    ? "not-required"
+    : local
+      ? LOCAL_MODEL
+      : (config.OPENAI_EMBEDDING_MODEL ?? "text-embedding-3-small");
+  const profile = keyword
+    ? KEYWORD_PROFILE
+    : local
+      ? `nomic15:${config.LOCAL_EMBEDDING_DIGEST ?? LOCAL_DIGEST}:768-pad1536:task1:poppler-v1:page-chunks-v1`
+      : `${embeddingModel}:${DIMENSIONS}:poppler-v1:page-chunks-v1`;
   return {
     provider,
+    retrievalMode: keyword ? ("keyword" as const) : ("hybrid" as const),
     configured:
       Boolean(local ? config.COMMANDCODE_API_KEY : config.OPENAI_API_KEY) &&
-      (!local ||
+      (keyword ||
+        !local ||
         /^[a-f0-9]{64}$/.test(config.LOCAL_EMBEDDING_DIGEST ?? LOCAL_DIGEST)) &&
       config.DOCUMENT_AI_ENABLED !== "false",
     embeddingModel,
